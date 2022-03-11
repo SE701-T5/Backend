@@ -26,7 +26,7 @@ Collaborative task management is conducted in the main project repository using
   * the main repository
   * an existing fork (when joining an [Issue](#issues-tasks) already in progress)
 * clone forked repository
-* crate a development branch in the cloned forked repository
+* create a development branch in the cloned forked repository
   * name the branch something relevant to the [Issue](#issues-tasks) and understandable
 * for development guidelines see [Development](#development)
 * commit development changes to remote main repository
