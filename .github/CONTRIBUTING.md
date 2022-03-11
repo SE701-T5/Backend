@@ -21,7 +21,7 @@ Collaborative task management is conducted in the main project repository using
   * or in a new task [Issue](#issues-tasks) created by you
     * **_IFF_ the _team_ or _sub-team_ allows it**, and
     * the [Issue](#issues-tasks) guidelines are followed
-* move the issue to the '_In progress_' column before (re)starting the task
+* move the [Issue](#issues-tasks) to the '_In progress_' column before (re)starting the task
 * fork either
   * the main repository
   * an existing fork (when joining an [Issue](#issues-tasks) already in progress)
@@ -29,9 +29,9 @@ Collaborative task management is conducted in the main project repository using
 * create a development branch in the cloned forked repository
   * name the branch something relevant to the [Issue](#issues-tasks) and understandable
 * for development guidelines see [Development](#development)
-* commit development changes to remote main repository
+* add completed development changes to remote main repository
   * push changes to the development branch in the forked repository
-  * create a new [Pull Request](#pull-requests)
+  * create a new [Pull Request](#pull-requests) to the main repository
 
 ## Issues (tasks)
 
@@ -108,7 +108,6 @@ Pull requests are required for merging task contributions to the main repository
 
 ### Make a Pull Request
 
-To make a pull request
 * Create a new pull request in the **forked** repository on the GitHub website
   * [Click here (in fork repo website) to create a new pull request](../../../compare)
   * click '_compare across forks_'
