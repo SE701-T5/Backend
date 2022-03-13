@@ -1,4 +1,4 @@
-# How to contribute to the Team 5 Project
+# How to contribute to UniForum
 
 ## Contribution Workflow
 
@@ -11,7 +11,7 @@ Collaborative task management is conducted in the main project repository using
 ### Repository contribution workflow:
 
 >* **_IFF_** you are not already currently _assigned_ to any other task [Issue](#issues-tasks) in either
->  * the '_In progress_' column in the [Kanban board](../../../projects), or
+   >  * the '_In progress_' column in the [Kanban board](../../../projects), or
 >  * the '_To do_' column in the [Kanban board](../../../projects)
 * assign yourself to an [Issue](#issues-tasks)
   * in either
@@ -31,6 +31,7 @@ Collaborative task management is conducted in the main project repository using
 * for development guidelines see [Development](#development)
 * add completed development changes to remote main repository
   * push changes to the development branch in the forked repository
+    * _**DO NOT**_ use ```push --force```
   * create a new [Pull Request](#pull-requests) to the main repository
 
 ## Issues (tasks)
@@ -49,6 +50,7 @@ Collaborative task management is conducted in the main project repository using
       * stating what it is and why it is needed if a _feature_
       * stating as much information as possible if a _bug_
     * have a _Label_ **_IFF_**
+      * _enhancement_
       * _bug_
       * _documentation_
     * have a _Project_ (linked to it)
@@ -66,14 +68,14 @@ Collaborative task management is conducted in the main project repository using
     * be in the
       * '_Review in progress_' column in the [Kanban board](../../../projects)
         * **_IFF_**
-          * a [Pull Request](#pull-requests) has been made before 
-            * it is approved, or 
+          * a [Pull Request](#pull-requests) has been made before
+            * it is approved, or
             * changes are requested
           * requested changes to a [Pull Request](#pull-requests) are completed
       * '_To do_' column in the [Kanban board](../../../projects)
         * **_IFF_**
           * incomplete, without _Assignee(s)_, and no pull request for it is open, or
-      * '_Done_' column in the [Kanban board](../../../projects) 
+      * '_Done_' column in the [Kanban board](../../../projects)
         * **_IFF_** is either Label
           * _duplicate_
           * _invalid_ (not suitable for the project)
@@ -85,7 +87,7 @@ Collaborative task management is conducted in the main project repository using
 
 ## Development
 
-Task development must be 
+Task development must be
 * associated with an [Issue](#issues-tasks)
 * contributed to
   * locally using a cloned fork of the main repository
@@ -123,6 +125,7 @@ Pull requests are required for merging task contributions to the main repository
     * a _Project_ (linked to it)
     * a _Milestone_ (linked to it)
     * a _Label_ **_IFF_**
+      * _enhancement_
       * _bug_
       * _documentation_
   * at least one _Reviewer_ assigned for [code review](#code-review) - can be added by a reviewer
@@ -136,7 +139,7 @@ Pull requests are required for merging task contributions to the main repository
 * go to the pull request on the main repository website
 * assign yourself as a _Reviewer_ if you are not already assigned
 * assign yourself as an _Assignee_ if you are **responsible for merging**
-* check the pull request passes continuous integration workflow(s) 
+* check the pull request passes continuous integration workflow(s)
 * review the code (on the website or locally)
 * run test suites
 * run the code
@@ -172,6 +175,3 @@ To merge a pull request
 
 * Follow the [contribution workflow](#contribution-workflow) for team documentation contributions
 * The [Pull Request](#pull-requests) must be approved by team members before merging
-
-
-
