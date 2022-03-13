@@ -40,7 +40,7 @@ jobs:
 
       # Clean installation of backend dependencies
       - name: Run install
-        run: npm ci || npm install
+        run: npm ci
 
       # Builds the project
       - name: Run build

@@ -2,7 +2,7 @@
   "name": "backend-repo",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "mocha ./test/* --exit"
   },
