@@ -41,6 +41,8 @@ Solves #<!--issue-->
 <!--Please delete options that are not relevant.-->
 
 - [ ] Does a similar (open or closed) pull request not already exist?
+- [ ] Is the pull request _head_ repository a fork repository?
+- [ ] Is the pull request _compare_ branch a development branch?
 - [ ] Is this pull request head a fork repository?
 - [ ] Is this pull request compare a development branch?
 - [ ] Is the code documented, particularly in hard-to-understand areas?
