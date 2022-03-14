@@ -1,0 +1,51 @@
+name: Backend Node.js CI
+
+# Events that trigger the workflow
+on:
+  # Workflow is run when changes are pushed to any branch
+  push:
+
+  # Workflow is run when pull requests are made to the main branch
+  pull_request:
+    branches: [main]
+
+  # Workflow is run when manually triggered on the GitHub website
+  workflow_dispatch:
+
+  # Workflow is run on schedule at 4 pm UTC (currently 5 am NZT) every day
+  schedule:
+    - cron: '0 16 * * *'
+
+# The workflow job: builds and tests the backend
+jobs:
+  build:
+    # Workflow job is run on the latest Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # Defines the Node.js variation for the workflow job configuration
+    strategy:
+      matrix:
+        node-version: [16.x, 17.x]
+
+    # Sequence of tasks for completing the workflow job
+    steps:
+      # Checks out the repository under $GITHUB_WORKSPACE for workflow job access
+      - uses: actions/checkout@v2
+
+      # Runs the workflow job using the Node.js version specified in 'strategy'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Clean installation of backend dependencies
+      - name: Run install
+        run: npm ci
+
+      # Builds the project
+      - name: Run build
+        run: npm run build --if-present
+
+      # Runs automated testing
+      - name: Run test
+        run: npm test

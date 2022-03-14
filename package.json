@@ -1,0 +1,27 @@
+{
+  "name": "backend-repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha ./test/* --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SE701-T5/Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SE701-T5/Backend/issues"
+  },
+  "homepage": "https://github.com/SE701-T5/Backend#readme",
+  "devDependencies": {
+    "mocha": "^9.2.2",
+    "supertest": "^6.2.2"
+  },
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}
