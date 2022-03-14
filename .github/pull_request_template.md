@@ -43,8 +43,6 @@ Solves #<!--issue-->
 - [ ] Does a similar (open or closed) pull request not already exist?
 - [ ] Is the pull request _head_ repository a fork repository?
 - [ ] Is the pull request _compare_ branch a development branch?
-- [ ] Is this pull request head a fork repository?
-- [ ] Is this pull request compare a development branch?
 - [ ] Is the code documented, particularly in hard-to-understand areas?
 - [ ] Does the code build without new warnings?
 - [ ] Has testing been performed that proves changes are effective and work?
