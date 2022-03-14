@@ -1,0 +1,18 @@
+# SE701-T5/Backend repository code owners for pull request reviews
+
+# @SE701-T5/backend team members are default pull request reviewers
+# for all changes not including the following, which have precedence
+*   @SE701-T5/backend
+
+# @SE701-T5/team5 team members are all default pull request reviewers
+# for changes to team-related document files in the root/ directory
+README.md   @SE701-T5/team5
+LICENSE     @SE701-T5/team5
+
+# @SE701-T5/team5 team members are all default pull request reviewers
+# for changes to team-related document files in the .github/ directory
+.github/*   @SE701-T5/team5
+
+# @SE701-T5/backend team members are default pull request reviewers
+# for changes to backend-related files in the .github/workflow/ directory
+.github/workflows/*     @SE701-T5/backend
