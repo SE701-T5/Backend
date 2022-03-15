@@ -1,6 +1,7 @@
 const expect = require('chai').expect;
  
 var forum = require('../config/db_schemas/forum.schema');
+var user = require('../config/db_schemas/user.schema');
  
 describe('Forum post schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
@@ -13,6 +14,20 @@ describe('Forum post schema test', function() {
             expect(err.errors.editted).to.exist;
             expect(err.errors.upVotes).to.exist;
             expect(err.errors.downVotes).to.exist;
+            done();
+        });
+    });
+});
+
+describe('Forum user schema test', function() {
+    it('should be invalid if required fields are empty', function(done) {
+        var f = new user();
+
+        f.validate(function(err) {
+            expect(err.errors.username).to.exist;
+            expect(err.errors.name).to.exist;
+            expect(err.errors.email).to.exist;
+            expect(err.errors.hashedPassword).to.exist;
             done();
         });
     });
