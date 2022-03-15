@@ -36,9 +36,47 @@ exports.userLogout = function(req, res) {
  * @param res HTTP request response object
  */
 exports.userViewById = function(req, res) {
-    // TODO: implement userViewById()
-    res.json({ dummyTest: "userViewById() dummy test passes" });
+    const { id } = req.params;
+
+    User.findById(id)
+        .then(user => {
+            if (user) {
+                res.json(user);
+            }
+            else {
+                res.sendStatus(404);
+            }
+        })
+        .catch(err => res.sendStatus(400).json('Error: ' + err));
 }
+
+/**
+ * Responds to HTTP request with all formatted users document matching name
+ * @param req HTTP request object
+ * @param res HTTP request response object
+ */
+exports.userViewByName = function(req, res) {
+    const { name } = req.params;
+
+    User.find({"name": { "$regex": name, "$options": "ix" } })
+        .then(users => res.json(users))
+        .catch(err => res.sendStatus(400).json('Error: ' + err));
+}
+
+/**
+ * Responds to HTTP request with all formatted users document matching an username
+ * @param req HTTP request object
+ * @param res HTTP request response object
+ */
+exports.userViewByUserName = function(req, res) {
+    const { username } = req.params;
+
+    User.find({"username": { "$regex": username, "$options": "ix" } })
+        .then(users => res.json(users))
+        .catch(err => res.sendStatus(400).json('Error: ' + err));
+}
+
+
 
 /**
  * Modifies the data of an existing forum user matching a given ID using HTTP request object data
