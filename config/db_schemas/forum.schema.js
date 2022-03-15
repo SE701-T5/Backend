@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const forumSchema = new Schema(
-{
+const forumSchema = new Schema({
     // The User's ID who owns the forum post
     userID: {
         type: String,
@@ -46,6 +45,9 @@ const forumSchema = new Schema(
     comments: [
         //TODO: Change to use 'commentSchema' once it has been created
     ]
+}, {
+    // Assigns createdAt and updatedAt fields
+    timestamps: true,
 });
 
 // Forum can be used to create new documents with the forumSchema
