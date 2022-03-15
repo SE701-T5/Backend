@@ -47,7 +47,7 @@ const forumSchema = new Schema({
     ]
 }, {
     // Assigns createdAt and updatedAt fields
-    timestamps: true,
+    timestamps: true
 });
 
 // Forum can be used to create new documents with the forumSchema
