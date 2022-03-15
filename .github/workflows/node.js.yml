@@ -49,3 +49,11 @@ jobs:
       # Runs automated testing
       - name: Run test
         run: npm test
+
+        # Configure environment variables
+        env:
+          PORT: ${{ secrets.PORT }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PW: ${{ secrets.DATABASE_PW }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}

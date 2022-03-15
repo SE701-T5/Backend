@@ -4,7 +4,7 @@
   "description": "RESTful API for a forum site.",
   "main": "server.js",
   "scripts": {
-    "test": "mocha ./test/* --exit",
+    "test": "mocha ./test/* --timeout 10000 --exit",
     "start": "nodemon server.js"
   },
   "repository": {
@@ -25,7 +25,8 @@
   "devDependencies": {
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
-    "supertest": "^6.2.2"
+    "supertest": "^6.2.2",
+    "assert": "^2.0.0"
   },
   "dependencies": {
     "body-parser": "^1.19.2",
