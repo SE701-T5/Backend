@@ -16,7 +16,7 @@
     "application",
     "api"
   ],
-  "author": "",
+  "author": "SE701-T5/backend team",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SE701-T5/Backend/issues"
@@ -24,10 +24,11 @@
   "homepage": "https://github.com/SE701-T5/Backend#readme",
   "devDependencies": {
     "mocha": "^9.2.2",
-    "supertest": "^6.2.2",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
+    "body-parser": "^1.19.2",
     "express": "^4.17.3",
     "mongoose": "^6.2.6",
     "promise": "^8.1.0"
