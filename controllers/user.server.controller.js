@@ -6,12 +6,21 @@ const User = require('../models/user.server.model');
  * @param res HTTP request response object
  */
 exports.userCreate = function(req, res) {
-    User.add(
-        req.body.username,
-        req.body.name,
-        req.body.email,
-        req.body.hashedPassword
+    const username = req.body.username;
+    const name = req.body.name;
+    const email = req.body.email;
+    const hashedPassword = req.body.hashedPassword;
+
+    const newUser = new User.create(
+        username,
+        name,
+        email,
+        hashedPassword
     );
+
+    newUser.save()
+        .then(() => res.json('User added!'))
+        .catch(err => res.status(400).json('Error: ' + err));
 }
 
 /**

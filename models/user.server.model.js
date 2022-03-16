@@ -7,16 +7,13 @@ const User = require('../config/db_schemas/user.schema')
  * @param {String} email User's email associated to their account
  * @param {String} hashedPassword User's hashed passsword used for login and verification
  */
-function createUser(username, name, email, hashedPassword) {
-    const newUser = new User({
+function create(username, name, email, hashedPassword) {
+    return newUser = new User({
         username,
         name,
         email,
         hashedPassword
     })
-    newUser.save()
-        .then(() => res.json('User added!'))
-        .catch(err => res.status(400).json('Error: ' + err));
 }
 
-module.exports = { createUser };
+module.exports = { create };
