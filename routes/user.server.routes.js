@@ -1,5 +1,6 @@
 const user = require('../controllers/user.server.controller');
 
+
 /**
  * Handles HTTP requests for the User module using Express.js route()
  * @param app Express.js application object

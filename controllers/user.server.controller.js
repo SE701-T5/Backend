@@ -1,5 +1,5 @@
-const User = require('../models/user.server.model');
-
+const User2 = require('../models/user.server.model');
+const User = require('../config/db_schemas/user.schema')
 
 
 /**
