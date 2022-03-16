@@ -9,13 +9,13 @@ exports.userCreate = function(req, res) {
     const username = req.body.username;
     const name = req.body.name;
     const email = req.body.email;
-    const hashedPassword = req.body.hashedPassword;
+    const password = req.body.password;
 
     const newUser = new User.create(
         username,
         name,
         email,
-        hashedPassword
+        password
     );
 
     newUser.save()
