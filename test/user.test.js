@@ -50,7 +50,7 @@ describe("View forum user by ID dummy test", function() {
                 if (err) done(err);
                 done();
             });
-    }).timeout(10000);
+    });
     it('should return a 404 response for invalid id',function(done) {
 
         request(app)
@@ -58,7 +58,7 @@ describe("View forum user by ID dummy test", function() {
             .send()
             .expect(404, done);
 
-    }).timeout(10000);
+    });
 });
 
 describe("Update forum user by ID dummy test", function() {
