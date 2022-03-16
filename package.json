@@ -29,8 +29,10 @@
   },
   "dependencies": {
     "body-parser": "^1.19.2",
+    "chai": "^4.3.6",
     "express": "^4.17.3",
     "mongoose": "^6.2.6",
-    "promise": "^8.1.0"
+    "promise": "^8.1.0",
+    "sinon": "^13.0.1"
   }
 }
