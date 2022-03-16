@@ -39,15 +39,8 @@ exports.userLogout = function(req, res) {
  */
 exports.userViewById = function(req, res) {
 
-    User.findById(req.params.id).exec()
-        .then(user => {
-            if (user) {
-                res.json(user);
-            }
-            else {
-                res.sendStatus(404);
-            }
-        })
+    User.findById(req.params.id)
+        .then(user => res.json(user))
         .catch(err => res.sendStatus(400).json('Error: ' + err));
 }
 
