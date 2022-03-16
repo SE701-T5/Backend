@@ -2,15 +2,16 @@ const
     request = require('supertest'),
     app = require('../server');
 
-describe("Create forum comment test", function() {
-    it("should return: status 200", function(done) {
+describe("Create forum comment test", function () {
+    it("should return: status 200", function (done) {
         request(app)
             .post('/api/v1/comments')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'userCreate() dummy test passes' })
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
+            .send({
+                username: 'Dave123',
+                name: 'dave',
+                dave: '17-03-2022',
+                content: 'This is the moment.'
+            })
+            .expect(200, done);
     });
 });
