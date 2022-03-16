@@ -1,5 +1,7 @@
 const User = require('../models/user.server.model');
 
+
+
 /**
  * Creates a new forum user using HTTP request object data
  * @param req HTTP request object

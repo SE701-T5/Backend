@@ -44,8 +44,8 @@ describe("Log out forum user dummy test", function() {
 describe("View forum user by ID dummy test", function() {
     it("should return: { dummyTest: 'userViewById() dummy test passes' }", function(done) {
         request(app)
-            .get('/api/v1/users/:id')
-            .expect({ dummyTest: 'userViewById() dummy test passes' })
+            .get('/api/v1/users/6231894a450df47c04de66ac')
+            .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
