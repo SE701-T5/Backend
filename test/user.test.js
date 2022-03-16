@@ -42,7 +42,7 @@ describe("Log out forum user dummy test", function() {
 });
 
 describe("View forum user by ID dummy test", function() {
-    it("should return: { dummyTest: 'userViewById() dummy test passes' }", function(done) {
+    it("should return: status 200", function(done) {
         request(app)
             .get('/api/v1/users/6231894a450df47c04de66ac')
             .expect(200)
@@ -50,6 +50,14 @@ describe("View forum user by ID dummy test", function() {
                 if (err) done(err);
                 done();
             });
+    });
+    it('should return a 404 response for invalid id', (done) => {
+
+        request(app)
+            .get('/api/v1/users/x')
+            .send()
+            .expect(404, done);
+
     });
 });
 
