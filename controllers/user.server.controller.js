@@ -50,31 +50,7 @@ exports.userViewById = function(req, res) {
         .catch(err => res.sendStatus(400).json('Error: ' + err));
 }
 
-/**
- * Responds to HTTP request with all formatted users document matching name
- * @param req HTTP request object
- * @param res HTTP request response object
- */
-exports.userViewByName = function(req, res) {
-    const { name } = req.params;
 
-    User.find({"name": { "$regex": name, "$options": "ix" } })
-        .then(users => res.json(users))
-        .catch(err => res.sendStatus(400).json('Error: ' + err));
-}
-
-/**
- * Responds to HTTP request with all formatted users document matching an username
- * @param req HTTP request object
- * @param res HTTP request response object
- */
-exports.userViewByUserName = function(req, res) {
-    const { username } = req.params;
-
-    User.find({"username": { "$regex": username, "$options": "ix" } })
-        .then(users => res.json(users))
-        .catch(err => res.sendStatus(400).json('Error: ' + err));
-}
 
 
 
