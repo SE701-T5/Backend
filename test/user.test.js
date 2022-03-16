@@ -2,16 +2,17 @@ const
     request = require('supertest'),
     app = require('../server');
 
-describe("Create forum user dummy test", function() {
-    it("should return: { dummyTest: 'userCreate() dummy test passes' }", function(done) {
+describe("Create forum user test", function() {
+    it("should return: status 200", function(done) {
         request(app)
             .post('/api/v1/users')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'userCreate() dummy test passes' })
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
+            .send({
+                username: 'Bob123',
+                name: 'bob',
+                email: 'bob420@hotmail.com',
+                hashedPassword: '324hkjhh92bfd8g1b@#$Fn912bf'
+            })
+            .expect(200, done);
     });
 });
 
