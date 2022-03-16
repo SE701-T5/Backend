@@ -52,7 +52,6 @@ describe("View forum user by ID dummy test", function() {
             });
     });
     it('should return a 404 response for invalid id',function(done) {
-
         request(app)
             .get('/api/v1/users/x')
             .send()

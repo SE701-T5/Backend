@@ -37,11 +37,15 @@ exports.userLogout = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.userViewById = function(req, res) {
+exports.userViewById = async function(req, res) {
 
-    User.findById(req.params.id)
-        .then(user => res.json(user))
-        .catch(err => res.sendStatus(400).json('Error: ' + err));
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        res.json(user);
+    } else {
+        res.sendStatus(404);
+    }
 }
 
 
