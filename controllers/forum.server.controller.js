@@ -71,15 +71,16 @@ exports.postCreate = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.postViewById = async function(req, res) {
-    const post = await Forum.searchById(req.params.id)
-
-    if (post) {
-        res.json(post);
-    }
-    else {
-        res.sendStatus(404);
-    }
+exports.postViewById = function(req, res) {
+    Forum.searchById(req.params.id, function(result) {
+        if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+        } else {
+            // Return the forum post document object with 200 status
+            res.status(200).json({"forumPost": result});
+        }
+    });
 }
 
 /**

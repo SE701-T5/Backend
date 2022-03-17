@@ -46,6 +46,10 @@ exports.insertPost = function(params, done) {
         });
 }
 
-exports.searchById = async function(id) {
-    return Forum.findById(id);
+exports.searchById = function(id,done) {
+    Forum.findById(id)
+        .then((res) => done(res))
+        .catch((err) => {
+            return done({status: 400, err: err})
+        });
 }
