@@ -1,4 +1,6 @@
-const Forum = require('../models/forum.server.model');
+const
+    Forum = require('../models/forum.server.model'),
+    { isValidDocumentID } = require("../lib/validate.lib");
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
@@ -121,4 +123,44 @@ exports.commentGiveById = function(req, res) {
 exports.commentUpdateById = function(req, res) {
     // TODO: implement postUpdateById()
     res.json({ dummyTest: "commentUpdateById() dummy test passes" });
+}
+
+/**
+ * Delete the data of an existing forum post matching a given ID using HTTP request object data
+ * @param req HTTP request object
+ * @param res HTTP request response object
+ */
+exports.postDeleteById = function(req, res) {
+    const reqParams = req.params;
+    let isBadRequest = false;
+
+    // Check that every expected forum post attribute exists in the request body
+    if (!reqParams.id) {
+        isBadRequest = true;
+    }
+
+    if (!isBadRequest) {
+        // Confirm that database document ID is valid
+        isBadRequest = !isValidDocumentID(reqParams.id);
+    }
+
+    if (!isBadRequest) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            Forum.deletePostById(reqParams.id, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return a message body { success: true } with 200 status
+                    res.status(200).json({ "success": true });
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
