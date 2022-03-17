@@ -114,12 +114,36 @@ describe("View forum post successfully", function() {
     });
 });
 
+describe("View forum post successfully", function() {
+    it("should return: 200", function(done) {
+        request(app)
+            .get('/api/v1/posts/6232994f41c28ff61a79a5b0')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
 
 describe("View forum post unsuccessfully for invalid id", function() {
     it("should return: 400", function(done) {
         request(app)
             .get('/api/v1/posts/xxx')
-            .expect(400)
+            .expect(404)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
+describe("View forum post unsuccessfully for invalid id", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .get('/api/v1/posts/62328e357ec3446e40e1b29b')
+            .expect(404)
             .end(function(err, res) {
                 if (err) done(err);
                 done();

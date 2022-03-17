@@ -55,6 +55,6 @@ exports.searchById = function(id,done) {
     Forum.findById(id)
         .then((res) => done(res))
         .catch((err) => {
-            return done({status: 400, err: err})
+            return done({status: 404, err: err})
         });
 }
