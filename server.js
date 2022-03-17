@@ -1,5 +1,5 @@
 const
-    database = require('./config/db.server.config'),
+    { connect } = require('./config/db.server.config'),
     express = require('./config/express.server.config');
 
 // Express.js application object
@@ -12,7 +12,7 @@ const PORT = process.env.PORT;
 const databaseName = process.env.DATABASE_NAME;
 
 // Connect to MongoDB database
-database.connect(databaseName)
+connect(databaseName)
     .then(
         () => {
             app.listen(PORT, function () {
