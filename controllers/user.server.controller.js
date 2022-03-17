@@ -20,7 +20,7 @@ exports.userCreate = function(req, res) {
         isBadRequest = false,
         forumUserParams;
 
-    // Check that every expected forum post attribute exists in the request body
+    // Check that every expected forum user attribute exists in the request body
     if (!reqBody.username || !reqBody.displayName || !reqBody.email || !reqBody.password) {
         isBadRequest = true;
     }
