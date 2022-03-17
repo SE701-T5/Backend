@@ -44,7 +44,7 @@ describe("Log out forum user dummy test", function() {
 describe("View forum user by ID successfully", function() {
     it("should return: status 200", function(done) {
         request(app)
-            .get('/api/v1/users/6232997c41c28ff61a79a5b4')
+            .get('/api/v1/users/6232b0487ec3446e40e1b2f0')
             .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
