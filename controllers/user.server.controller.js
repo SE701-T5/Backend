@@ -47,8 +47,8 @@ exports.userCreate = function(req, res) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
             } else {
-                // Return 201 status
-                res.status(201);
+                // User was created successfully, return 201 status
+                res.status(201).send("User created successfully!");
             }
         });
     }
