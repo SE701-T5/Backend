@@ -36,7 +36,7 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
                 name: 'Tim',
                 password: 'passwordtim'
             })
-            .expect(500)
+            .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
@@ -54,7 +54,7 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
                 email: 'yi14123@gmail.com',
                 password: 'passwordtim'
             })
-            .expect(500)
+            .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
