@@ -11,7 +11,6 @@ exports.resetCollections = async () => {
     try {
         await Forum.deleteMany();
     } catch (err) {
-        console.log(err);
         result = {status: 500, err: err};
     }
 
