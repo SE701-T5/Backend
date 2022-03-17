@@ -28,6 +28,8 @@ jobs:
 
     # Defines the Node.js variation for the workflow job configuration
     strategy:
+      # Set to sequential testing to prevent test conflicts between jobs
+      max-parallel: 1
       matrix:
         node-version: [ 16.x, 17.x ]
 
@@ -64,7 +66,7 @@ jobs:
         run: npm test
 
   build_push:
-    name: 'Job for Push Action With Secrets Access'
+    name: 'Job for Push, Schedule and Dispatch Actions With Secrets Access'
     if: github.event_name != 'pull_request_target'
 
     # Workflow job is run on the latest Ubuntu runner
@@ -72,6 +74,8 @@ jobs:
 
     # Defines the Node.js variation for the workflow job configuration
     strategy:
+      # Set to sequential testing to prevent test conflicts between jobs
+      max-parallel: 1
       matrix:
         node-version: [ 16.x, 17.x ]
 
