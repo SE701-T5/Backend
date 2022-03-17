@@ -21,12 +21,15 @@ exports.userCreate = function(req, res) {
         email = req.body.email,
         hashedPassword = hashPassword(req.body.password);
 
-    User.create(
-        username,
-        name,
-        email,
-        hashedPassword
-    );
+User.create(username, name, email, hashedPassword, function(result) {
+        if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+        } else {
+            // Return the forum post document object with 201 status
+            res.status(201).json({"forumPost": result});
+        }
+    });
 }
 
 /**
