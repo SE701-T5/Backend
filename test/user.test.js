@@ -45,7 +45,7 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
 });
 
 describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
-    it("should return: status 500", function(done) {
+    it("should return: status 400", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
