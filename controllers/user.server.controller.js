@@ -15,21 +15,46 @@ const User = require('../models/user.server.model');
  * @param res HTTP request response object
  */
 exports.userCreate = function(req, res) {
-    const
-        username = req.body.username,
-        name = req.body.name,
-        email = req.body.email,
-        hashedPassword = hashPassword(req.body.password);
+    const reqBody = req.body;
+    let
+        isBadRequest = false,
+        forumUserParams;
 
-    User.create(username, name, email, hashedPassword, function(result) {
-        if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-        } else {
-            // Return the forum post document object with 201 status
-            res.status(201).json({"forumPost": result});
+    // Check that every expected forum post attribute exists in the request body
+    if (!reqBody.username || !reqBody.displayName || !reqBody.email || !reqBody.password) {
+        isBadRequest = true;
+    }
+
+    if (!isBadRequest) {
+        forumUserParams = {
+            'username': reqBody.username.length < 2 ? reqBody.username : false,
+            'displayName': reqBody.displayName.length < 2 ? reqBody.displayName : false,
+            'email': reqBody.email ? reqBody.email : false,
+            'hashedPassword': reqBody.password ? hashPassword(reqBody.password) : false
         }
-    });
+    }
+
+    // Confirm that forum post attribute values are valid
+    for (let key in forumUserParams) {
+        if (forumUserParams[key] === false) {
+            isBadRequest = true;
+        }
+    }
+
+    if (!isBadRequest) {
+        User.create(forumUserParams, function(result) {
+            if (result.err) {
+                // Return the error message with the error status
+                res.status(result.status).send(result.err);
+            } else {
+                // Return the forum post document object with 201 status
+                res.status(201).json({"forumPost": result});
+            }
+        });
+    }
+    else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**
