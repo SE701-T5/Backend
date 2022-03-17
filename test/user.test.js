@@ -1,13 +1,60 @@
 const
+    { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
     app = require('../server');
 
-describe("Create forum user dummy test", function() {
-    it("should return: { dummyTest: 'userCreate() dummy test passes' }", function(done) {
+beforeEach(async function() {
+    const testDatabaseName = process.env.DATABASE_TEST_NAME;
+    await closeConn(); // Disconnect from the app database
+    await connect(testDatabaseName, true); // Connect to the test database
+});
+
+describe("Create forum user successfully", function() {
+    it("should return: status 201", function(done) {
         request(app)
             .post('/api/v1/users')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'userCreate() dummy test passes' })
+            .send({
+                username: 'Bob123',
+                displayName: 'bob',
+                email: 'bob420@hotmail.com',
+                password: 'passwordbob'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
+describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
+    it("should return: status 400", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Tim123',
+                displayName: 'Tim',
+                password: 'passwordtim'
+            })
+            .expect(400)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
+describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
+    it("should return: status 400", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Yi123',
+                displayName: 'Yi',
+                email: 'yi14123@gmail.com',
+                password: 'passwordtim'
+            })
+            .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
