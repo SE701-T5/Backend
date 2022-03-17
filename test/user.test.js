@@ -87,10 +87,6 @@ describe("View forum user by ID unsuccessfully", function() {
     });
 });
 
-
-
-
-
 describe("Update forum user by ID dummy test", function() {
     it("should return: { dummyTest: 'userUpdateById() dummy test passes' }", function(done) {
         request(app)
