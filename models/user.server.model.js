@@ -21,7 +21,7 @@ const User = require('../config/db_schemas/user.schema')
             if (err.code === 11000) {
                 return done({err: "Conflict", status: 409});
             }
-            return done({status: 500, err: err})
+            return done({status: 400, err: err})
         });
 }
 
