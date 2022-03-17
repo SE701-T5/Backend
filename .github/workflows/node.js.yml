@@ -5,8 +5,8 @@ on:
   # Workflow is run when changes are pushed to any branch
   push:
 
-  # Workflow is run when pull requests are made to the main branch
-  pull_request:
+  # Workflow is run when pull requests to the main branch are opened, reopened, and synchronized
+  pull_request_target:
     branches: [main]
 
   # Workflow is run when manually triggered on the GitHub website
@@ -48,8 +48,6 @@ jobs:
 
       # Runs automated testing
       - name: Run test
-        run: npm test
-
         # Configure environment variables
         env:
           PORT: ${{ secrets.PORT }}
@@ -57,3 +55,4 @@ jobs:
           DATABASE_PW: ${{ secrets.DATABASE_PW }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
+        run: npm test
