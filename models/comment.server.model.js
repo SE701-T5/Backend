@@ -7,11 +7,19 @@ const User = require('../config/db_schemas/comment.schema')
  * @param {String} date Date when the comment was created
  * @param {String} content Content of the comment
  */
- exports.create = function(username, name, date, content) {
-    return newComment = new Comment({
+exports.create = function (username, name, date, content) {
+    const newComment = new Comment({
         username,
         name,
         date,
         content
-    })
+    });
+    newComment.save()
+        .then((res) => done(res))
+        .catch((err) => {
+            if (err.code === 11000) {
+                return done({ err: "Conflict", status: 409 });
+            }
+            return done({ status: 500, err: err })
+        });
 }
