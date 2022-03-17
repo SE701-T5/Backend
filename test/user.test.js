@@ -104,7 +104,7 @@ describe("View forum user by ID successfully", function() {
             .end(function(err, res) {
                 if (err) done(err);
                 request(app)
-                    .get(`/api/v1/users/${res.body._id}`)
+                    .get(`/api/v1/users/${res.body.user._id}`)
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
