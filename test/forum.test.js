@@ -1,6 +1,6 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
-    { resetCollections } = require("../models/db.server.model");
+    { resetCollections } = require("../models/db.server.model"),
     request = require('supertest'),
     app = require('../server');
 
