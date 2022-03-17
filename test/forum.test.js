@@ -1,5 +1,6 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
+    { resetCollections } = require("../models/db.server.model"),
     request = require('supertest'),
     app = require('../server');
 
@@ -7,6 +8,12 @@ beforeEach(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
+    await resetCollections(); // reset database for testing
+});
+
+after(async function() {
+    await resetCollections(); // reset database for testing
+    await closeConn(true); // Disconnect from the app database
 });
 
 describe("Create forum post successfully", function() {
