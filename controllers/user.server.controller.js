@@ -29,8 +29,8 @@ exports.userCreate = function(req, res) {
         forumUserParams = {
             'username': reqBody.username.length < 2 ? reqBody.username : false,
             'displayName': reqBody.displayName.length < 2 ? reqBody.displayName : false,
-            'email': reqBody.email ? reqBody.email : false,
-            'hashedPassword': reqBody.password ? hashPassword(reqBody.password) : false
+            'email': reqBody.email.length > 0 ? reqBody.email : false,
+            'hashedPassword': reqBody.password.length > 0 ? hashPassword(reqBody.password) : false
         }
     }
 
