@@ -28,7 +28,7 @@ describe("Create forum user successfully", function() {
 });
 
 describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
-    it("should return: status 500", function(done) {
+    it("should return: status 400", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
