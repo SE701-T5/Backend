@@ -13,11 +13,57 @@ exports.postViews = function(req, res) {
 /**
  * Creates a new forum post using HTTP request object data
  * @param req HTTP request object
- * @param res HTTP request response object
+ * @param res HTTP request response status code, and message if error, or JSON if successful
  */
 exports.postCreate = function(req, res) {
-    // TODO: implement postCreate()
-    res.json({ dummyTest: "postCreate() dummy test passes" });
+    const reqBody = req.body;
+    let
+        isBadRequest = false,
+        forumPostParams;
+
+    // Check that every expected forum post attribute exists in the request body
+    if (!reqBody.userID || !reqBody.title || !reqBody.communityID || !reqBody.text || !reqBody.images) {
+        isBadRequest = true;
+    }
+
+    if (!isBadRequest) {
+        // Set forum post attributes to an object for passing to the model
+        forumPostParams = {
+            "userID": reqBody.userID.length > 2 ? reqBody.userID : false,
+            "title": reqBody.title.length > 0 ? reqBody.title : false,
+            "communityID": reqBody.communityID.length > 2 ? reqBody.communityID : false,
+            "text": reqBody.text || "",
+            "images": reqBody.images || [""],
+        };
+
+        // Confirm that forum post attribute values are valid
+        for (let key in forumPostParams) {
+            if (forumPostParams[key] === false) {
+                isBadRequest = true;
+            }
+        }
+    }
+
+    if (!isBadRequest) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            // Insert new forum post to database
+            Forum.insertPost(forumPostParams, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return the forum post document object with 201 status
+                    res.status(201).json({"forumPost": result});
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**
@@ -26,8 +72,15 @@ exports.postCreate = function(req, res) {
  * @param res HTTP request response object
  */
 exports.postViewById = function(req, res) {
-    // TODO: implement postViewById()
-    res.json({ dummyTest: "postViewById() dummy test passes" });
+    Forum.searchById(req.params.id, function(result) {
+        if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+        } else {
+            // Return the forum post document object with 200 status
+            res.json({"forumPost": result});
+        }
+    });
 }
 
 /**

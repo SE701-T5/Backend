@@ -13,7 +13,7 @@ const userSchema = new Schema(
         minlength: 3
     },
     // This is the user's public display name
-    name: {
+    displayName: {
         type: String,
         required: true,
         trim: true,
@@ -23,6 +23,7 @@ const userSchema = new Schema(
     email: {
         type: String,
         required: true,
+        unique: true,
         trim: true
     },
     // Hashed password used for login and verification
