@@ -41,16 +41,20 @@ describe("Log out forum user dummy test", function() {
     });
 });
 
-describe("View forum user by ID", function() {
+describe("View forum user by ID successfully", function() {
     it("should return: status 200", function(done) {
         request(app)
-            .get('/api/v1/users/6232aa057ec3446e40e1b2e3')
+            .get('/api/v1/users/6232997c41c28ff61a79a5b4')
             .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
             });
     });
+
+});
+
+describe("View forum user by ID unsuccessfully", function() {
     it('should return a 404 response for invalid id',function(done) {
         request(app)
             .get('/api/v1/users/x')
@@ -62,6 +66,10 @@ describe("View forum user by ID", function() {
 
     });
 });
+
+
+
+
 
 describe("Update forum user by ID dummy test", function() {
     it("should return: { dummyTest: 'userUpdateById() dummy test passes' }", function(done) {
