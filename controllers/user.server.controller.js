@@ -1,21 +1,31 @@
 const User = require('../models/user.server.model');
 
 /**
+ * Returns the hashPassword given a plaintextPassword
+ * @param {String} password
+ */
+ function hashPassword(password) {
+    // TODO: Create a has function for the password
+    return 'password'
+}
+
+/**
  * Creates a new forum user using HTTP request object data
  * @param req HTTP request object
  * @param res HTTP request response object
  */
 exports.userCreate = function(req, res) {
-    const username = req.body.username;
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
+    const
+        username = req.body.username,
+        name = req.body.name,
+        email = req.body.email,
+        hashedPassword = hashPassword(req.body.password);
 
     const newUser = new User.create(
         username,
         name,
         email,
-        password
+        hashedPassword
     );
 
     newUser.save()
