@@ -58,7 +58,6 @@ describe("View forum user by ID successfully", function() {
                 done();
             });
     });
-
 });
 
 describe("View forum user by ID successfully", function() {
