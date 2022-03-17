@@ -92,26 +92,26 @@ describe("Log out forum user dummy test", function() {
 describe("View forum user by ID successfully", function() {
     it("should return: status 200", function(done) {
         request(app)
-            .get('/api/v1/users/6232bf697ec3446e40e1b30b')
-            .expect(200)
+            .post('/api/v1/users')
+            .send(
+                {
+                    username: 'Bob1234',
+                    displayName: 'bob',
+                    email: 'bob420@hotmail.com',
+                    password: 'passwordbob'
+                })
+            .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                done();
+                request(app)
+                    .get(`/api/v1/users/${res.body.user._id}`)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
             });
     });
-});
-
-describe("View forum user by ID successfully", function() {
-    it("should return: status 200", function(done) {
-        request(app)
-            .get('/api/v1/users/6232bf707ec3446e40e1b30c')
-            .expect(200)
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
-    });
-
 });
 
 describe("View forum user by ID unsuccessfully", function() {
