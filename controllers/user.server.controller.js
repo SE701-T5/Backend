@@ -1,5 +1,4 @@
-const User2 = require('../models/user.server.model');
-const User = require('../config/db_schemas/user.schema')
+const User = require('../models/user.server.model');
 
 
 /**
@@ -37,15 +36,17 @@ exports.userLogout = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.userViewById = async function(req, res) {
+exports.userViewById = function(req, res) {
 
-    const user = await User.findById(req.params.id);
-
-    if (user) {
-        res.json(user);
-    } else {
-        res.sendStatus(404);
-    }
+    User.searchById(req.params.id, function(result) {
+        if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+        } else {
+            // Return the user document object with 200 status
+            res.json({"user": result});
+        }
+    });
 }
 
 
