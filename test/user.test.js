@@ -9,7 +9,7 @@ beforeEach(async function() {
 });
 
 describe("Create forum user successfully", function() {
-    it("should return: status 200", function(done) {
+    it("should return: status 201", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
