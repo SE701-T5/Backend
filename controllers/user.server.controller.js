@@ -21,7 +21,7 @@ exports.userCreate = function(req, res) {
         email = req.body.email,
         hashedPassword = hashPassword(req.body.password);
 
-User.create(username, name, email, hashedPassword, function(result) {
+    User.create(username, name, email, hashedPassword, function(result) {
         if (result.err) {
             // Return the error message with the error status
             res.status(result.status).send(result.err);
