@@ -45,12 +45,12 @@ exports.insertPost = function(params, done) {
             return done({err: "Internal server error", status: 500});
         });
 }
+
 /**
  * Search a forum post in the database
  * @param id forum post id
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-
 exports.searchById = function(id,done) {
     Forum.findById(id)
         .then((res) => done(res))
