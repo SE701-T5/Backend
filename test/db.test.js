@@ -1,13 +1,19 @@
 const
     request = require('supertest'),
     app = require('../server');
+const {closeConn, connect} = require("../config/db.server.config");
 
-describe("Reset database dummy test", function() {
-    it("should return: { dummyTest: 'resetDB() dummy test passes' }", function(done) {
+beforeEach(async function() {
+    const testDatabaseName = process.env.DATABASE_TEST_NAME;
+    await closeConn(); // Disconnect from the app database
+    await connect(testDatabaseName, true); // Connect to the test database
+});
+
+describe("Reset database test - remove all documents from all collections", function() {
+    it("should return: 200 'OK'", function(done) {
         request(app)
             .post('/api/v1/reset')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'resetDB() dummy test passes' })
+            .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
