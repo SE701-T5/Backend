@@ -47,8 +47,8 @@ exports.userCreate = function(req, res) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
             } else {
-                // Return the forum post document object with 201 status
-                res.status(201).json({"forumPost": result});
+                // Return 201 status
+                res.status(201);
             }
         });
     }
