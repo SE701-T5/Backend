@@ -1,6 +1,7 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
+    assert = require("assert"),
     app = require('../server');
 
 beforeEach(async function() {
@@ -150,15 +151,314 @@ describe("View forum post unsuccessfully for invalid id", function() {
     });
 });
 
-describe("Update forum post by ID dummy test", function() {
-    it("should return: { dummyTest: 'postUpdateById() dummy test passes' }", function(done) {
+/**
+ * Test successful forum post database document update using valid ID for edits and votes
+ */
+describe("Update forum post successfully with valid ID for edits and votes", function() {
+    it("should return: 201", function(done) {
         request(app)
-            .patch('/api/v1/posts/:id')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'postUpdateById() dummy test passes' })
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                done();
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            title: "No more St. Paddy's day!",
+                            text: ":(",
+                            downVotes: 1
+                        })
+                    .expect(201)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        assert.equal(res.body.forumPost.title, "No more St. Paddy's day!");
+                        assert.equal(res.body.forumPost.bodyText, ":(");
+                        assert.equal(res.body.forumPost.downVotes, 1);
+                        assert.equal(res.body.forumPost.edited, true);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test successful forum post database document update using valid ID for only votes
+ */
+describe("Update forum post successfully with valid ID for only votes", function() {
+    it("should return: 201", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            upVotes: 1,
+                            downVotes: 1000
+                        })
+                    .expect(201)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        assert.equal(res.body.forumPost.upVotes, 1);
+                        assert.equal(res.body.forumPost.downVotes, 1000);
+                        assert.equal(res.body.forumPost.edited, false);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test successful forum post database document update using valid ID for only edits
+ */
+describe("Update forum post successfully with valid ID for only edits", function() {
+    it("should return: 201", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            title: "A new title",
+                            text: "A new body text"
+                        })
+                    .expect(201)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        assert.equal(res.body.forumPost.title, "A new title");
+                        assert.equal(res.body.forumPost.bodyText, "A new body text");
+                        assert.equal(res.body.forumPost.edited, true);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using invalid ID
+ */
+describe("Update forum post unsuccessfully with invalid ID", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/123`)
+                    .send(
+                        {
+                            title: "A new title",
+                            text: "A new body text"
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using empty update object
+ */
+describe("Update forum post unsuccessfully with empty update object", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using invalid communityID update field
+ */
+describe("Update forum post unsuccessfully with invalid communityID update field", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            "communityID": "12"
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using invalid title update field
+ */
+describe("Update forum post unsuccessfully with invalid title update field", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            "title": ""
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using invalid upVotes update field
+ */
+describe("Update forum post unsuccessfully with invalid upVotes update field", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            "upVotes": NaN
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful forum post database document update using invalid downVotes update field
+ */
+describe("Update forum post unsuccessfully with invalid downVotes update field", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/posts')
+            .send(
+                {
+                    userID: "Bob",
+                    title: "Happy St. Paddy's day!",
+                    communityID: "communityID",
+                    text: "What's the craic?",
+                    images: ["image string"]
+                })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .patch(`/api/v1/posts/${res.body.forumPost._id}`)
+                    .send(
+                        {
+                            "downVotes": NaN
+                        })
+                    .expect(400)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
             });
     });
 });

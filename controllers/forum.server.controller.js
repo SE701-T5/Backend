@@ -1,6 +1,11 @@
 const
     Forum = require('../models/forum.server.model'),
-    { isValidDocumentID } = require("../lib/validate.lib");
+    {
+        isValidDocumentID,
+        parseInteger,
+        isAnyFieldValid,
+        isAllFieldsValid
+    } = require("../lib/validate.lib");
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
@@ -19,34 +24,18 @@ exports.postViews = function(req, res) {
  */
 exports.postCreate = function(req, res) {
     const reqBody = req.body;
-    let
-        isBadRequest = false,
-        forumPostParams;
 
-    // Check that every expected forum post attribute exists in the request body
-    if (!reqBody.userID || !reqBody.title || !reqBody.communityID || !reqBody.text || !reqBody.images) {
-        isBadRequest = true;
-    }
+    // Set forum post fields to an object for passing to the model
+    const forumPostParams = {
+        "userID": reqBody.userID && reqBody.userID.length > 2 ? reqBody.userID : false,
+        "title": reqBody.title.length && reqBody.title.length > 0 ? reqBody.title : false,
+        "communityID": reqBody.communityID && reqBody.communityID.length > 2 ? reqBody.communityID : false,
+        "bodyText": reqBody.text || "",
+        "attachments": reqBody.images || [""]
+    };
 
-    if (!isBadRequest) {
-        // Set forum post attributes to an object for passing to the model
-        forumPostParams = {
-            "userID": reqBody.userID.length > 2 ? reqBody.userID : false,
-            "title": reqBody.title.length > 0 ? reqBody.title : false,
-            "communityID": reqBody.communityID.length > 2 ? reqBody.communityID : false,
-            "text": reqBody.text || "",
-            "images": reqBody.images || [""],
-        };
-
-        // Confirm that forum post attribute values are valid
-        for (let key in forumPostParams) {
-            if (forumPostParams[key] === false) {
-                isBadRequest = true;
-            }
-        }
-    }
-
-    if (!isBadRequest) {
+    // Confirm that all forum post field values are valid
+    if (isAllFieldsValid(forumPostParams)) {
         const isUserAuthenticated = true; // TODO: implement user authentication
 
         if (isUserAuthenticated) {
@@ -91,8 +80,48 @@ exports.postViewById = function(req, res) {
  * @param res HTTP request response object
  */
 exports.postUpdateById = function(req, res) {
-    // TODO: implement postUpdateById()
-    res.json({ dummyTest: "postUpdateById() dummy test passes" });
+    const
+        reqParams = req.params,
+        reqBody = req.body;
+    let forumUpdateParams;
+
+    // Check that a valid ID exists in the request parameters
+    let isBadRequest = !isValidDocumentID(reqParams.id);
+
+    if (!isBadRequest) {
+        // Set fields for updating to an object with either passed values or false to declare them as invalid
+        forumUpdateParams = {
+            "communityID": reqBody.communityID && reqBody.communityID.length > 2 ? reqBody.communityID : false,
+            "title": reqBody.title && reqBody.title.length > 0 ? reqBody.title : false,
+            "bodyText": reqBody.text || false,
+            "upVotes": reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
+            "downVotes": reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
+            "attachments": reqBody.images || false
+        }
+
+        // Check that there is not zero valid fields being updated, removes invalid fields
+        isBadRequest = !isAnyFieldValid(forumUpdateParams);
+    }
+
+    if (!isBadRequest) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            Forum.updatePostById(reqParams.id, forumUpdateParams, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return the forum post document object with 201 status
+                    res.status(201).json({"forumPost": result});
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**
@@ -132,17 +161,9 @@ exports.commentUpdateById = function(req, res) {
  */
 exports.postDeleteById = function(req, res) {
     const reqParams = req.params;
-    let isBadRequest = false;
 
-    // Check that every expected forum post attribute exists in the request body
-    if (!reqParams.id) {
-        isBadRequest = true;
-    }
-
-    if (!isBadRequest) {
-        // Confirm that database document ID is valid
-        isBadRequest = !isValidDocumentID(reqParams.id);
-    }
+    // Check that a valid ID exists in the request parameters
+    let isBadRequest = !isValidDocumentID(reqParams.id);
 
     if (!isBadRequest) {
         const isUserAuthenticated = true; // TODO: implement user authentication
