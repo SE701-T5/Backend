@@ -21,16 +21,12 @@ exports.userCreate = function(req, res) {
         email = req.body.email,
         hashedPassword = hashPassword(req.body.password);
 
-    const newUser = new User.create(
+    User.create(
         username,
         name,
         email,
         hashedPassword
     );
-
-    newUser.save()
-        .then(() => res.status(200).json('User added!'))
-        .catch(err => res.status(400).json('Error: ' + err));
 }
 
 /**
