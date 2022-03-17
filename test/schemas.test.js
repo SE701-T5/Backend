@@ -9,7 +9,7 @@ describe('Forum user schema test', function() {
 
         f.validate(function(err) {
             expect(err.errors.username).to.exist;
-            expect(err.errors.name).to.exist;
+            expect(err.errors.displayName).to.exist;
             expect(err.errors.email).to.exist;
             expect(err.errors.hashedPassword).to.exist;
             done();
