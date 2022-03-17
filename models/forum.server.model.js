@@ -45,16 +45,34 @@ exports.insertPost = function(params, done) {
             return done({err: "Internal server error", status: 500});
         });
 }
+
 /**
  * Search a forum post in the database
  * @param id forum post id
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-
 exports.searchById = function(id,done) {
     Forum.findById(id)
         .then((res) => done(res))
         .catch((err) => {
             return done({status: 404, err: err})
+        });
+}
+
+/**
+ * Delete an existing forum post matching a given ID
+ * @param id the ID for matching to the database document being deleted
+ * @param done function callback, returns status code and message if error
+ */
+exports.deletePostById = function(id, done) {
+    Forum.deleteOne({ _id: id })
+        .then((res) => {
+            if (res.deletedCount === 0) {
+                return done({ err: "Not found", status: 404 });
+            }
+            return done(res);
+        })
+        .catch((err) => {
+            return done({ err: "Internal server error", status: 500 });
         });
 }
