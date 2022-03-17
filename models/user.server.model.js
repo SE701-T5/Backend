@@ -5,7 +5,6 @@ const User = require("../config/db_schemas/user.schema");
  * @param id user id
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-
 exports.searchById = function(id,done) {
     try {
         User.findById(id)
