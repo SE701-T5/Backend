@@ -7,9 +7,13 @@ const User = require("../config/db_schemas/user.schema");
  */
 
 exports.searchById = function(id,done) {
-    User.findById(id)
-        .then((res) => done(res))
-        .catch((err) => {
-            return done({status: 404, err: err})
-        });
+    try {
+        User.findById(id)
+            .then((res) => done(res))
+            .catch((err) => {
+                return done({status: 404, err: err})
+            });
+    } catch (err) {
+        done({ status: 500, err: err });
+    }
 }
