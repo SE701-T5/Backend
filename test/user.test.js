@@ -13,6 +13,7 @@ describe("Create forum user test", function() {
                 hashedPassword: '324hkjhh92bfd8g1b@#$Fn912bf'
             })
             .expect(200, done);
+        // TODO: Call a delete request, otherwise it will fail next time
     });
 });
 
