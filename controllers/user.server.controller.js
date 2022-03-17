@@ -58,10 +58,6 @@ exports.userViewById = function(req, res) {
 
 }
 
-
-
-
-
 /**
  * Modifies the data of an existing forum user matching a given ID using HTTP request object data
  * @param req HTTP request object
