@@ -18,7 +18,7 @@ describe("Create forum user successfully", function() {
                 email: 'bob420@hotmail.com',
                 password: 'passwordbob'
             })
-            .expect(200)
+            .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
