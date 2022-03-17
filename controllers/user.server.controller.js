@@ -27,8 +27,8 @@ exports.userCreate = function(req, res) {
 
     if (!isBadRequest) {
         forumUserParams = {
-            'username': reqBody.username.length < 2 ? reqBody.username : false,
-            'displayName': reqBody.displayName.length < 2 ? reqBody.displayName : false,
+            'username': reqBody.username.length < 3 ? false : reqBody.username,
+            'displayName': reqBody.displayName.length < 3 ? false : reqBody.displayName,
             'email': reqBody.email.length > 0 ? reqBody.email : false,
             'hashedPassword': reqBody.password.length > 0 ? hashPassword(reqBody.password) : false
         }
@@ -38,6 +38,7 @@ exports.userCreate = function(req, res) {
     for (let key in forumUserParams) {
         if (forumUserParams[key] === false) {
             isBadRequest = true;
+            break;
         }
     }
 
