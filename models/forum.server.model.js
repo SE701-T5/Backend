@@ -45,6 +45,7 @@ insertPost = function(params, done) {
             return done({err: "Internal server error", status: 500});
         });
 }
+
 /**
  * Search a forum post in the database
  * @param id forum post id
