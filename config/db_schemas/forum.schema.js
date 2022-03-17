@@ -7,7 +7,13 @@ const forumSchema = new Schema({
     userID: {
         type: String,
         required: true,
-        unique: true,
+        trim: true,
+        minlength: 3
+    },
+    // The ID for the community the blog is associates with
+    communityID: {
+        type: String,
+        required: true,
         trim: true,
         minlength: 3
     },
@@ -23,8 +29,8 @@ const forumSchema = new Schema({
         type: String,
         required: true
     },
-    // Used to deterine whether a post has been editted
-    editted: {
+    // Used to determine whether a post has been edited
+    edited: {
         type: Boolean,
         required: true
     },
