@@ -1,6 +1,13 @@
 const
+    { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
     app = require('../server');
+
+beforeEach(async function() {
+    const testDatabaseName = process.env.DATABASE_TEST_NAME;
+    await closeConn(); // Disconnect from the app database
+    await connect(testDatabaseName, true); // Connect to the test database
+});
 
 describe("Create forum user dummy test", function() {
     it("should return: { dummyTest: 'userCreate() dummy test passes' }", function(done) {
@@ -44,7 +51,20 @@ describe("Log out forum user dummy test", function() {
 describe("View forum user by ID successfully", function() {
     it("should return: status 200", function(done) {
         request(app)
-            .get('/api/v1/users/6232b0487ec3446e40e1b2f0')
+            .get('/api/v1/users/6232bf697ec3446e40e1b30b')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+
+});
+
+describe("View forum user by ID successfully", function() {
+    it("should return: status 200", function(done) {
+        request(app)
+            .get('/api/v1/users/6232bf707ec3446e40e1b30c')
             .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
