@@ -78,7 +78,7 @@ exports.postViewById = function(req, res) {
             res.status(result.status).send(result.err);
         } else {
             // Return the forum post document object with 200 status
-            res.status(200).json({"forumPost": result});
+            res.json({"forumPost": result});
         }
     });
 }

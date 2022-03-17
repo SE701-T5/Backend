@@ -100,11 +100,13 @@ describe("View forum post(s) by search dummy test", function() {
     });
 });
 
-describe("View forum post by ID dummy test", function() {
-    it("should return: { dummyTest: 'postViewById() dummy test passes' }", function(done) {
+
+
+describe("View forum post successfully", function() {
+    it("should return: 200", function(done) {
         request(app)
-            .get('/api/v1/posts/:id')
-            .expect({ dummyTest: 'postViewById() dummy test passes' })
+            .get('/api/v1/posts/62329bab7ec3446e40e1b2e0')
+            .expect(200)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
@@ -113,11 +115,11 @@ describe("View forum post by ID dummy test", function() {
 });
 
 
-describe("View forum post", function() {
-    it("should return: 200", function(done) {
+describe("View forum post unsuccessfully for invalid id", function() {
+    it("should return: 400", function(done) {
         request(app)
-            .get('/api/v1/posts/62329bab7ec3446e40e1b2e0')
-            .expect(200)
+            .get('/api/v1/posts/xxx')
+            .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
