@@ -1,4 +1,5 @@
 const
+    { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
     app = require('../server');
 
@@ -22,6 +23,7 @@ describe("Create forum user successfully", function() {
             .end(function(err, res) {
                 if (err) done(err);
                 done();
+            });
     });
 });
 
@@ -38,6 +40,7 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
             .end(function(err, res) {
                 if (err) done(err);
                 done();
+            });
     });
 });
 
@@ -55,6 +58,7 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
             .end(function(err, res) {
                 if (err) done(err);
                 done();
+            });
     });
 });
 
