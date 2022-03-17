@@ -28,7 +28,7 @@ describe("Create forum user successfully", function() {
 });
 
 describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
-    it("should return: status 400", function(done) {
+    it("should return: status 500", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
@@ -36,7 +36,7 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
                 name: 'Tim',
                 password: 'passwordtim'
             })
-            .expect(400)
+            .expect(500)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
@@ -45,7 +45,7 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
 });
 
 describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
-    it("should return: status 400", function(done) {
+    it("should return: status 500", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
@@ -54,7 +54,7 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
                 email: 'yi14123@gmail.com',
                 password: 'passwordtim'
             })
-            .expect(400)
+            .expect(500)
             .end(function(err, res) {
                 if (err) done(err);
                 done();
