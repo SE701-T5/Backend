@@ -2,7 +2,7 @@ const
     request = require('supertest'),
     app = require('../server');
 
-describe("Create forum user test", function() {
+describe("Create forum user successfully", function() {
     it("should return: status 200", function(done) {
         request(app)
             .post('/api/v1/users')
@@ -10,10 +10,45 @@ describe("Create forum user test", function() {
                 username: 'Bob123',
                 name: 'bob',
                 email: 'bob420@hotmail.com',
-                hashedPassword: '324hkjhh92bfd8g1b@#$Fn912bf'
+                password: 'passwordbob'
             })
-            .expect(200, done);
-        // TODO: Call a delete request, otherwise it will fail next time
+            .expect(200)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+    });
+});
+
+describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
+    it("should return: status 400", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Tim123',
+                name: 'Tim',
+                password: 'passwordtim'
+            })
+            .expect(400)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+    });
+});
+
+describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
+    it("should return: status 400", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Yi123',
+                name: 'Yi',
+                email: 'yi14123@gmail.com',
+                password: 'passwordtim'
+            })
+            .expect(400)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
     });
 });
 
