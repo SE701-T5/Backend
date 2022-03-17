@@ -72,8 +72,14 @@ exports.postCreate = function(req, res) {
  * @param res HTTP request response object
  */
 exports.postViewById = function(req, res) {
-    // TODO: implement postViewById()
-    res.json({ dummyTest: "postViewById() dummy test passes" });
+    const post = Forum.searchById(req.params.id)
+
+    if (post) {
+        res.json(post);
+    }
+    else {
+        res.sendStatus(404);
+    }
 }
 
 /**

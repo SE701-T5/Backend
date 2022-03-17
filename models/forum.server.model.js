@@ -45,3 +45,7 @@ exports.insertPost = function(params, done) {
             return done({err: "Internal server error", status: 500});
         });
 }
+
+exports.searchById = function(id) {
+    return Forum.findById(id);
+}

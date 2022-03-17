@@ -112,6 +112,19 @@ describe("View forum post by ID dummy test", function() {
     });
 });
 
+
+describe("View forum post", function() {
+    it("should return: 200", function(done) {
+        request(app)
+            .get('/api/v1/posts/62329bab7ec3446e40e1b2e0')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
 describe("Update forum post by ID dummy test", function() {
     it("should return: { dummyTest: 'postUpdateById() dummy test passes' }", function(done) {
         request(app)
