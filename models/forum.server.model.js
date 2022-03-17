@@ -46,6 +46,6 @@ exports.insertPost = function(params, done) {
         });
 }
 
-exports.searchById = function(id) {
+exports.searchById = async function(id) {
     return Forum.findById(id);
 }

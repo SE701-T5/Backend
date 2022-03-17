@@ -71,8 +71,8 @@ exports.postCreate = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.postViewById = function(req, res) {
-    const post = Forum.searchById(req.params.id)
+exports.postViewById = async function(req, res) {
+    const post = await Forum.searchById(req.params.id)
 
     if (post) {
         res.json(post);
