@@ -48,7 +48,7 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Yi123',
+                username: 'Yi',
                 email: 'yi14123@gmail.com',
                 password: 'passwordtim'
             })
