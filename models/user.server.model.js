@@ -1,4 +1,3 @@
-
 const User = require('../config/db_schemas/user.schema')
 
 /**
@@ -6,7 +5,7 @@ const User = require('../config/db_schemas/user.schema')
  * @param params object containing forum user attributes
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
- exports.create = function(params, done) {
+exports.create = function(params, done) {
     const
         username = params.username,
         displayName = params.displayName,
@@ -48,5 +47,3 @@ exports.searchById = function(id,done) {
         done({ status: 500, err: err });
     }
 }
-
-
