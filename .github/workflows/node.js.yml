@@ -1,3 +1,4 @@
+# Continuous integration workflow for node.js backend server
 name: Backend Node.js CI
 
 # Events that trigger the workflow
@@ -5,8 +6,8 @@ on:
   # Workflow is run when changes are pushed to any branch
   push:
 
-  # Workflow is run when pull requests are made to the main branch
-  pull_request:
+  # Workflow is run when pull requests to the main branch are opened, reopened, and synchronized
+  pull_request_target:
     branches: [main]
 
   # Workflow is run when manually triggered on the GitHub website
@@ -16,21 +17,28 @@ on:
   schedule:
     - cron: '0 16 * * *'
 
-# The workflow job: builds and tests the backend
+# The workflow jobs: builds and tests the backend
 jobs:
-  build:
+  build_pull_request:
+    name: 'Job for Pull Request Action With Secrets Access'
+    if: github.event_name == 'pull_request_target'
+
     # Workflow job is run on the latest Ubuntu runner
     runs-on: ubuntu-latest
 
     # Defines the Node.js variation for the workflow job configuration
     strategy:
+      # Set to sequential testing to prevent test conflicts between jobs
+      max-parallel: 1
       matrix:
-        node-version: [16.x, 17.x]
+        node-version: [ 16.x, 17.x ]
 
     # Sequence of tasks for completing the workflow job
     steps:
-      # Checks out the repository under $GITHUB_WORKSPACE for workflow job access
-      - uses: actions/checkout@v2
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       # Runs the workflow job using the Node.js version specified in 'strategy'
       - name: Use Node.js ${{ matrix.node-version }}
@@ -48,8 +56,50 @@ jobs:
 
       # Runs automated testing
       - name: Run test
+         # Configure environment variables
+        env:
+          PORT: ${{ secrets.PORT }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PW: ${{ secrets.DATABASE_PW }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
         run: npm test
 
+  build_push:
+    name: 'Job for Push, Schedule and Dispatch Actions With Secrets Access'
+    if: github.event_name != 'pull_request_target'
+
+    # Workflow job is run on the latest Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # Defines the Node.js variation for the workflow job configuration
+    strategy:
+      # Set to sequential testing to prevent test conflicts between jobs
+      max-parallel: 1
+      matrix:
+        node-version: [ 16.x, 17.x ]
+
+    # Sequence of tasks for completing the workflow job
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+
+      # Runs the workflow job using the Node.js version specified in 'strategy'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Clean installation of backend dependencies
+      - name: Run install
+        run: npm ci
+
+      # Builds the project
+      - name: Run build
+        run: npm run build --if-present
+
+      # Runs automated testing
+      - name: Run test
         # Configure environment variables
         env:
           PORT: ${{ secrets.PORT }}
@@ -57,3 +107,4 @@ jobs:
           DATABASE_PW: ${{ secrets.DATABASE_PW }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
+        run: npm test

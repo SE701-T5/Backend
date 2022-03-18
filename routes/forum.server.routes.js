@@ -11,7 +11,8 @@ module.exports = function(app) {
 
     app.route('/api/v1/posts/:id')
         .get(forum.postViewById)
-        .patch(forum.postUpdateById);
+        .patch(forum.postUpdateById)
+        .delete(forum.postDeleteById);
 
     app.route('/api/v1/posts/:id/comments')
         .get(forum.commentViewById)
