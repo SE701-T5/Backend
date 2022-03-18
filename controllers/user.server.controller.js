@@ -4,7 +4,7 @@ const User = require('../models/user.server.model');
  * Returns the hashPassword given a plaintextPassword
  * @param {String} password
  */
- function hashPassword(password) {
+function hashPassword(password) {
     // TODO: Create a has function for the password
     return 'password'
 }
