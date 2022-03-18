@@ -11,7 +11,7 @@ exports.commentCreate = function (req, res) {
         isBadRequest = false,
         commentParams;
 
-    // Check that every expected forum user attribute exists in the request body
+    // Check that every expected forum comment attribute exists in the request body
     if (!reqBody.postID || !reqBody.authorID || !reqBody.authorDisplayName || 
         !reqBody.bodytext || !reqBody.date || !reqBody.upVotes || !reqBody.downVotes) {
         isBadRequest = true;
@@ -23,7 +23,7 @@ exports.commentCreate = function (req, res) {
             'authorID': reqBody.authorID.length < 3 ? false : reqBody.authorID,
             'authorDisplayName': reqBody.authorDisplayName.length < 3 ? false : reqBody.authorDisplayName,
             'bodytext': reqBody.bodytext.length < 1 ? false : reqBody.bodytext,
-            'date': reqBody.date,
+            'date': reqBody.date.length !== 10 ? false : reqBody.date,
             'upVotes': reqBody.upVotes,
             'downVotes': reqBody.downVotes
         }
@@ -43,7 +43,7 @@ exports.commentCreate = function (req, res) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
             } else {
-                // User was created successfully, return 201 status
+                // Comment was created successfully, return 201 status
                 res.status(201).json({"comment": result});
             }
         });
