@@ -16,10 +16,10 @@ describe("Create forum comment test", function () {
                 postID: '001',
                 authorID: 'GeorgeClooney',
                 authorDisplayName: 'gerogy',
-                bodytext: 'Hi my name is George'
+                bodytext: 'Hi my name is George',
                 date: '17-03-2022',
-                upVotes: 0',
-                downVotes: 0
+                upVotes: '0',
+                downVotes: '0'
             })
             .expect(200, done);
     });
