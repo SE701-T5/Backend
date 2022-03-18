@@ -6,6 +6,5 @@ const comment = require('../controllers/comment.server.controller');
  */
 module.exports = function(app) {
     app.route('/api/v1/comments')
-        .get(forum.postViews)
-        .post(forum.postCreate);
+        .post(comment.commentCreate);
 }
