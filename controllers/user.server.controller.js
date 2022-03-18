@@ -10,6 +10,16 @@ function hashPassword(password) {
 }
 
 /**
+ * Returns a random displayName (e.g. Name0001)
+ */
+function generateDisplayName() {
+    let maxValue = 9999
+    let randomNumber = Math.floor(Math.random() * maxValue);
+
+    return "Name" + randomNumber.toString()
+}
+
+/**
  * Creates a new forum user using HTTP request object data
  * @param req HTTP request object
  * @param res HTTP request response object
@@ -21,14 +31,14 @@ exports.userCreate = function(req, res) {
         forumUserParams;
 
     // Check that every expected forum user attribute exists in the request body
-    if (!reqBody.username || !reqBody.displayName || !reqBody.email || !reqBody.password) {
+    if (!reqBody.username || !reqBody.email || !reqBody.password) {
         isBadRequest = true;
     }
 
     if (!isBadRequest) {
         forumUserParams = {
             'username': reqBody.username.length < 3 ? false : reqBody.username,
-            'displayName': reqBody.displayName.length < 3 ? false : reqBody.displayName,
+            'displayName': generateDisplayName(),
             'email': reqBody.email.length > 0 ? reqBody.email : false,
             'hashedPassword': reqBody.password.length > 0 ? hashPassword(reqBody.password) : false
         }
