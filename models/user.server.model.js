@@ -20,7 +20,9 @@ exports.create = function(params, done) {
     });
 
     newUser.save()
-        .then((res) => done(res))
+        .then((res) => {
+            return done(res);
+        })
         .catch((err) => {
             // Forum user is already in the database with unique attributes, return duplicate conflict error
             if (err.code === 11000) {

@@ -155,10 +155,10 @@ describe("Update forum user by ID dummy test", function() {
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Bob123',
-                displayName: 'bob',
-                email: 'bob420@hotmail.com',
-                password: 'passwordbob'
+                username: 'Todd123',
+                displayName: 'todd',
+                email: 'todd413@hotmail.com',
+                password: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
