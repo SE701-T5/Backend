@@ -23,7 +23,8 @@ exports.commentCreate = function (req, res) {
             'authorID': reqBody.authorID.length < 3 ? false : reqBody.authorID,
             'authorDisplayName': reqBody.authorDisplayName.length < 3 ? false : reqBody.authorDisplayName,
             'bodytext': reqBody.bodytext.length < 1 ? false : reqBody.bodytext,
-            'date': reqBody.date.length !== 10 ? false : reqBody.date,
+            // 'date': reqBody.date.length !== 10 ? false : reqBody.date,
+            'date': reqBody.date,
             'upVotes': reqBody.upVotes,
             'downVotes': reqBody.downVotes
         }

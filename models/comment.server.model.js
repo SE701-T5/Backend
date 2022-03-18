@@ -10,7 +10,16 @@ const Comment = require('../config/db_schemas/comment.schema')
  * @param {String} upVotes 
  * @param {String} downVotes 
  */
-exports.create = function (postID, authorID, authorDisplayName, bodytext, date, upVotes, downVotes) {
+exports.create = function (params, done) {
+    const
+        postID = params.postID,
+        authorID = params.authorID,
+        authorDisplayName = params.authorDisplayName,
+        bodytext = params.bodytext;
+        date = params.date;
+        upVotes = params.upVotes;
+        downVotes = params.downVotes;
+
     const newComment = new Comment({
         postID,
         authorID,
@@ -20,6 +29,7 @@ exports.create = function (postID, authorID, authorDisplayName, bodytext, date, 
         upVotes,
         downVotes
     });
+
     newComment.save()
         .then((res) => done(res))
         .catch((err) => {
