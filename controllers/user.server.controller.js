@@ -114,3 +114,35 @@ exports.userUpdateById = function(req, res) {
     // TODO: implement userUpdateById()
     res.json({ dummyTest: "userUpdateById() dummy test passes" });
 }
+
+/**
+ * Delete the data of an existing forum user matching a given ID using HTTP request object data
+ * @param req HTTP request object
+ * @param res HTTP request response object
+ */
+ exports.userDeleteById = function(req, res) {
+    const reqParams = req.params;
+
+    // Check that a valid ID exists in the request parameters
+    let isBadRequest = !isValidDocumentID(reqParams.id);
+
+    if (!isBadRequest) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            User.deleteUserById(reqParams.id, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return a message body { success: true } with 200 status
+                    res.status(200).json({ "success": true });
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
+}
