@@ -4,34 +4,49 @@ const Schema = mongoose.Schema;
 
 const commentSchema = new Schema(
 {   
-    // Username used of the user who made the comment
-    username: {
+    commentID: {
         type: String,
         required: true,
         trim: true,
         minlength: 3
     },
-    // This is the user's public display name
-    name: {
+    postID: {
         type: String,
         required: true,
         trim: true,
         minlength: 3
     },
-    // Date when the comment was created
+    authorID: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 3
+    },
+    authorDisplayName: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 3
+    },
+    bodytext: {
+        type: String,
+        required: true,
+        minlength: 1
+    },
     date: {
         type: String,
         required: true,
         trim: true,
         minlength: 3
     },
-    // Content of the comment
-    content: {
-        type: String,
+    upVotes: {
+        type: Number,
         required: true,
-        minlength: 1
     },
-    
+    downVotes: {
+        type: Number,
+        required: true,
+    },
 }, {
     // Assigns createdAt and updatedAt fields
     timestamps: true
