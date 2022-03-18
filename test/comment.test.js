@@ -1,4 +1,5 @@
 const
+    { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
     app = require('../server');
 
@@ -8,7 +9,7 @@ beforeEach(async function () {
     await connect(testDatabaseName, true); // Connect to the test database
 });
 
-describe("Create forum comment test", function () {
+describe("Create forum comment successfully", function () {
     it("should return: status 201", function (done) {
         request(app)
             .post('/api/v1/comments')
@@ -21,7 +22,11 @@ describe("Create forum comment test", function () {
                 upVotes: '0',
                 downVotes: '0'
             })
-            .expect(200, done);
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done (err);
+                done();
+            })
     });
 });
 

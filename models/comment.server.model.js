@@ -7,12 +7,15 @@ const Comment = require('../config/db_schemas/comment.schema')
  * @param {String} date Date when the comment was created
  * @param {String} content Content of the comment
  */
-exports.create = function (username, name, date, content) {
+exports.create = function (postID, authorID, authorDisplayName, bodytext, date, upVotes, downVotes) {
     const newComment = new Comment({
-        username,
-        name,
+        postID,
+        authorID,
+        authorDisplayName,
+        bodytext,
         date,
-        content
+        upVotes,
+        downVotes
     });
     newComment.save()
         .then((res) => done(res))
@@ -20,6 +23,6 @@ exports.create = function (username, name, date, content) {
             if (err.code === 11000) {
                 return done({ err: "Conflict", status: 409 });
             }
-            return done({ status: 500, err: err })
+            return done({ err: "Internal server error", status: 500 })
         });
 }
