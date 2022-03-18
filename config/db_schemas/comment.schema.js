@@ -30,7 +30,7 @@ const commentSchema = new Schema(
         type: String,
         required: true,
         trim: true,
-        minlength: 3
+        minlength: 10 // Date is in international format: YYYY-MM-DD
     },
     upVotes: {
         type: Number,
