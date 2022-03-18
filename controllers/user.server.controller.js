@@ -4,7 +4,7 @@ const User = require('../models/user.server.model');
  * Returns the hashPassword given a plaintextPassword
  * @param {String} password
  */
- function hashPassword(password) {
+function hashPassword(password) {
     // TODO: Create a has function for the password
     return 'password'
 }
@@ -49,7 +49,7 @@ exports.userCreate = function(req, res) {
                 res.status(result.status).send(result.err);
             } else {
                 // User was created successfully, return 201 status
-                res.status(201).send("User created successfully!");
+                res.status(201).json({"user": result});
             }
         });
     }
@@ -84,8 +84,25 @@ exports.userLogout = function(req, res) {
  * @param res HTTP request response object
  */
 exports.userViewById = function(req, res) {
-    // TODO: implement userViewById()
-    res.json({ dummyTest: "userViewById() dummy test passes" });
+    const id = req.params.id;
+    let isBadRequest = false;
+    if (!id) {
+        isBadRequest = true;
+    }
+    if (!isBadRequest){
+        User.searchById(id, function(result) {
+            if (result.err) {
+                // Return the error message with the error status
+                res.status(result.status).send(result.err);
+            } else {
+                // Return the user document object with 200 status
+                res.json({"user": result});
+            }
+        });
+    } else {
+        res.status(400).send("Bad request");
+    }
+
 }
 
 /**
