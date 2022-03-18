@@ -10,13 +10,13 @@ function hashPassword(password) {
 }
 
 /**
- * Returns a random displayName (e.g. Name0001)
+ * Returns a random displayName (e.g. User0001)
  */
 function generateDisplayName() {
     let maxValue = 9999
     let randomNumber = Math.floor(Math.random() * maxValue);
 
-    return "Name" + randomNumber.toString()
+    return "User" + randomNumber.toString()
 }
 
 /**
