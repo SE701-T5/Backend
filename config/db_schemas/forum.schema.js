@@ -1,3 +1,4 @@
+const Comment = require('../config/db_schemas/comment.schema')
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -48,9 +49,9 @@ const forumSchema = new Schema({
     attachments: [{
         type: String
     }],
-    comments: [
-        //TODO: Change to use 'commentSchema' once it has been created
-    ]
+    comments: [{
+        Comment
+    }]
 }, {
     // Assigns createdAt and updatedAt fields
     timestamps: true
