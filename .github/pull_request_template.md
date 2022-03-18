@@ -53,6 +53,6 @@ Solves #<!--issue-->
 - [ ] Is the pull request linked to a project?
 - [ ] Is the pull request linked to a milestone?
 
-For more information, refer to the [Contributing Guidelines](../blob/contribution-guidelines/.github/CONTRIBUTING.md) document.
+For more information, refer to the Contributing Guidelines and Code of Conduct links at the bottom of this page.
 
 <!--Don't forget to notify others of the pull request for a quick review.-->
