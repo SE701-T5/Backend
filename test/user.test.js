@@ -10,7 +10,7 @@ beforeEach(async function() {
 });
 
 
-describe("Create forum user successfully", function() {
+describe("Create forum user successfully without displayName", function() {
     it("should return: status 201", function(done) {
         request(app)
             .post('/api/v1/users')
@@ -18,6 +18,24 @@ describe("Create forum user successfully", function() {
                 username: 'Bob123',
                 email: 'bob420@hotmail.com',
                 password: 'passwordbob'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
+describe("Create forum user successfully with displayName", function() {
+    it("should return: status 201", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Gary143',
+                displayName: "Gary",
+                email: 'gary283@hotmail.com',
+                password: 'passwordgary'
             })
             .expect(201)
             .end(function(err, res) {
