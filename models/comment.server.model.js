@@ -1,4 +1,4 @@
-const User = require('../config/db_schemas/comment.schema')
+const Comment = require('../config/db_schemas/comment.schema')
 
 /**
  * Creates and returns a new forum comment using the commentSchema

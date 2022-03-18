@@ -4,12 +4,6 @@ const Schema = mongoose.Schema;
 
 const commentSchema = new Schema(
 {   
-    commentID: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 3
-    },
     postID: {
         type: String,
         required: true,

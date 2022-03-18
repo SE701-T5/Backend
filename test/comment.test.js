@@ -13,11 +13,31 @@ describe("Create forum comment test", function () {
         request(app)
             .post('/api/v1/comments')
             .send({
-                username: 'Dave123',
-                name: 'dave',
-                dave: '17-03-2022',
-                content: 'This is the moment.'
+                postID: '001',
+                authorID: 'GeorgeClooney',
+                authorDisplayName: 'gerogy',
+                bodytext: 'Hi my name is George'
+                date: '17-03-2022',
+                upVotes: 0',
+                downVotes: 0
             })
             .expect(200, done);
     });
 });
+
+// describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
+//     it("should return: status 400", function(done) {
+//         request(app)
+//             .post('/api/v1/users')
+//             .send({
+//                 username: 'Tim123',
+//                 displayName: 'Tim',
+//                 password: 'passwordtim'
+//             })
+//             .expect(400)
+//             .end(function(err, res) {
+//                 if (err) done(err);
+//                 done();
+//             });
+//     });
+// });
