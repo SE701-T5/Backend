@@ -139,3 +139,30 @@ describe("Update forum user by ID dummy test", function() {
             });
     });
 });
+
+/**
+ * Test successful forum user database document deletion using existing and valid ID
+ */
+ describe("Delete forum user successfully", function() {
+    it("should return: 200", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Bob123',
+                displayName: 'bob',
+                email: 'bob420@hotmail.com',
+                password: 'passwordbob'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .delete(`/api/v1/users/${res.body.user._id}`)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});
