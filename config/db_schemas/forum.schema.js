@@ -1,4 +1,4 @@
-const Comment = require('../config/db_schemas/comment.schema')
+const Comment = require('./comment.schema')
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
