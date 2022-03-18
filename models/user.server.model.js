@@ -53,8 +53,8 @@ exports.searchById = function(id,done) {
  * @param id the ID for matching to the database document being deleted
  * @param done function callback, returns status code and message if error
  */
- deleteUserById = function(id, done) {
-    Forum.deleteOne({ _id: id })
+exports.deleteUserById = function(id, done) {
+    User.deleteOne({ _id: id })
         .then((res) => {
             if (res.deletedCount === 0) {
                 return done({ err: "Not found", status: 404 });
