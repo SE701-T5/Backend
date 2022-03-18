@@ -17,6 +17,7 @@ module.exports = function() {
     require('../routes/db.server.routes.js')(app);
     require('../routes/forum.server.routes.js')(app);
     require('../routes/user.server.routes.js')(app);
+    require('../routes/comment.server.routes.js')(app);
 
     return app;
 };
