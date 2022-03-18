@@ -16,7 +16,6 @@ describe("Create forum user successfully", function() {
             .post('/api/v1/users')
             .send({
                 username: 'Bob123',
-                displayName: 'bob',
                 email: 'bob420@hotmail.com',
                 password: 'passwordbob'
             })
@@ -34,7 +33,6 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
             .post('/api/v1/users')
             .send({
                 username: 'Tim123',
-                displayName: 'Tim',
                 password: 'passwordtim'
             })
             .expect(400)
@@ -51,7 +49,6 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
             .post('/api/v1/users')
             .send({
                 username: 'Yi123',
-                displayName: 'Yi',
                 email: 'yi14123@gmail.com',
                 password: 'passwordtim'
             })

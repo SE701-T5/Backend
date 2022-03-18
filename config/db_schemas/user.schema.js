@@ -15,7 +15,6 @@ const userSchema = new Schema(
     // This is the user's public display name
     displayName: {
         type: String,
-        required: true,
         trim: true,
         minlength: 3
     },
