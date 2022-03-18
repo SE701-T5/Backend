@@ -19,8 +19,8 @@ describe("Create forum comment successfully", function () {
                 authorDisplayName: 'gerogy',
                 bodytext: 'Hi my name is George',
                 date: '17-03-2022',
-                upVotes: '0',
-                downVotes: '0'
+                upVotes: 0,
+                downVotes: 0
             })
             .expect(201)
             .end(function(err, res) {

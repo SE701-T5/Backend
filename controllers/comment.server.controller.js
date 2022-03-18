@@ -6,16 +6,6 @@ const Comment = require('../models/comment.server.model');
  * @param res HTTP request response object
  */
 exports.commentCreate = function (req, res) {
-    Comment.create(username, name, date, content, function (result) {
-        if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-        } else {
-            // Return the comment document object with 201 status
-            res.status(201).json({ "comment": result });
-        }
-    });
-
     const reqBody = req.body;
     let
         isBadRequest = false,
