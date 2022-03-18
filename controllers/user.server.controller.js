@@ -28,6 +28,7 @@ exports.userCreate = function(req, res) {
     const reqBody = req.body;
     let
         isBadRequest = false,
+        displayName,
         forumUserParams;
 
     // Check that every expected forum user attribute exists in the request body
@@ -35,10 +36,15 @@ exports.userCreate = function(req, res) {
         isBadRequest = true;
     }
 
+    // If a displayName is not provided, generate one
+    if (!reqBody.displayName) {
+        displayName = generateDisplayName()
+    }
+
     if (!isBadRequest) {
         forumUserParams = {
             'username': reqBody.username.length < 3 ? false : reqBody.username,
-            'displayName':  reqBody.displayName.length < 3 ? generateDisplayName() : reqBody.displayName,
+            'displayName': displayName,
             'email': reqBody.email.length > 0 ? reqBody.email : false,
             'hashedPassword': reqBody.password.length > 0 ? hashPassword(reqBody.password) : false
         }
