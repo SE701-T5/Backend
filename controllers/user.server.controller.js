@@ -23,7 +23,7 @@ exports.userCreate = function(req, res) {
     }
 
     if (isAllFieldsValid(forumUserParams)) {
-        User.create(forumUserParams, function(result) {
+        User.createUser(forumUserParams, function(result) {
             if (result.err) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
@@ -67,7 +67,7 @@ exports.userViewById = function(req, res) {
     const id = req.params.id;
 
     if (isValidDocumentID(id)){
-        User.searchById(id, function(result) {
+        User.searchUserById(id, function(result) {
             if (result.err) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);

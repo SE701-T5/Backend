@@ -47,11 +47,11 @@ insertPost = function(params, done) {
 }
 
 /**
- * Search a forum post in the database
- * @param id forum post id
+ * Search for a forum post in the database
+ * @param id forum post ID
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-searchById = function(id, done) {
+searchPostById = function(id, done) {
     try {
         Forum.findById(id)
             .then((res) => done(res))
@@ -89,7 +89,7 @@ deletePostById = function(id, done) {
  */
 updatePostById = function(id, updates, done) {
     // Search for a document matching the given ID to increment upVotes and downVotes
-    searchById(id, function(result) {
+    searchPostById(id, function(result) {
         if (result.err) {
             // Return the error message with the error status
             return done(result);
@@ -114,4 +114,4 @@ updatePostById = function(id, updates, done) {
     });
 }
 
-module.exports = { searchById, insertPost, deletePostById, updatePostById };
+module.exports = { searchPostById, insertPost, deletePostById, updatePostById };

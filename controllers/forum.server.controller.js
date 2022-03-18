@@ -63,7 +63,7 @@ exports.postCreate = function(req, res) {
  * @param res HTTP request response object
  */
 exports.postViewById = function(req, res) {
-    Forum.searchById(req.params.id, function(result) {
+    Forum.searchPostById(req.params.id, function(result) {
         if (result.err) {
             // Return the error message with the error status
             res.status(result.status).send(result.err);
@@ -76,8 +76,8 @@ exports.postViewById = function(req, res) {
 
 /**
  * Modifies the data of an existing forum post matching a given ID using HTTP request object data
- * @param req HTTP request object
- * @param res HTTP request response object
+ * @param req HTTP request object containing the forum post database document fields being updated
+ * @param res HTTP request response object containing the updated forum post database document data
  */
 exports.postUpdateById = function(req, res) {
     const

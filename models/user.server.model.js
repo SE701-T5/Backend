@@ -15,7 +15,7 @@ function hashPassword(password) {
  * @param params object containing forum user attributes
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-create = function(params, done) {
+createUser = function(params, done) {
     const
         username = params.username,
         displayName = params.displayName,
@@ -46,7 +46,7 @@ create = function(params, done) {
  * @param id user id
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-searchById = function(id, done) {
+searchUserById = function(id, done) {
     try {
         User.findById(id)
             .then((res) => done(res))
@@ -78,4 +78,4 @@ updateUserById = function(id, updates, done) {
         });
 }
 
-module.exports = { updateUserById, searchById, create };
+module.exports = { updateUserById, searchUserById, createUser };
