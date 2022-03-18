@@ -33,3 +33,20 @@ describe('Forum post schema test', function() {
         });
     });
 });
+ 
+describe('Comment schema test', function() {
+    it('should be invalid if required fields are empty', function(done) {
+        const f = new forum();
+ 
+        f.validate(function(err) {
+            expect(err.errors.postID).to.exist;
+            expect(err.errors.authorID).to.exist;
+            expect(err.errors.authorDisplayName).to.exist;
+            expect(err.errors.bodyText).to.exist;
+            expect(err.errors.date).to.exist;
+            expect(err.errors.upVotes).to.exist;
+            expect(err.errors.downVotes).to.exist;
+            done();
+        });
+    });
+});

@@ -9,7 +9,7 @@ beforeEach(async function () {
     await connect(testDatabaseName, true); // Connect to the test database
 });
 
-describe("Create forum comment successfully", function () {
+describe("Create forum comment test successfully", function () {
     it("should return: status 201", function (done) {
         request(app)
             .post('/api/v1/comments')
@@ -23,26 +23,49 @@ describe("Create forum comment successfully", function () {
                 downVotes: 0
             })
             .expect(201)
-            .end(function(err, res) {
-                if (err) done (err);
+            .end(function (err, res) {
+                if (err) done(err);
                 done();
             })
     });
 });
 
-// describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
-//     it("should return: status 400", function(done) {
-//         request(app)
-//             .post('/api/v1/users')
-//             .send({
-//                 username: 'Tim123',
-//                 displayName: 'Tim',
-//                 password: 'passwordtim'
-//             })
-//             .expect(400)
-//             .end(function(err, res) {
-//                 if (err) done(err);
-//                 done();
-//             });
-//     });
-// });
+describe("Create forum comment test unsuccessfully - missing attribute 'authorID'", function () {
+    it("should return: status 400", function (done) {
+        request(app)
+            .post('/api/v1/comments')
+            .send({
+                postID: '001',
+                authorDisplayName: 'gerogy',
+                bodytext: 'Hi my name is George',
+                date: '17-03-2022',
+                upVotes: 0,
+                downVotes: 0
+            })
+            .expect(400)
+            .end(function (err, res) {
+                if (err) done(err);
+                done();
+            })
+    });
+});
+
+describe("Create forum comment test unsuccessfully - attribute length requirement not met", function () {
+    it("should return: status 400", function (done) {
+        request(app)
+            .post('/api/v1/comments')
+            .send({
+                postID: '001',
+                authorDisplayName: 'gerogy',
+                bodytext: '',
+                date: '17-03-2022',
+                upVotes: 0,
+                downVotes: 0
+            })
+            .expect(400)
+            .end(function (err, res) {
+                if (err) done(err);
+                done();
+            })
+    });
+});
