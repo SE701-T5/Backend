@@ -49,7 +49,7 @@ exports.userCreate = function(req, res) {
                 res.status(result.status).send(result.err);
             } else {
                 // User was created successfully, return 201 status
-                res.status(201).json({"user": result});
+                res.status(201).send("User created successfully!");
             }
         });
     }
@@ -84,25 +84,8 @@ exports.userLogout = function(req, res) {
  * @param res HTTP request response object
  */
 exports.userViewById = function(req, res) {
-    const id = req.params.id;
-    let isBadRequest = false;
-    if (!id) {
-        isBadRequest = true;
-    }
-    if (!isBadRequest){
-        User.searchById(id, function(result) {
-            if (result.err) {
-                // Return the error message with the error status
-                res.status(result.status).send(result.err);
-            } else {
-                // Return the user document object with 200 status
-                res.json({"user": result});
-            }
-        });
-    } else {
-        res.status(400).send("Bad request");
-    }
-
+    // TODO: implement userViewById()
+    res.json({ dummyTest: "userViewById() dummy test passes" });
 }
 
 /**

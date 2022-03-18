@@ -9,7 +9,6 @@ beforeEach(async function() {
     await connect(testDatabaseName, true); // Connect to the test database
 });
 
-
 describe("Create forum user successfully", function() {
     it("should return: status 201", function(done) {
         request(app)
@@ -89,41 +88,15 @@ describe("Log out forum user dummy test", function() {
     });
 });
 
-describe("View forum user by ID successfully", function() {
-    it("should return: status 200", function(done) {
+describe("View forum user by ID dummy test", function() {
+    it("should return: { dummyTest: 'userViewById() dummy test passes' }", function(done) {
         request(app)
-            .post('/api/v1/users')
-            .send(
-                {
-                    username: 'Bob1234',
-                    displayName: 'bob',
-                    email: 'bob420@hotmail.com',
-                    password: 'passwordbob'
-                })
-            .expect(201)
-            .end(function(err, res) {
-                if (err) done(err);
-                request(app)
-                    .get(`/api/v1/users/${res.body.user._id}`)
-                    .expect(200)
-                    .end(function(err, res) {
-                        if (err) done(err);
-                        done();
-                    });
-            });
-    });
-});
-
-describe("View forum user by ID unsuccessfully", function() {
-    it('should return a 404 response for invalid id',function(done) {
-        request(app)
-            .get('/api/v1/users/x')
-            .expect(404)
+            .get('/api/v1/users/:id')
+            .expect({ dummyTest: 'userViewById() dummy test passes' })
             .end(function(err, res) {
                 if (err) done(err);
                 done();
             });
-
     });
 });
 
