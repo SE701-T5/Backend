@@ -29,7 +29,7 @@ exports.userCreate = function(req, res) {
         'username': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
         'displayName': reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : generateDisplayName(),
         'email': reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
-        'hashedPassword': reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
+        'password': reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
     }
 
     if (isAllFieldsValid(forumUserParams)) {
@@ -109,7 +109,7 @@ exports.userUpdateById = function(req, res) {
             "username": reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
             "displayName": reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
             "email": reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
-            "hashedPassword": reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
+            "password": reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
         }
         isBadRequest = !isAnyFieldValid(userUpdateParams); // Checks for any valid field, removes all invalid fields
     }

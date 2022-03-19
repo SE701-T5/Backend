@@ -1,6 +1,7 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
     { resetCollections } = require("../models/db.server.model"),
+    { hashPassword } = require("../models/user.server.model")
     request = require('supertest'),
     assert = require("assert"),
     app = require('../server');
@@ -181,7 +182,7 @@ describe("Update forum user successfully with valid ID", function() {
                         assert.equal(res.body.updatedForumUser.username, "OldBob");
                         assert.equal(res.body.updatedForumUser.displayName, "Bob");
                         assert.equal(res.body.updatedForumUser.email, "joe@bobby.com");
-                        assert.equal(res.body.updatedForumUser.hashedPassword, "JoeBob");
+                        assert.equal(res.body.updatedForumUser.hashedPassword, hashPassword("JoeBob"));
                         done();
                     });
             });

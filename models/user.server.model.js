@@ -1,13 +1,15 @@
-const User = require('../config/db_schemas/user.schema');
+const
+    User = require('../config/db_schemas/user.schema'),
+    saltedMd5 = require('salted-md5');
 
 /**
  * Hashes a given plaintext password
  * @param password plaintext password for hashing
  * @returns {String} hashed password
  */
-function hashPassword(password) {
-    // TODO: Create a function for hashing (and maybe salting) passwords
-    return password;
+hashPassword = function(password) {
+    const hashedPassword = saltedMd5(password, 'UniForum-Salt')
+    return hashedPassword;
 }
 
 /**
@@ -20,7 +22,7 @@ createUser = function(params, done) {
         username = params.username,
         displayName = params.displayName,
         email = params.email,
-        hashedPassword = hashPassword(params.hashedPassword);
+        hashedPassword = hashPassword(params.password);
 
     const newUser = new User({
         username,
@@ -85,8 +87,8 @@ deleteUserById = function(id, done) {
  * @param done function callback, returns status code, and updated document data or message if error
  */
 updateUserById = function(id, updates, done) {
-    if ("hashedPassword" in updates) {
-        updates.hashedPassword = hashPassword(updates.hashedPassword);
+    if ("password" in updates) {
+        updates.hashedPassword = hashPassword(updates.password);
     }
     // Find the forum user database document matching the given ID, update all edited fields, return updated user data
     User.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
@@ -98,4 +100,4 @@ updateUserById = function(id, updates, done) {
         });
 }
 
-module.exports = { updateUserById, searchUserById, createUser, deleteUserById };
+module.exports = { hashPassword, updateUserById, searchUserById, createUser, deleteUserById };

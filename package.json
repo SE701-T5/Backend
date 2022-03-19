@@ -36,6 +36,7 @@
     "express": "^4.17.3",
     "mongoose": "^6.2.6",
     "promise": "^8.1.0",
+    "salted-md5": "^4.0.2",
     "sinon": "^13.0.1"
   }
 }
