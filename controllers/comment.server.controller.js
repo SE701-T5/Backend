@@ -12,8 +12,8 @@ exports.commentCreate = function (req, res) {
         commentParams;
 
     // Check that every expected forum comment attribute exists in the request body
-    if (!reqBody.postID || !reqBody.authorID || !reqBody.authorDisplayName || 
-        !reqBody.bodytext || !reqBody.date || !reqBody.upVotes || !reqBody.downVotes) {
+    if (!reqBody.postID || !reqBody.authorID || !reqBody.authorDisplayName || !reqBody.bodytext || 
+        !reqBody.date || reqBody.upVotes !== 0 || reqBody.downVotes !== 0) {
         isBadRequest = true;
     }
 
@@ -23,8 +23,7 @@ exports.commentCreate = function (req, res) {
             'authorID': reqBody.authorID.length < 3 ? false : reqBody.authorID,
             'authorDisplayName': reqBody.authorDisplayName.length < 3 ? false : reqBody.authorDisplayName,
             'bodytext': reqBody.bodytext.length < 1 ? false : reqBody.bodytext,
-            // 'date': reqBody.date.length !== 10 ? false : reqBody.date,
-            'date': reqBody.date,
+            'date': reqBody.date.length !== 10 ? false : reqBody.date,
             'upVotes': reqBody.upVotes,
             'downVotes': reqBody.downVotes
         }
