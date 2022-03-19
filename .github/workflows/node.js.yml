@@ -107,7 +107,7 @@ jobs:
 
   build_main:
     name: 'Job for Non-PR Action in Main Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.repository == 'SE701-T5/Backend' && github.ref == 'main'
+    if: github.event_name != 'pull_request_target' && github.repository == 'SE701-T5/Backend' && github.ref_name == 'main'
 
     # Workflow job is run on the latest Ubuntu runner
     runs-on: ubuntu-latest
