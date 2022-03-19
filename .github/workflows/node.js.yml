@@ -115,6 +115,7 @@ jobs:
     # Defines the Node.js variation for the workflow job configuration
     strategy:
       # Set to sequential testing to prevent test conflicts between jobs
+      max-parallel: 1
       matrix:
         node-version: [ 16.x, 17.x ]
 
