@@ -50,7 +50,7 @@ const forumSchema = new Schema({
         type: String
     }],
     comments: [{
-        // Comment
+        type: Number
     }]
 }, {
     // Assigns createdAt and updatedAt fields
