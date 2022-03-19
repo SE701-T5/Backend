@@ -1,13 +1,11 @@
-const User = require('../models/user.server.model');
-
-/**
- * Returns the hashPassword given a plaintextPassword
- * @param {String} password
- */
-function hashPassword(password) {
-    // TODO: Create a has function for the password
-    return 'password'
-}
+const
+    User = require('../models/user.server.model'),
+    emailValidator = require('email-validator'),
+    {
+        isValidDocumentID,
+        isAnyFieldValid,
+        isAllFieldsValid
+    } = require("../lib/validate.lib");
 
 /**
  * Creates a new forum user using HTTP request object data
@@ -16,34 +14,16 @@ function hashPassword(password) {
  */
 exports.userCreate = function(req, res) {
     const reqBody = req.body;
-    let
-        isBadRequest = false,
-        forumUserParams;
 
-    // Check that every expected forum user attribute exists in the request body
-    if (!reqBody.username || !reqBody.displayName || !reqBody.email || !reqBody.password) {
-        isBadRequest = true;
+    const forumUserParams = {
+        'username': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
+        'displayName': reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
+        'email': reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
+        'hashedPassword': reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
     }
 
-    if (!isBadRequest) {
-        forumUserParams = {
-            'username': reqBody.username.length < 3 ? false : reqBody.username,
-            'displayName': reqBody.displayName.length < 3 ? false : reqBody.displayName,
-            'email': reqBody.email.length > 0 ? reqBody.email : false,
-            'hashedPassword': reqBody.password.length > 0 ? hashPassword(reqBody.password) : false
-        }
-    }
-
-    // Confirm that forum post attribute values are valid
-    for (let key in forumUserParams) {
-        if (forumUserParams[key] === false) {
-            isBadRequest = true;
-            break;
-        }
-    }
-
-    if (!isBadRequest) {
-        User.create(forumUserParams, function(result) {
+    if (isAllFieldsValid(forumUserParams)) {
+        User.createUser(forumUserParams, function(result) {
             if (result.err) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
@@ -85,12 +65,9 @@ exports.userLogout = function(req, res) {
  */
 exports.userViewById = function(req, res) {
     const id = req.params.id;
-    let isBadRequest = false;
-    if (!id) {
-        isBadRequest = true;
-    }
-    if (!isBadRequest){
-        User.searchById(id, function(result) {
+
+    if (isValidDocumentID(id)){
+        User.searchUserById(id, function(result) {
             if (result.err) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
@@ -102,15 +79,48 @@ exports.userViewById = function(req, res) {
     } else {
         res.status(400).send("Bad request");
     }
-
 }
 
 /**
  * Modifies the data of an existing forum user matching a given ID using HTTP request object data
- * @param req HTTP request object
- * @param res HTTP request response object
+ * @param req HTTP request object containing the user document fields being updated
+ * @param res HTTP request response object containing the updated user document data
  */
 exports.userUpdateById = function(req, res) {
-    // TODO: implement userUpdateById()
-    res.json({ dummyTest: "userUpdateById() dummy test passes" });
+    const
+        reqParams = req.params,
+        reqBody = req.body;
+    let userUpdateParams,
+        isBadRequest = !isValidDocumentID(reqParams.id); // Check that a valid ID exists in the request parameters
+
+    if (!isBadRequest) {
+        // Set fields for updating to an object with either passed values or false to declare them as invalid
+        userUpdateParams = {
+            "username": reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
+            "displayName": reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
+            "email": reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
+            "hashedPassword": reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
+        }
+        isBadRequest = !isAnyFieldValid(userUpdateParams); // Checks for any valid field, removes all invalid fields
+    }
+
+    if (!isBadRequest) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            User.updateUserById(reqParams.id, userUpdateParams, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return the forum post document object with 201 status
+                    res.status(201).json({"updatedForumUser": result});
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
