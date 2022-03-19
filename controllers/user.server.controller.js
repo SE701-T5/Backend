@@ -133,10 +133,7 @@ exports.userUpdateById = function(req, res) {
  exports.userDeleteById = function(req, res) {
     const reqParams = req.params;
 
-    // Check that a valid ID exists in the request parameters
-    let isBadRequest = !isValidDocumentID(reqParams.id);
-
-    if (!isBadRequest) {
+       if (isValidDocumentID(reqParams.id)) {
         const isUserAuthenticated = true; // TODO: implement user authentication
 
         if (isUserAuthenticated) {
