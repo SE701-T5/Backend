@@ -17,15 +17,32 @@ after(async function() {
     await closeConn(true); // Disconnect from the app database
 });
 
-describe("Create forum user successfully", function() {
+describe("Create forum user successfully without displayName", function() {
     it("should return: status 201", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
                 username: 'Bob123',
-                displayName: 'bob',
                 email: 'bob420@hotmail.com',
                 password: 'passwordbob'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                done();
+            });
+    });
+});
+
+describe("Create forum user successfully with displayName", function() {
+    it("should return: status 201", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Gary143',
+                displayName: "Gary",
+                email: 'gary283@hotmail.com',
+                password: 'passwordgary'
             })
             .expect(201)
             .end(function(err, res) {
@@ -41,7 +58,6 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
             .post('/api/v1/users')
             .send({
                 username: 'Tim123',
-                displayName: 'Tim',
                 password: 'passwordtim'
             })
             .expect(400)
@@ -57,8 +73,7 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Yi123',
-                displayName: 'Yi',
+                username: 'Yi',
                 email: 'yi14123@gmail.com',
                 password: 'passwordtim'
             })

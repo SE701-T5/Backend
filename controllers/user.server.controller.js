@@ -8,6 +8,16 @@ const
     } = require("../lib/validate.lib");
 
 /**
+ * Returns a random displayName (e.g. User0001)
+ */
+function generateDisplayName() {
+    let maxValue = 9999
+    let randomNumber = Math.floor(Math.random() * maxValue);
+
+    return "User" + randomNumber.toString()
+}
+
+/**
  * Creates a new forum user using HTTP request object data
  * @param req HTTP request object
  * @param res HTTP request response object
@@ -17,7 +27,7 @@ exports.userCreate = function(req, res) {
 
     const forumUserParams = {
         'username': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
-        'displayName': reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
+        'displayName': reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : generateDisplayName(),
         'email': reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
         'hashedPassword': reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
     }
