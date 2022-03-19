@@ -75,6 +75,7 @@ deleteUserById = function(id, done) {
         });
 }
 
+/**
  * Updates given fields of a database collection document for a user matching a given ID
  * @param id the ID of the document being updated
  * @param updates the document field(s) being updated
