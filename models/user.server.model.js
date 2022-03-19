@@ -30,7 +30,9 @@ createUser = function(params, done) {
     });
 
     newUser.save()
-        .then((res) => done(res))
+        .then((res) => {
+            return done(res);
+        })
         .catch((err) => {
             // Forum user is already in the database with unique attributes, return duplicate conflict error
             if (err.code === 11000) {
@@ -59,6 +61,24 @@ searchUserById = function(id, done) {
 }
 
 /**
+ * Delete an existing forum user matching a given ID
+ * @param id the ID for matching to the database document being deleted
+ * @param done function callback, returns status code and message if error
+ */
+deleteUserById = function(id, done) {
+    User.deleteOne({ _id: id })
+        .then((res) => {
+            if (res.deletedCount === 0) {
+                return done({ err: "Not found", status: 404 });
+            }
+            return done(res);
+        })
+        .catch((err) => {
+            return done({ err: "Internal server error", status: 500 });
+        });
+}
+
+/**
  * Updates given fields of a database collection document for a user matching a given ID
  * @param id the ID of the document being updated
  * @param updates the document field(s) being updated
@@ -78,4 +98,4 @@ updateUserById = function(id, updates, done) {
         });
 }
 
-module.exports = { updateUserById, searchUserById, createUser };
+module.exports = { updateUserById, searchUserById, createUser, deleteUserById };

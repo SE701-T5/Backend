@@ -402,3 +402,30 @@ describe("Update forum user unsuccessfully with invalid password update field", 
             });
     });
 });
+
+/**
+ * Test successful forum user database document deletion using existing and valid ID
+ */
+ describe("Delete forum user successfully", function() {
+    it("should return: 200", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Todd123',
+                displayName: 'todd',
+                email: 'todd413@hotmail.com',
+                password: 'passwordtodd'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .delete(`/api/v1/users/${res.body.user._id}`)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        done();
+                    });
+            });
+    });
+});

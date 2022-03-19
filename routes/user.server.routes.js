@@ -16,5 +16,6 @@ module.exports = function(app) {
 
     app.route('/api/v1/users/:id')
         .get(user.userViewById)
-        .patch(user.userUpdateById);
+        .patch(user.userUpdateById)
+        .delete(user.userDeleteById);
 }

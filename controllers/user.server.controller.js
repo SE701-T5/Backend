@@ -124,3 +124,32 @@ exports.userUpdateById = function(req, res) {
         res.status(400).send("Bad request");
     }
 }
+
+/**
+ * Delete the data of an existing forum user matching a given ID using HTTP request object data
+ * @param req HTTP request object
+ * @param res HTTP request response object
+ */
+ exports.userDeleteById = function(req, res) {
+    const reqParams = req.params;
+
+    if (isValidDocumentID(reqParams.id)) {
+        const isUserAuthenticated = true; // TODO: implement user authentication
+
+        if (isUserAuthenticated) {
+            User.deleteUserById(reqParams.id, function (result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    // Return a message body { success: true } with 200 status
+                    res.status(200).json({ "success": true });
+                }
+            });
+        } else {
+            res.status(401).send("Unauthorized");
+        }
+    } else {
+        res.status(400).send("Bad request");
+    }
+}
