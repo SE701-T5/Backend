@@ -72,6 +72,9 @@ deleteUserById = function(id, done) {
                 return done({ err: "Not found", status: 404 });
             }
             return done(res);
+        })
+        .catch((err) => {
+            return done({ err: "Internal server error", status: 500 });
         });
 }
 
