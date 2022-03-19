@@ -18,6 +18,9 @@ after(async function() {
     await closeConn(true); // Disconnect from the app database
 });
 
+/**
+ * Test successful forum user database document creation without a displayName input
+ */
 describe("Create forum user successfully without displayName", function() {
     it("should return: status 201", function(done) {
         request(app)
@@ -35,6 +38,9 @@ describe("Create forum user successfully without displayName", function() {
     });
 });
 
+/**
+ * Test successful forum user database document creation with a displayName input
+ */
 describe("Create forum user successfully with displayName", function() {
     it("should return: status 201", function(done) {
         request(app)
@@ -53,6 +59,9 @@ describe("Create forum user successfully with displayName", function() {
     });
 });
 
+/**
+ * Test forum user database document is created unsuccessfully when there is a missing attribute
+ */
 describe("Create forum user test unsuccessfully - missing attribute 'email'", function() {
     it("should return: status 400", function(done) {
         request(app)
@@ -69,6 +78,10 @@ describe("Create forum user test unsuccessfully - missing attribute 'email'", fu
     });
 });
 
+/**
+ * Test forum user database document is created unsuccessfully when an attribute does not
+ * meet the length requirement
+ */
 describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
     it("should return: status 400", function(done) {
         request(app)
@@ -81,6 +94,27 @@ describe("Create forum user test unsuccessfully - attribute length requirement n
             .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
+                done();
+            });
+    });
+});
+
+/**
+ * Test successful password hashing when a forum user document is created
+ */
+describe("Test password hashing works correctly", function() {
+    it("should return: status 201", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Jim123',
+                email: 'Jim420@hotmail.com',
+                password: 'passwordjim'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                assert.equal(res.body.updatedForumUser.hashedPassword, hashPassword("passwordjim"));
                 done();
             });
     });
