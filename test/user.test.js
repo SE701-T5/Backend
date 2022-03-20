@@ -6,12 +6,18 @@ const
     app = require('../server');
 
 /**
- * Before each test, the app database is disconnected before the test database is connected and all data is deleted
+ * Before all tests, the app database is disconnected before the test database is connected
  */
-beforeEach(async function() {
+before(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
+});
+
+/**
+ * Before each test, all data in the test database is deleted
+ */
+beforeEach(async function() {
     await resetCollections(); // reset database for testing
 });
 
