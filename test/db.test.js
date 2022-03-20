@@ -3,6 +3,9 @@ const
     request = require('supertest'),
     app = require('../server');
 
+/**
+ * Before each test, the app database is disconnected before the test database is connected
+ */
 beforeEach(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database

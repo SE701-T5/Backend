@@ -1,4 +1,6 @@
-const user = require('../controllers/user.server.controller');
+const
+    user = require('../controllers/user.server.controller'),
+    { isRequestTokenAuthorized } = require('../lib/middleware.lib');
 
 /**
  * Handles HTTP requests for the User module using Express.js route()
@@ -12,10 +14,10 @@ module.exports = function(app) {
         .post(user.userLogin);
 
     app.route('/api/v1/users/logout')
-        .post(user.userLogout);
+        .post(isRequestTokenAuthorized, user.userLogout);
 
     app.route('/api/v1/users/:id')
         .get(user.userViewById)
-        .patch(user.userUpdateById)
-        .delete(user.userDeleteById);
+        .patch(isRequestTokenAuthorized, user.userUpdateById)
+        .delete(isRequestTokenAuthorized, user.userDeleteById);
 }
