@@ -456,7 +456,6 @@ describe("set user authentication token unsuccessfully with invalid user ID", fu
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                const id = res.body.userData._id;
                 request(app)
                     .post('/api/v1/users/login')
                     .send({
