@@ -150,7 +150,7 @@ exports.userUpdateById = function(req, res) {
         "username": reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
         "displayName": reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
         "email": reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
-        "hashedPassword": reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false
+        "plaintextPassword": reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false
     }
 
     if (isValidDocumentID(reqParams.id) && isAnyFieldValid(userUpdateParams)) {
