@@ -136,12 +136,35 @@ exports.commentViewById = function(req, res) {
 
 /**
  * Creates a new comment for a forum post matching a given ID using HTTP request object data
- * @param req HTTP request object
- * @param res HTTP request response object
+ * @param req HTTP request object containing forum post comment field data, and post ID
+ * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
 exports.commentGiveById = function(req, res) {
-    // TODO: implement commentGiveById()
-    res.json({ dummyTest: "commentGiveById() dummy test passes" });
+    const
+        reqParams = req.params,
+        reqBody = req.body,
+        commentParams = {
+            'postID': isValidDocumentID(reqParams.id) ? reqParams.id : false,
+            'authorID': isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
+            'authorUserName': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
+            'bodyText': reqBody.bodyText && reqBody.bodyText.length > 0 ? reqBody.bodyText : false,
+            "attachments": reqBody.images ? reqBody.images : [""]
+        };
+
+    if (isAllFieldsValid(commentParams)) {
+        Forum.addComment(commentParams, function(result) {
+            if (result.err) {
+                // Return the error message with the error status
+                res.status(result.status).send(result.err);
+            } else {
+                // Comment was created successfully, return 201 status
+                res.status(201).json({"comment": result});
+            }
+        });
+    }
+    else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**

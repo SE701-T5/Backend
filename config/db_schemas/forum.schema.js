@@ -1,15 +1,15 @@
-const Comment = require('./comment.schema')
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
 const forumSchema = new Schema({
-    // The User's ID who owns the forum post
+    // The User's ID who owns the forum post - must be a document ID length
     userID: {
         type: String,
         required: true,
         trim: true,
-        minlength: 3
+        minlength: 24,
+        maxLength: 24
     },
     // The ID for the community the blog is associates with
     communityID: {
@@ -49,8 +49,9 @@ const forumSchema = new Schema({
     attachments: [{
         type: String
     }],
+    // Contains the document IDs of post comments (optional)
     comments: [{
-        type: Number
+        type: String
     }]
 }, {
     // Assigns createdAt and updatedAt fields
