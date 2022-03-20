@@ -395,7 +395,7 @@ describe("Get user authentication token unsuccessfully with invalid user ID", fu
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
-                        getUserAuthToken('wrong ID',function(result) {
+                        getUserAuthToken('wrong ID', function(result) {
                             assert.equal(result.status, 404);
                             done();
                         });
