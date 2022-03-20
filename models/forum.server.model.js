@@ -163,4 +163,4 @@ addComment = function (params, done) {
         });
 }
 
-module.exports = { searchById, insertPost, deletePostById, updatePostById, addComment };
+module.exports = { searchPostById, insertPost, deletePostById, updatePostById, addComment };

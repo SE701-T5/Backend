@@ -35,15 +35,13 @@ after(async function() {
 describe("Create forum post successfully", function() {
     it("should return: 201", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "How do I make a forum post?!",
-                    communityID: "communityID",
-                    text: "Help me, I don't know how to turn my computer on!",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -217,15 +215,13 @@ describe("View forum post(s) by search dummy test", function() {
 describe("View forum post successfully", function() {
     it("should return: 200", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "More spam day!",
-                    communityID: "communityID",
-                    text: "Click bait",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -288,15 +284,13 @@ describe("View forum post unsuccessfully for invalid id", function() {
 describe("Update forum post successfully with valid ID for edits and votes", function() {
     it("should return: 201", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -357,15 +351,13 @@ describe("Update forum post successfully with valid ID for edits and votes", fun
 describe("Update forum post successfully with valid ID for only votes", function() {
     it("should return: 201", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -424,15 +416,13 @@ describe("Update forum post successfully with valid ID for only votes", function
 describe("Update forum post successfully with valid ID for only edits", function() {
     it("should return: 201", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -553,15 +543,13 @@ describe("Update forum post unsuccessfully using invalid authorization token", f
 describe("Update forum post unsuccessfully with invalid ID", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -617,15 +605,13 @@ describe("Update forum post unsuccessfully with invalid ID", function() {
 describe("Update forum post unsuccessfully with empty update object", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -679,15 +665,13 @@ describe("Update forum post unsuccessfully with empty update object", function()
 describe("Update forum post unsuccessfully with invalid communityID update field", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -741,15 +725,13 @@ describe("Update forum post unsuccessfully with invalid communityID update field
 describe("Update forum post unsuccessfully with invalid title update field", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -803,15 +785,13 @@ describe("Update forum post unsuccessfully with invalid title update field", fun
 describe("Update forum post unsuccessfully with invalid upVotes update field", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -865,15 +845,13 @@ describe("Update forum post unsuccessfully with invalid upVotes update field", f
 describe("Update forum post unsuccessfully with invalid downVotes update field", function() {
     it("should return: 400", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
@@ -927,15 +905,13 @@ describe("Update forum post unsuccessfully with invalid downVotes update field",
 describe("Delete forum post successfully", function() {
     it("should return: 200", function(done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "Happy St. Paddy's day!",
-                    communityID: "communityID",
-                    text: "What's the craic?",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: 'todd',
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);

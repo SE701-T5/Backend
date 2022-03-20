@@ -294,10 +294,10 @@ describe("Logout forum user successfully", function() {
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Todd123',
+                username: 'NewUser',
                 displayName: 'todd',
-                email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -306,9 +306,9 @@ describe("Logout forum user successfully", function() {
                 request(app)
                     .post('/api/v1/users/login')
                     .send({
-                        username: 'Todd123',
-                        email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -337,10 +337,10 @@ describe("Logout forum user unsuccessfully - invalid authorization token", funct
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Todd123',
+                username: 'NewUser',
                 displayName: 'todd',
-                email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -349,9 +349,9 @@ describe("Logout forum user unsuccessfully - invalid authorization token", funct
                 request(app)
                     .post('/api/v1/users/login')
                     .send({
-                        username: 'Todd123',
-                        email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -380,20 +380,21 @@ describe("Logout forum user unsuccessfully - invalid user ID", function() {
         request(app)
             .post('/api/v1/users')
             .send({
-                username: 'Todd123',
+                username: 'NewUser',
                 displayName: 'todd',
-                email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
+                const id = res.body.userData._id;
                 request(app)
                     .post('/api/v1/users/login')
                     .send({
-                        username: 'Todd123',
-                        email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function(err, res) {

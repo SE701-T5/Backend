@@ -2,14 +2,30 @@ const
     { closeConn, connect } = require("../config/db.server.config"),
     request = require('supertest'),
     app = require('../server');
+const {resetCollections} = require("../models/db.server.model");
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected
  */
-beforeEach(async function () {
+before(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
+});
+
+/**
+ * Before each test, all data in the test database is deleted
+ */
+beforeEach(async function() {
+    await resetCollections(); // reset database for testing
+});
+
+/**
+ * After all tests, all test database document data is deleted and the test database is disconnected
+ */
+after(async function() {
+    await resetCollections(); // reset database for testing
+    await closeConn(true); // Disconnect from the app database
 });
 
 /**
@@ -18,30 +34,56 @@ beforeEach(async function () {
 describe("Create forum comment test successfully", function () {
     it("should return: status 201", function (done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "How do I make a forum post?!",
-                    communityID: "communityID",
-                    text: "Help me, I don't know how to turn my computer on!",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
+                const id = res.body.userData._id;
                 request(app)
-                    .post(`/api/v1/posts/${ res.body.forumPost._id }/comments`)
+                    .post('/api/v1/users/login')
                     .send({
-                        authorID: "12345678901234567890abcd",
-                        authorUserName: 'GeorgeClooney',
-                        username: 'gerogy',
-                        bodyText: 'Hi my name is George'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
-                    .expect(201)
+                    .expect(200)
                     .end(function (err, res) {
                         if (err) done(err);
-                        done();
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .post(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .set({"X-Authorization": authToken})
+                                    .send({
+                                        authorID: id,
+                                        username: 'NewUser',
+                                        bodyText: 'Hi my name is George'
+                                    })
+                                    .expect(201)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        done();
+                                    });
+                            });
                     });
             });
     });
@@ -53,29 +95,55 @@ describe("Create forum comment test successfully", function () {
 describe("Create forum comment test unsuccessfully - missing field 'authorID'", function () {
     it("should return: status 400", function (done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "How do I make a forum post?!",
-                    communityID: "communityID",
-                    text: "Help me, I don't know how to turn my computer on!",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
+                const id = res.body.userData._id;
                 request(app)
-                    .post(`/api/v1/posts/${ res.body.forumPost._id }/comments`)
+                    .post('/api/v1/users/login')
                     .send({
-                        authorUserName: 'GeorgeClooney',
-                        username: 'gerogy',
-                        bodyText: 'Hi my name is George'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
-                    .expect(400)
+                    .expect(200)
                     .end(function (err, res) {
                         if (err) done(err);
-                        done();
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .post(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .set({"X-Authorization": authToken})
+                                    .send({
+                                        username: 'NewUser',
+                                        bodyText: 'Hi my name is George'
+                                    })
+                                    .expect(400)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        done();
+                                    });
+                            });
                     });
             });
     });
@@ -87,30 +155,56 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
 describe("Create forum comment test unsuccessfully - field length requirement not met", function () {
     it("should return: status 400", function (done) {
         request(app)
-            .post('/api/v1/posts')
-            .send(
-                {
-                    userID: "12345678901234567890abcd",
-                    title: "How do I make a forum post?!",
-                    communityID: "communityID",
-                    text: "Help me, I don't know how to turn my computer on!",
-                    images: ["image string"]
-                })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
             .expect(201)
-            .end(function (err, res) {
+            .end(function(err, res) {
                 if (err) done(err);
+                const id = res.body.userData._id;
                 request(app)
-                    .post(`/api/v1/posts/${ res.body.forumPost._id }/comments`)
+                    .post('/api/v1/users/login')
                     .send({
-                        authorID: "12345678901234567890abcd",
-                        authorUserName: 'GeorgeClooney',
-                        username: '',
-                        bodyText: 'Hi my name is George'
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
                     })
-                    .expect(400)
+                    .expect(200)
                     .end(function (err, res) {
                         if (err) done(err);
-                        done();
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .post(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .set({"X-Authorization": authToken})
+                                    .send({
+                                        authorID: id,
+                                        username: '',
+                                        bodyText: 'Hi my name is George'
+                                    })
+                                    .expect(400)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        done();
+                                    });
+                            });
                     });
             });
     });

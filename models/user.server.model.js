@@ -161,6 +161,7 @@ getUserAuthToken = function(userID, done) {
             return done({ status: result.status, err: result.err });
         } else {
             if (result.authToken.length === 16) {
+                console.log(result.authToken);
                 // Return a user's authorization token
                 return done(result.authToken);
             } else {

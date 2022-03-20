@@ -149,13 +149,14 @@ exports.commentViewById = function(req, res) {
 
 /**
  * Creates a new comment for a forum post matching a given ID using HTTP request object data
- * @param req HTTP request object containing forum post comment field data, and post ID
+ * @param req HTTP request object containing forum post comment field data, and post ID, and authorization token
  * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
 exports.commentGiveById = function(req, res) {
     const
         reqParams = req.params,
         reqBody = req.body,
+        authToken = req.get(configParams.get('authToken')),
         commentParams = {
             'postID': isValidDocumentID(reqParams.id) ? reqParams.id : false,
             'authorID': isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
@@ -165,13 +166,24 @@ exports.commentGiveById = function(req, res) {
         };
 
     if (isAllFieldsValid(commentParams)) {
-        Forum.addComment(commentParams, function(result) {
-            if (result.err) {
-                // Return the error message with the error status
-                res.status(result.status).send(result.err);
+        User.isUserAuthorized(commentParams.authorID, authToken, function(result) {
+            if (result.isAuth) {
+                Forum.addComment(commentParams, function(result) {
+                    if (result.err) {
+                        // Return the error message with the error status
+                        res.status(result.status).send(result.err);
+                    } else {
+                        // Comment was created successfully, return 201 status
+                        res.status(201).json({"comment": result});
+                    }
+                });
             } else {
-                // Comment was created successfully, return 201 status
-                res.status(201).json({"comment": result});
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    res.status(401).send("Unauthorized");
+                }
             }
         });
     }
