@@ -216,6 +216,7 @@ isUserAuthorized = function(userID, authToken, done) {
 }
 
 module.exports = {
+    hashPassword,
     updateUserById,
     searchUserById,
     createUser,
