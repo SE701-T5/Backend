@@ -1,7 +1,7 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
     { resetCollections } = require("../models/db.server.model"),
-    { hashPassword } = require("../models/user.server.model")
+    { hashPassword } = require("../models/user.server.model"),
     request = require('supertest'),
     assert = require("assert"),
     app = require('../server');

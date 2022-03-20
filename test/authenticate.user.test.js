@@ -7,6 +7,7 @@ const
         getUserAuthToken,
         setUserAuthToken
     } = require("../models/user.server.model"),
+    { hashPassword } = require("../models/user.server.model"),
     request = require('supertest'),
     assert = require("assert"),
     app = require('../server');
@@ -49,7 +50,7 @@ describe("Authenticate user successfully with matching email and password", func
             .end(function(err, res) {
                 if (err) done(err);
                 authenticateUser({ email: email }, password, function (result) {
-                    assert.equal(result.email === email && result.hashedPassword === password, true);
+                    assert.equal(result.email === email && result.hashedPassword === hashPassword(password), true);
                     done();
                 });
             });
@@ -76,7 +77,7 @@ describe("Authenticate user successfully with matching username and password", f
             .end(function(err, res) {
                 if (err) done(err);
                 authenticateUser({ username: username }, password, function (result) {
-                    assert.equal(result.username === username && result.hashedPassword === password, true);
+                    assert.equal(result.username === username && result.hashedPassword === hashPassword(password), true);
                     done();
                 });
             });
@@ -106,7 +107,7 @@ describe("Authenticate user successfully with matching email and username and pa
                 authenticateUser({ username: username, email: email }, password, function (result) {
                     console.log(result._id);
                     assert.equal(result.email === email &&
-                        result.username === username && result.hashedPassword === password, true);
+                        result.username === username && result.hashedPassword === hashPassword(password), true);
                     done();
                 });
             });
