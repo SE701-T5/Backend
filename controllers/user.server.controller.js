@@ -104,7 +104,7 @@ exports.userLogin = function(req, res) {
 /**
  * Logs out an authenticated logged-in forum user matching a given ID using HTTP request object data
  * @param req HTTP request object containing forum user ID, and authorization token for verification
- * @param res HTTP request response object
+ * @param res HTTP request response status code and message
  */
 exports.userLogout = function(req, res) {
     const
