@@ -168,7 +168,7 @@ getUserAuthToken = function(userID, done) {
             }
         }
     });
-};
+}
 
 /**
  * Sets the authorization token of a user if the user exists in the database and has logged in
@@ -187,7 +187,7 @@ setUserAuthToken = function(userID, done) {
             return done({ authToken: result.authToken });
         }
     });
-};
+}
 
 /**
  * Verify if a user exists in the database and is currently authorized to access, store and modify database data
@@ -214,6 +214,23 @@ isUserAuthorized = function(userID, authToken, done) {
     }
 }
 
+/**
+ * Resets the authorization token of a user to unauthorized, or "0", if the user exists in the database and is logged in
+ * @param userID the user ID for matching with a _id field in the database
+ * @param done function callback, returns status code, and message if error
+ */
+removeUserAuthToken = function(userID, done) {
+    updateUserById(userID, { authToken: "0" }, function (result) {
+        if (result.err) {
+            // Return the error message with the error status
+            return done({ status: result.status, err: result.err });
+        } else {
+            // Return success status
+            return done({ status: 200 });
+        }
+    });
+}
+
 module.exports = {
     updateUserById,
     searchUserById,
@@ -223,5 +240,6 @@ module.exports = {
     getUserAuthToken,
     setUserAuthToken,
     isUserAuthorized,
-    searchUserByAuthToken
+    searchUserByAuthToken,
+    removeUserAuthToken
 };
