@@ -1,4 +1,6 @@
-const forum = require('../controllers/forum.server.controller');
+const
+    forum = require('../controllers/forum.server.controller'),
+    { isRequestTokenAuthorized } = require('../lib/middleware.lib');
 
 /**
  * Handles HTTP requests for the Forum module using Express.js route()
@@ -7,12 +9,12 @@ const forum = require('../controllers/forum.server.controller');
 module.exports = function(app) {
     app.route('/api/v1/posts')
         .get(forum.postViews)
-        .post(forum.postCreate);
+        .post(isRequestTokenAuthorized, forum.postCreate);
 
     app.route('/api/v1/posts/:id')
         .get(forum.postViewById)
-        .patch(forum.postUpdateById)
-        .delete(forum.postDeleteById);
+        .patch(isRequestTokenAuthorized, forum.postUpdateById)
+        .delete(isRequestTokenAuthorized, forum.postDeleteById);
 
     app.route('/api/v1/posts/:id/comments')
         .get(forum.commentViewById)

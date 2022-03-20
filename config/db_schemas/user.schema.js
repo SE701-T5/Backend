@@ -30,6 +30,11 @@ const userSchema = new Schema(
     hashedPassword: {
         type: String,
         required: true
+    },
+    // Authorization for verifying users are logged in and can access data
+    authToken: {
+        type: String,
+        required: true
     }
 }, {
     // Assigns createdAt and updatedAt fields
