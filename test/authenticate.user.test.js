@@ -360,7 +360,7 @@ describe("Get user authentication token successfully with valid and logged-in us
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
-                        getUserAuthToken(id,function(result) {
+                        getUserAuthToken(id, function(result) {
                             assert.equal(result.length === 16, true);
                             done();
                         });
