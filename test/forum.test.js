@@ -38,7 +38,7 @@ describe("Create forum post successfully", function() {
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -156,7 +156,7 @@ describe("Create forum post unsuccessfully - communityID less than 3 chars", fun
             .post('/api/v1/posts')
             .send(
                 {
-                    userID: "Bob",
+                    userID: "12345678901234567890abcd",
                     title: "How do I learn to read?",
                     communityID: "ab",
                     text: "I really don't understand the words I have just typed, truly",
@@ -179,7 +179,7 @@ describe("Create forum post unsuccessfully - title less than 1 char", function()
             .post('/api/v1/posts')
             .send(
                 {
-                    userID: "Bob",
+                    userID: "12345678901234567890abcd",
                     title: "",
                     communityID: "communityID",
                     text: "I really don't understand the words I have just typed, truly",
@@ -218,7 +218,7 @@ describe("View forum post successfully", function() {
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -287,7 +287,7 @@ describe("Update forum post successfully with valid ID for edits and votes", fun
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -354,7 +354,7 @@ describe("Update forum post successfully with valid ID for only votes", function
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -419,7 +419,7 @@ describe("Update forum post successfully with valid ID for only edits", function
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -546,7 +546,7 @@ describe("Update forum post unsuccessfully with invalid ID", function() {
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -608,7 +608,7 @@ describe("Update forum post unsuccessfully with empty update object", function()
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -668,7 +668,7 @@ describe("Update forum post unsuccessfully with invalid communityID update field
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -728,7 +728,7 @@ describe("Update forum post unsuccessfully with invalid title update field", fun
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -788,7 +788,7 @@ describe("Update forum post unsuccessfully with invalid upVotes update field", f
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -848,7 +848,7 @@ describe("Update forum post unsuccessfully with invalid downVotes update field",
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })
@@ -900,56 +900,6 @@ describe("Update forum post unsuccessfully with invalid downVotes update field",
 });
 
 /**
- * A dummy test until the feature is implemented for responding to HTTP PATCH request with a hardcoded string
- * TODO: fix this test when the view forum post comment by ID feature is implemented
- */
-describe("View forum post comment by ID dummy test", function() {
-    it("should return: { dummyTest: 'commentViewById() dummy test passes' }", function(done) {
-        request(app)
-            .get('/api/v1/posts/:id/comments')
-            .expect({ dummyTest: 'commentViewById() dummy test passes' })
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
-    });
-});
-
-/**
- * A dummy test until the feature is implemented for responding to HTTP POST request with a hardcoded string
- * TODO: fix this test when the create forum post comment feature is implemented
- */
-describe("Create forum post comment dummy test", function() {
-    it("should return: { dummyTest: 'commentGiveById() dummy test passes' }", function(done) {
-        request(app)
-            .post('/api/v1/posts/:id/comments')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'commentGiveById() dummy test passes' })
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
-    });
-});
-
-/**
- * A dummy test until the feature is implemented for responding to HTTP PATCH request with a hardcoded string
- * TODO: fix this test when the update forum post comment by ID feature is implemented
- */
-describe("Update forum post comment by ID dummy test", function() {
-    it("should return: { dummyTest: 'commentUpdateById() dummy test passes' }", function(done) {
-        request(app)
-            .patch('/api/v1/posts/:id/comments/:id')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'commentUpdateById() dummy test passes' })
-            .end(function(err, res) {
-                if (err) done(err);
-                done();
-            });
-    });
-});
-
-/**
  * Test successful forum post database document deletion using existing and valid ID
  */
 describe("Delete forum post successfully", function() {
@@ -958,7 +908,7 @@ describe("Delete forum post successfully", function() {
             .post('/api/v1/users')
             .send({
                 username: 'NewUser',
-                displayName: "NewUser",
+                displayName: 'todd',
                 email: 'new@user.com',
                 plaintextPassword: 'newUser'
             })

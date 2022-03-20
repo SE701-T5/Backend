@@ -1,7 +1,8 @@
 const
     expect = require('chai').expect,
     user = require('../config/db_schemas/user.schema'),
-    forum = require('../config/db_schemas/forum.schema');
+    forum = require('../config/db_schemas/forum.schema'),
+    comment = require('../config/db_schemas/comment.schema');
 
 /**
  * Test successful forum user schema fields exist
@@ -32,6 +33,26 @@ describe('Forum post schema test', function() {
             expect(err.errors.userID).to.exist;
             expect(err.errors.communityID).to.exist;
             expect(err.errors.title).to.exist;
+            expect(err.errors.bodyText).to.exist;
+            expect(err.errors.edited).to.exist;
+            expect(err.errors.upVotes).to.exist;
+            expect(err.errors.downVotes).to.exist;
+            done();
+        });
+    });
+});
+
+/**
+ * Test successful forum post comment schema fields exist
+ */
+describe('Comment schema test', function() {
+    it('should be invalid if required fields are empty', function(done) {
+        const f = new comment();
+ 
+        f.validate(function(err) {
+            expect(err.errors.postID).to.exist;
+            expect(err.errors.authorID).to.exist;
+            expect(err.errors.authorUserName).to.exist;
             expect(err.errors.bodyText).to.exist;
             expect(err.errors.edited).to.exist;
             expect(err.errors.upVotes).to.exist;

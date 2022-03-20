@@ -77,7 +77,7 @@ exports.userLogin = function(req, res) {
                             res.status(result.status).send(result.err);
                         } else if (result) {
                             // Return the authorization token if already set for the user
-                            res.send({ status: 200, userID: userID, authToken: result.authToken });
+                            res.send({ status: 200, userID: userID, authToken: result });
                         } else {
                             // Set a new authorization token if one not already set for the user
                             User.setUserAuthToken(userID, function(result) {

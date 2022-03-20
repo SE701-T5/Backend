@@ -1,4 +1,6 @@
-const Forum = require("../config/db_schemas/forum.schema");
+const
+    Forum = require("../config/db_schemas/forum.schema"),
+    Comment = require("../config/db_schemas/comment.schema");
 
 /**
  * Insert a new forum post to the database
@@ -16,7 +18,7 @@ insertPost = function(params, done) {
         upVotes = 0,
         downVotes = 0,
         attachments = params.attachments,
-        comments = [];
+        comments = [""];
 
     // Create new forum post document
     const newPost = new Forum({
@@ -96,9 +98,10 @@ updatePostById = function(id, updates, done) {
         } else {
             updates["upVotes"] = updates.upVotes ? updates.upVotes + result.upVotes : result.upVotes;
             updates["downVotes"] = updates.downVotes ? updates.downVotes + result.downVotes : result.downVotes;
+            updates["comments"] = updates.comments ? result.comments.concat(updates.comments) : result.comments;
 
-            // If the update does not just involve up votes or down votes, and actual edits
-            if (Object.keys(updates).length > 2) {
+            // If the update does not just involve up votes, down votes, or comments, and actual edits
+            if (Object.keys(updates).length > 3) {
                 updates["edited"] = true; // set the edited field to true
             }
 
@@ -114,4 +117,50 @@ updatePostById = function(id, updates, done) {
     });
 }
 
-module.exports = { searchPostById, insertPost, deletePostById, updatePostById };
+/**
+ * Creates and returns a new forum comment using the comment schema
+ * @param params object containing forum post comment fields
+ * @param done function callback, returns status code, and message if error, or JSON if successful
+ */
+addComment = function (params, done) {
+    const
+        postID = params.postID,
+        authorID = params.authorID,
+        authorUserName = params.authorUserName,
+        bodyText = params.bodyText,
+        edited = false,
+        upVotes = 0,
+        downVotes = 0,
+        attachments = params.attachments;
+
+    const newComment = new Comment({
+        postID,
+        authorID,
+        authorUserName,
+        bodyText,
+        edited,
+        upVotes,
+        downVotes,
+        attachments
+    });
+
+    newComment.save()
+        .then((res) => {
+            updatePostById(postID, { comments: [res.id] }, function(result) {
+                if (result.err) {
+                    // Return the error message with the error status
+                    return done(result);
+                } else {
+                    done(res);
+                }
+            });
+        })
+        .catch((err) => {
+            if (err.code === 11000) {
+                return done({ err: "Conflict", status: 409 });
+            }
+            return done({ err: "Internal server error", status: 500 })
+        });
+}
+
+module.exports = { searchPostById, insertPost, deletePostById, updatePostById, addComment };
