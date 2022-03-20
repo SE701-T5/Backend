@@ -4,11 +4,11 @@ const
 
 /**
  * Hashes a given plaintext password
- * @param password plaintext password for hashing
+ * @param plaintextPassword plaintext password for hashing
  * @returns {String} hashed password
  */
-hashPassword = function(password) {
-    const hashedPassword = saltedMd5(password, 'UniForum-Salt')
+hashPassword = function(plaintextPassword) {
+    const hashedPassword = saltedMd5(plaintextPassword, 'UniForum-Salt')
     return hashedPassword;
 }
 
@@ -22,7 +22,7 @@ createUser = function(params, done) {
         username = params.username,
         displayName = params.displayName,
         email = params.email,
-        hashedPassword = hashPassword(params.password);
+        hashedPassword = hashPassword(params.plaintextPassword);
         authToken = "0";
 
     const newUser = new User({
@@ -106,8 +106,8 @@ deleteUserById = function(id, done) {
  * @param done function callback, returns status code, and updated document data or message if error
  */
 updateUserById = function(id, updates, done) {
-    if ("password" in updates) {
-        updates.hashedPassword = hashPassword(updates.password);
+    if ("plaintextPassword" in updates) {
+        updates.hashedPassword = hashPassword(updates.plaintextPassword);
     }
     try {
         // Find the forum user database document matching the given ID, update all edited fields, return updated user data
@@ -126,15 +126,15 @@ updateUserById = function(id, updates, done) {
 /**
  * Authenticates a user by searching for any existing user in the database with a matching provided login and password
  * @param login the given { login-type: login-value } being matched with a login of any existing user in the database
- * @param password the given password being matched with the password of an existing user matched by the given login
+ * @param plaintextPassword the given password being matched with the password of an existing user matched by the given login
  * @param done function callback, returns user data if authenticated, false if not or error message if server error
  */
-authenticateUser = function(login, password, done) {
+authenticateUser = function(login, plaintextPassword, done) {
     if ("email" || "username" in login) {
         try {
             User.findOne(login)
                 .then((res) => {
-                    if (res.hashedPassword.match(hashPassword(password))) {
+                    if (res.hashedPassword.match(hashPassword(plaintextPassword))) {
                         return done(res);
                     }
                     return done(false);

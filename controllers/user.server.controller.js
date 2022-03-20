@@ -29,7 +29,7 @@ exports.userCreate = function(req, res) {
         'username': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
         'displayName': reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : generateDisplayName(),
         'email': reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
-        'password': reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
+        'plaintextPassword': reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false
     }
 
     if (isAllFieldsValid(forumUserParams)) {
@@ -56,15 +56,15 @@ exports.userCreate = function(req, res) {
 exports.userLogin = function(req, res) {
     const
         reqBody = req.body,
-        password = reqBody.password && reqBody.password.length > 0 ? reqBody.password : false;
+        plaintextPassword = reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false;
 
     const forumUserLoginBody = {
         'username': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
         'email': reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false
     }
 
-    if (isAnyFieldValid(forumUserLoginBody) && password) {
-        User.authenticateUser(forumUserLoginBody, password,function (result) {
+    if (isAnyFieldValid(forumUserLoginBody) && plaintextPassword) {
+        User.authenticateUser(forumUserLoginBody, plaintextPassword,function (result) {
             if (result.err) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
@@ -150,7 +150,7 @@ exports.userUpdateById = function(req, res) {
         "username": reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
         "displayName": reqBody.displayName && reqBody.displayName.length > 2 ? reqBody.displayName : false,
         "email": reqBody.email && emailValidator.validate(reqBody.email) ? reqBody.email : false,
-        "hashedPassword": reqBody.password && reqBody.password.length > 0 ? reqBody.password : false
+        "hashedPassword": reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false
     }
 
     if (isValidDocumentID(reqParams.id) && isAnyFieldValid(userUpdateParams)) {
