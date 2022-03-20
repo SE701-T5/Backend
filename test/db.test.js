@@ -4,12 +4,25 @@ const
     app = require('../server');
 
 /**
- * Before each test, the app database is disconnected before the test database is connected
+ * Before all tests, the app database is disconnected
+ */
+before(async function() {
+    await closeConn(); // Disconnect from the app database
+});
+
+/**
+ * Before each test, the test database is connected
  */
 beforeEach(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
-    await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
+});
+
+/**
+ * After all tests, the test database is disconnected
+ */
+after(async function() {
+    await closeConn(true); // Disconnect from the app database
 });
 
 /**
