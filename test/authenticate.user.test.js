@@ -431,7 +431,7 @@ describe("Set user authentication token successfully with valid and logged-in us
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
-                        setUserAuthToken(id,function(result) {
+                        setUserAuthToken(id, function(result) {
                             assert.equal(result.authToken.length === 16, true);
                             done();
                         });
