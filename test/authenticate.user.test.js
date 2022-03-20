@@ -252,7 +252,7 @@ describe("Verify user authentication successfully with valid ID and authenticati
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
-                        isUserAuthorized(id, res.body.authToken,function(result) {
+                        isUserAuthorized(id, res.body.authToken, function(result) {
                             assert.equal(result.isAuth, true);
                             done();
                         });
