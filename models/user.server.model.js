@@ -23,12 +23,14 @@ createUser = function(params, done) {
         displayName = params.displayName,
         email = params.email,
         hashedPassword = hashPassword(params.password);
+        authToken = "0";
 
     const newUser = new User({
         username,
         displayName,
         email,
-        hashedPassword
+        hashedPassword,
+        authToken
     });
 
     newUser.save()
@@ -38,16 +40,16 @@ createUser = function(params, done) {
         .catch((err) => {
             // Forum user is already in the database with unique attributes, return duplicate conflict error
             if (err.code === 11000) {
-                return done({err: "Conflict", status: 409});
+                return done({ err: "Conflict", status: 409 });
             }
             // Any other database error, return internal server error
-            return done({err: "Internal server error", status: 500});
+            return done({ err: "Internal server error", status: 500 });
         });
 }
 
 /**
- * Search user by id in the database
- * @param id user id
+ * Search for a user document in the user collections of the database with a matching _id field
+ * @param id the user ID for matching with a _id field in the database
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
 searchUserById = function(id, done) {
@@ -55,7 +57,24 @@ searchUserById = function(id, done) {
         User.findById(id)
             .then((res) => done(res))
             .catch((err) => {
-                return done({status: 404, err: err})
+                return done({ status: 404, err: err })
+            });
+    } catch (err) {
+        done({ status: 500, err: err });
+    }
+}
+
+/**
+ * Search for a user document in the user collections of the database with a matching authToken field
+ * @param authToken the authorization token for matching with an authToken field in the database
+ * @param done function callback, returns status code, and message if error, or JSON if successful
+ */
+searchUserByAuthToken = function(authToken, done) {
+    try {
+        User.findOne({ authToken: authToken })
+            .then((res) => done({ status: 200, res: res }))
+            .catch((err) => {
+                return done({ status: 404, err: err })
             });
     } catch (err) {
         done({ status: 500, err: err });
@@ -90,14 +109,121 @@ updateUserById = function(id, updates, done) {
     if ("password" in updates) {
         updates.hashedPassword = hashPassword(updates.password);
     }
-    // Find the forum user database document matching the given ID, update all edited fields, return updated user data
-    User.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
-        .then((res) => {
-            return res ? done(res) : done({ err: "Not found", status: 404 });
-        })
-        .catch((err) => {
-            return done({ err: "Internal server error", status: 500 });
-        });
+    try {
+        // Find the forum user database document matching the given ID, update all edited fields, return updated user data
+        User.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
+            .then((res) => {
+                return res ? done(res) : done({ err: "Not found", status: 404 });
+            })
+            .catch((err) => {
+                return done({ err: "Not found", status: 404 });
+            });
+    } catch (err) {
+        return done({ err: "Internal server error", status: 500 });
+    }
 }
 
-module.exports = { hashPassword, updateUserById, searchUserById, createUser, deleteUserById };
+/**
+ * Authenticates a user by searching for any existing user in the database with a matching provided login and password
+ * @param login the given { login-type: login-value } being matched with a login of any existing user in the database
+ * @param password the given password being matched with the password of an existing user matched by the given login
+ * @param done function callback, returns user data if authenticated, false if not or error message if server error
+ */
+authenticateUser = function(login, password, done) {
+    if ("email" || "username" in login) {
+        try {
+            User.findOne(login)
+                .then((res) => {
+                    if (res.hashedPassword.match(hashPassword(password))) {
+                        return done(res);
+                    }
+                    return done(false);
+                })
+                .catch((err) => {
+                    return done(false);
+                });
+        } catch (err) {
+            return done({ status: 500, err: err });
+        }
+    } else {
+        return done(false);
+    }
+}
+
+/**
+ * Gets the authorization token of a user if the user exists in the database and is logged-in
+ * @param userID the user ID for matching with a _id field in the database
+ * @param done function callback, returns authorization token if one, or false, or status code and message if error
+ */
+getUserAuthToken = function(userID, done) {
+    searchUserById(userID, function (result) {
+        if (result.err) {
+            // Return the error message with the error status
+            return done({ status: result.status, err: result.err });
+        } else {
+            if (result.authToken.length === 16) {
+                // Return a user's authorization token
+                return done(result.authToken);
+            } else {
+                // Return false because an authorization token hasn't yet been set
+                return done(false);
+            }
+        }
+    });
+};
+
+/**
+ * Sets the authorization token of a user if the user exists in the database and has logged in
+ * @param userID the user ID for matching with a _id field in the database
+ * @param done function callback, returns authorization token if one, or status code and message if error
+ */
+setUserAuthToken = function(userID, done) {
+    // Resourced from: https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
+    const hexToken = [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    updateUserById(userID, { authToken: hexToken }, function (result) {
+        if (result.err) {
+            // Return the error message with the error status
+            return done({ status: result.status, err: result.err });
+        } else {
+            // Return the authorization token in JSON format
+            return done({ authToken: result.authToken });
+        }
+    });
+};
+
+/**
+ * Verify if a user exists in the database and is currently authorized to access, store and modify database data
+ * @param userID the user ID for matching with a _id field in the database
+ * @param authToken the authorization token for matching with an authToken field in the database
+ * @param done function callback, returns true if user is authorized, otherwise false, or status code and error message
+ */
+isUserAuthorized = function(userID, authToken, done) {
+    if (authToken && typeof authToken === 'string' && authToken.length === 16) {
+        searchUserById(userID, function (result) {
+            if (result.err) {
+                // Return the error message with the error status
+                return done({ isAuth: false, status: result.status, err: result.err });
+            } else {
+                if (result.authToken.match(authToken)) {
+                    return done({ isAuth: true });
+                } else {
+                    return done({ isAuth: false });
+                }
+            }
+        });
+    } else {
+        return done({ isAuth: false });
+    }
+}
+
+module.exports = {
+    updateUserById,
+    searchUserById,
+    createUser,
+    deleteUserById,
+    authenticateUser,
+    getUserAuthToken,
+    setUserAuthToken,
+    isUserAuthorized,
+    searchUserByAuthToken
+};

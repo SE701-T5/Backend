@@ -3,6 +3,9 @@ const
     user = require('../config/db_schemas/user.schema'),
     forum = require('../config/db_schemas/forum.schema');
 
+/**
+ * Test successful forum user schema fields exist
+ */
 describe('Forum user schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
         const f = new user();
@@ -12,11 +15,15 @@ describe('Forum user schema test', function() {
             expect(err.errors.displayName).to.exist;
             expect(err.errors.email).to.exist;
             expect(err.errors.hashedPassword).to.exist;
+            expect(err.errors.authToken).to.exist;
             done();
         });
     });
 });
- 
+
+/**
+ * Test successful forum post schema fields exist
+ */
 describe('Forum post schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
         const f = new forum();
