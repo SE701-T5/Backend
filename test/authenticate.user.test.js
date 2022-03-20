@@ -7,6 +7,7 @@ const
         getUserAuthToken,
         setUserAuthToken
     } = require("../models/user.server.model"),
+    { hashPassword } = require("../models/user.server.model"),
     request = require('supertest'),
     assert = require("assert"),
     app = require('../server');
@@ -42,20 +43,20 @@ describe("Authenticate user successfully with matching email and password", func
     it("should return: true", function(done) {
         const
             email = 'test@dummy.com',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: 'TestDummy',
                 displayName: 'MostValuedTest',
                 email: email,
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ email: email }, password, function (result) {
-                    assert.equal(result.email === email && result.hashedPassword === password, true);
+                authenticateUser({ email: email }, plaintextPassword, function (result) {
+                    assert.equal(result.email === email && result.hashedPassword === hashPassword(plaintextPassword), true);
                     done();
                 });
             });
@@ -69,20 +70,20 @@ describe("Authenticate user successfully with matching username and password", f
     it("should return: true", function(done) {
         const
             username = 'TestDummy',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: username,
                 displayName: 'MostValuedTest',
                 email: 'test@dummy.com',
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ username: username }, password, function (result) {
-                    assert.equal(result.username === username && result.hashedPassword === password, true);
+                authenticateUser({ username: username }, plaintextPassword, function (result) {
+                    assert.equal(result.username === username && result.hashedPassword === hashPassword(plaintextPassword), true);
                     done();
                 });
             });
@@ -97,22 +98,22 @@ describe("Authenticate user successfully with matching email and username and pa
         const
             username = 'TestDummy',
             email = 'test@dummy.com',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: username,
                 displayName: 'MostValuedTest',
                 email: email,
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ username: username, email: email }, password, function (result) {
+                authenticateUser({ username: username, email: email }, plaintextPassword, function (result) {
                     console.log(result._id);
                     assert.equal(result.email === email &&
-                        result.username === username && result.hashedPassword === password, true);
+                        result.username === username && result.hashedPassword === hashPassword(plaintextPassword), true);
                     done();
                 });
             });
@@ -127,19 +128,19 @@ describe("Authenticate user unsuccessfully with non-matching email but matching 
         const
             correctEmail = 'test@dummy.com',
             incorrectEmail = 'tst@fummy.com',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: 'TestDummy',
                 displayName: 'MostValuedTest',
                 email: correctEmail,
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ email: incorrectEmail }, password, function (result) {
+                authenticateUser({ email: incorrectEmail }, plaintextPassword, function (result) {
                     assert.equal(result, false);
                     done();
                 });
@@ -155,19 +156,19 @@ describe("Authenticate user unsuccessfully with non-matching username but matchi
         const
             correctUsername = 'TestDummy',
             incorrectUsername = 'TstDummy',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: correctUsername,
                 displayName: 'MostValuedTest',
                 email: 'test@dummy.com',
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ username: incorrectUsername }, password, function (result) {
+                authenticateUser({ username: incorrectUsername }, plaintextPassword, function (result) {
                     assert.equal(result, false);
                     done();
                 });
@@ -184,19 +185,19 @@ describe("Authenticate user unsuccessfully with non-matching username but matchi
             correctUsername = 'TestDummy',
             incorrectUsername = 'TstDummy',
             email = 'test@dummy.com',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: correctUsername,
                 displayName: 'MostValuedTest',
                 email: email,
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ email: email, username: incorrectUsername }, password, function (result) {
+                authenticateUser({ email: email, username: incorrectUsername }, plaintextPassword, function (result) {
                     assert.equal(result, false);
                     done();
                 });
@@ -211,19 +212,19 @@ describe("Authenticate user unsuccessfully with matching displayName and matchin
     it("should return: true", function(done) {
         const
             displayName = 'MostValuedTest',
-            password = 'authentication-test';
+            plaintextPassword = 'authentication-test';
         request(app)
             .post('/api/v1/users')
             .send({
                 username: 'TestDummy',
                 displayName: displayName,
                 email: 'test@dummy.com',
-                password: password
+                plaintextPassword: plaintextPassword
             })
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                authenticateUser({ displayName: displayName }, password, function (result) {
+                authenticateUser({ displayName: displayName }, plaintextPassword, function (result) {
                     assert.equal(result, false);
                     done();
                 });
@@ -242,7 +243,7 @@ describe("Verify user authentication successfully with valid ID and authenticati
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -253,7 +254,7 @@ describe("Verify user authentication successfully with valid ID and authenticati
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -278,7 +279,7 @@ describe("Verify user authentication unsuccessfully with valid ID and invalid au
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -289,7 +290,7 @@ describe("Verify user authentication unsuccessfully with valid ID and invalid au
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -314,7 +315,7 @@ describe("Verify user authentication unsuccessfully with invalid ID and valid au
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -325,7 +326,7 @@ describe("Verify user authentication unsuccessfully with invalid ID and valid au
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -350,7 +351,7 @@ describe("Get user authentication token successfully with valid and logged-in us
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -361,7 +362,7 @@ describe("Get user authentication token successfully with valid and logged-in us
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -386,7 +387,7 @@ describe("Get user authentication token unsuccessfully with invalid user ID", fu
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -396,7 +397,7 @@ describe("Get user authentication token unsuccessfully with invalid user ID", fu
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -421,7 +422,7 @@ describe("Set user authentication token successfully with valid and logged-in us
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -432,7 +433,7 @@ describe("Set user authentication token successfully with valid and logged-in us
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -457,7 +458,7 @@ describe("set user authentication token unsuccessfully with invalid user ID", fu
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -467,7 +468,7 @@ describe("set user authentication token unsuccessfully with invalid user ID", fu
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {

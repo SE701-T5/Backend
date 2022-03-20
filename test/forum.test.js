@@ -40,7 +40,7 @@ describe("Create forum post successfully", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -51,7 +51,7 @@ describe("Create forum post successfully", function() {
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -88,7 +88,7 @@ describe("Create forum post unsuccessfully with an invalid authentication token"
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -99,7 +99,7 @@ describe("Create forum post unsuccessfully with an invalid authentication token"
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -220,7 +220,7 @@ describe("View forum post successfully", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -231,7 +231,7 @@ describe("View forum post successfully", function() {
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -289,7 +289,7 @@ describe("Update forum post successfully with valid ID for edits and votes", fun
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -300,7 +300,7 @@ describe("Update forum post successfully with valid ID for edits and votes", fun
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -356,7 +356,7 @@ describe("Update forum post successfully with valid ID for only votes", function
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -367,7 +367,7 @@ describe("Update forum post successfully with valid ID for only votes", function
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -421,7 +421,7 @@ describe("Update forum post successfully with valid ID for only edits", function
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -432,7 +432,7 @@ describe("Update forum post successfully with valid ID for only edits", function
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -486,7 +486,7 @@ describe("Update forum post unsuccessfully using invalid authorization token", f
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -497,7 +497,7 @@ describe("Update forum post unsuccessfully using invalid authorization token", f
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -548,7 +548,7 @@ describe("Update forum post unsuccessfully with invalid ID", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -559,7 +559,7 @@ describe("Update forum post unsuccessfully with invalid ID", function() {
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -610,7 +610,7 @@ describe("Update forum post unsuccessfully with empty update object", function()
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -621,7 +621,7 @@ describe("Update forum post unsuccessfully with empty update object", function()
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -670,7 +670,7 @@ describe("Update forum post unsuccessfully with invalid communityID update field
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -681,7 +681,7 @@ describe("Update forum post unsuccessfully with invalid communityID update field
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -730,7 +730,7 @@ describe("Update forum post unsuccessfully with invalid title update field", fun
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -741,7 +741,7 @@ describe("Update forum post unsuccessfully with invalid title update field", fun
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -790,7 +790,7 @@ describe("Update forum post unsuccessfully with invalid upVotes update field", f
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -801,7 +801,7 @@ describe("Update forum post unsuccessfully with invalid upVotes update field", f
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -850,7 +850,7 @@ describe("Update forum post unsuccessfully with invalid downVotes update field",
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -861,7 +861,7 @@ describe("Update forum post unsuccessfully with invalid downVotes update field",
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -960,7 +960,7 @@ describe("Delete forum post successfully", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -971,7 +971,7 @@ describe("Delete forum post successfully", function() {
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -1037,7 +1037,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function()
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -1048,7 +1048,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function()
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {
@@ -1097,7 +1097,7 @@ describe("Delete forum post unsuccessfully using invalid authorization token", f
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -1108,7 +1108,7 @@ describe("Delete forum post unsuccessfully using invalid authorization token", f
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function (err, res) {

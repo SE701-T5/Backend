@@ -1,6 +1,7 @@
 const
     { closeConn, connect } = require("../config/db.server.config"),
     { resetCollections } = require("../models/db.server.model"),
+    { hashPassword } = require("../models/user.server.model"),
     request = require('supertest'),
     assert = require("assert"),
     app = require('../server');
@@ -30,7 +31,7 @@ after(async function() {
 });
 
 /**
- * Test successfully creating a new forum user without using a displayName field
+ * Test successful forum user database document creation without a displayName input
  */
 describe("Create forum user successfully without displayName", function() {
     it("should return: status 201", function(done) {
@@ -39,7 +40,7 @@ describe("Create forum user successfully without displayName", function() {
             .send({
                 username: 'Bob123',
                 email: 'bob420@hotmail.com',
-                password: 'passwordbob'
+                plaintextPassword: 'passwordbob'
             })
             .expect(201)
             .end(function(err, res) {
@@ -60,7 +61,7 @@ describe("Create forum user successfully with displayName", function() {
                 username: 'Gary143',
                 displayName: "Gary",
                 email: 'gary283@hotmail.com',
-                password: 'passwordgary'
+                plaintextPassword: 'passwordgary'
             })
             .expect(201)
             .end(function(err, res) {
@@ -79,7 +80,7 @@ describe("Create forum user test unsuccessfully - missing field 'email'", functi
             .post('/api/v1/users')
             .send({
                 username: 'Tim123',
-                password: 'passwordtim'
+                plaintextPassword: 'passwordtim'
             })
             .expect(400)
             .end(function(err, res) {
@@ -92,18 +93,39 @@ describe("Create forum user test unsuccessfully - missing field 'email'", functi
 /**
  * Test unsuccessfully creating a new forum user with an invalid username field
  */
-describe("Create forum user test unsuccessfully - attribute length requirement not met", function() {
+describe("Create forum user test unsuccessfully - username field length requirement not met", function() {
     it("should return: status 400", function(done) {
         request(app)
             .post('/api/v1/users')
             .send({
                 username: 'Yi',
                 email: 'yi14123@gmail.com',
-                password: 'passwordtim'
+                plaintextPassword: 'passwordtim'
             })
             .expect(400)
             .end(function(err, res) {
                 if (err) done(err);
+                done();
+            });
+    });
+});
+
+/**
+ * Test successful password hashing when a forum user document is created
+ */
+describe("Test password hashing works correctly", function() {
+    it("should return: status 201", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Jim123',
+                email: 'Jim420@hotmail.com',
+                plaintextPassword: 'passwordjim'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                assert.equal(res.body.userData.hashedPassword, hashPassword("passwordjim"));
                 done();
             });
     });
@@ -120,7 +142,7 @@ describe("Log in forum user successfully", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -130,7 +152,7 @@ describe("Log in forum user successfully", function() {
                     .send({
                         username: 'NewUser',
                         email: 'new@user.com',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -152,7 +174,7 @@ describe("Log in forum user unsuccessfully - no valid login", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -160,7 +182,7 @@ describe("Log in forum user unsuccessfully - no valid login", function() {
                 request(app)
                     .post('/api/v1/users/login')
                     .send({
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(400)
                     .end(function(err, res) {
@@ -182,7 +204,7 @@ describe("Log in forum user unsuccessfully - no valid password", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -213,7 +235,7 @@ describe("Log in forum user unsuccessfully - non-matching login", function() {
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -222,7 +244,7 @@ describe("Log in forum user unsuccessfully - non-matching login", function() {
                     .post('/api/v1/users/login')
                     .send({
                         username: 'Nobody',
-                        password: 'newUser'
+                        plaintextPassword: 'newUser'
                     })
                     .expect(404)
                     .end(function(err, res) {
@@ -244,7 +266,7 @@ describe("Log in forum user unsuccessfully - non-matching password", function() 
                 username: 'NewUser',
                 displayName: "NewUser",
                 email: 'new@user.com',
-                password: 'newUser'
+                plaintextPassword: 'newUser'
             })
             .expect(201)
             .end(function(err, res) {
@@ -253,7 +275,7 @@ describe("Log in forum user unsuccessfully - non-matching password", function() 
                     .post('/api/v1/users/login')
                     .send({
                         username: 'NewUser',
-                        password: 'noUser'
+                        plaintextPassword: 'noUser'
                     })
                     .expect(404)
                     .end(function(err, res) {
@@ -404,7 +426,7 @@ describe("View forum user by ID successfully", function() {
                     username: 'Bob1234',
                     displayName: 'bob',
                     email: 'bob420@hotmail.com',
-                    password: 'passwordbob'
+                    plaintextPassword: 'passwordbob'
                 })
             .expect(201)
             .end(function(err, res) {
@@ -448,7 +470,7 @@ describe("Update forum user successfully with valid ID", function() {
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -459,7 +481,7 @@ describe("Update forum user successfully with valid ID", function() {
                     .send({
                         username: 'NewBob',
                         email: 'bobby@joe.com',
-                        password: 'BobbyJoe'
+                        plaintextPassword: 'BobbyJoe'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -472,7 +494,7 @@ describe("Update forum user successfully with valid ID", function() {
                                     username: "OldBob",
                                     displayName: "Bob",
                                     email: "joe@bobby.com",
-                                    password: "JoeBob"
+                                    plaintextPassword: "JoeBob"
                                 })
                             .expect(201)
                             .end(function(err, res) {
@@ -480,7 +502,7 @@ describe("Update forum user successfully with valid ID", function() {
                                 assert.equal(res.body.updatedForumUser.username, "OldBob");
                                 assert.equal(res.body.updatedForumUser.displayName, "Bob");
                                 assert.equal(res.body.updatedForumUser.email, "joe@bobby.com");
-                                assert.equal(res.body.updatedForumUser.hashedPassword, "JoeBob");
+                                assert.equal(res.body.updatedForumUser.hashedPassword, hashPassword("JoeBob"));
                                 done();
                             });
                     });
@@ -500,7 +522,7 @@ describe("Update forum user unsuccessfully with invalid authorization token", fu
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -511,7 +533,7 @@ describe("Update forum user unsuccessfully with invalid authorization token", fu
                     .send({
                         username: 'NewBob',
                         email: 'bobby@joe.com',
-                        password: 'BobbyJoe'
+                        plaintextPassword: 'BobbyJoe'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -524,7 +546,7 @@ describe("Update forum user unsuccessfully with invalid authorization token", fu
                                     username: "OldBob",
                                     displayName: "Bob",
                                     email: "joe@bobby.com",
-                                    password: "JoeBob"
+                                    plaintextPassword: "JoeBob"
                                 })
                             .expect(401)
                             .end(function(err, res) {
@@ -548,7 +570,7 @@ describe("Update forum user unsuccessfully with valid but un-matching ID", funct
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -559,7 +581,7 @@ describe("Update forum user unsuccessfully with valid but un-matching ID", funct
                     .send({
                         username: 'NewBob',
                         email: 'bobby@joe.com',
-                        password: 'BobbyJoe'
+                        plaintextPassword: 'BobbyJoe'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -572,7 +594,7 @@ describe("Update forum user unsuccessfully with valid but un-matching ID", funct
                                     username: "WrongBob",
                                     displayName: "NotFound",
                                     email: "what@email.com",
-                                    password: "password"
+                                    plaintextPassword: "password"
                                 })
                             .expect(404)
                             .end(function (err, res) {
@@ -596,7 +618,7 @@ describe("Update forum user unsuccessfully with invalid ID", function() {
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -608,7 +630,7 @@ describe("Update forum user unsuccessfully with invalid ID", function() {
                             username: "NewBob",
                             displayName: "Bobby",
                             email: "bobby@joe.com",
-                            password: "BobbyJoe"
+                            plaintextPassword: "BobbyJoe"
                         })
                     .expect(400)
                     .end(function(err, res) {
@@ -631,7 +653,7 @@ describe("Update forum user unsuccessfully with empty update object", function()
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -663,7 +685,7 @@ describe("Update forum user unsuccessfully with invalid username update field", 
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -695,7 +717,7 @@ describe("Update forum user unsuccessfully with invalid displayName update field
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -727,7 +749,7 @@ describe("Update forum user unsuccessfully with invalid email update field", fun
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -759,7 +781,7 @@ describe("Update forum user unsuccessfully with invalid password update field", 
                     username: "NewBob",
                     displayName: "Bobby",
                     email: "bobby@joe.com",
-                    password: "BobbyJoe"
+                    plaintextPassword: "BobbyJoe"
                 })
             .expect(201)
             .end(function(err, res) {
@@ -790,7 +812,7 @@ describe("Update forum user unsuccessfully with invalid password update field", 
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -801,7 +823,7 @@ describe("Update forum user unsuccessfully with invalid password update field", 
                         .send({
                             username: 'Todd123',
                             email: 'todd413@hotmail.com',
-                            password: 'passwordtodd'
+                            plaintextPassword: 'passwordtodd'
                         })
                         .expect(200)
                         .end(function(err, res) {
@@ -830,7 +852,7 @@ describe("Delete forum user unsuccessfully using invalid authorization token", f
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -841,7 +863,7 @@ describe("Delete forum user unsuccessfully using invalid authorization token", f
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
