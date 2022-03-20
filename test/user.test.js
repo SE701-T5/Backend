@@ -114,7 +114,7 @@ describe("Test password hashing works correctly", function() {
             .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                assert.equal(res.body.updatedForumUser.hashedPassword, hashPassword("passwordjim"));
+                assert.equal(res.body.user.hashedPassword, hashPassword("passwordjim"));
                 done();
             });
     });
