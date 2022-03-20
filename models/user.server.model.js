@@ -8,8 +8,7 @@ const
  * @returns {String} hashed password
  */
 hashPassword = function(plaintextPassword) {
-    const hashedPassword = saltedMd5(plaintextPassword, 'UniForum-Salt')
-    return hashedPassword;
+    return hashedPassword = saltedMd5(plaintextPassword, 'UniForum-Salt');
 }
 
 /**
