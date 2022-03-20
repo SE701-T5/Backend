@@ -13,7 +13,7 @@ module.exports = function() {
     // This is required for parsing application/json in req.body
     app.use(bodyParser.json());
 
-    //
+    // Set response headers using middleware
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "X-Authorization, Origin, X-Requested-With, Content-Type, Accept");
@@ -21,7 +21,7 @@ module.exports = function() {
         next();
     });
 
-    //
+    // HTTP GET request to homepage with a message response stating the server is running
     app.get('/', function(req, res){
         res.status(200).json({ "msg": "The server is up and running!" });
     });

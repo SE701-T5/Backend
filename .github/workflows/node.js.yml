@@ -63,7 +63,7 @@ jobs:
 
   build_fork:
     name: 'Job for Non-PR Action in Fork Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.repository != 'SE701-T5/Backend'
+    if: github.event_name != 'pull_request_target'
 
     # Workflow job is run on the latest Ubuntu runner
     runs-on: ubuntu-latest

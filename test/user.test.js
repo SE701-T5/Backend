@@ -297,7 +297,7 @@ describe("Logout forum user successfully", function() {
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -308,7 +308,7 @@ describe("Logout forum user successfully", function() {
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -340,7 +340,7 @@ describe("Logout forum user unsuccessfully - invalid authorization token", funct
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -351,7 +351,7 @@ describe("Logout forum user unsuccessfully - invalid authorization token", funct
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
@@ -383,7 +383,7 @@ describe("Logout forum user unsuccessfully - invalid user ID", function() {
                 username: 'Todd123',
                 displayName: 'todd',
                 email: 'todd413@hotmail.com',
-                password: 'passwordtodd'
+                plaintextPassword: 'passwordtodd'
             })
             .expect(201)
             .end(function(err, res) {
@@ -393,7 +393,7 @@ describe("Logout forum user unsuccessfully - invalid user ID", function() {
                     .send({
                         username: 'Todd123',
                         email: 'todd413@hotmail.com',
-                        password: 'passwordtodd'
+                        plaintextPassword: 'passwordtodd'
                     })
                     .expect(200)
                     .end(function(err, res) {
