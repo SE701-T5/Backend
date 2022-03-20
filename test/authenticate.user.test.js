@@ -288,7 +288,7 @@ describe("Verify user authentication unsuccessfully with valid ID and invalid au
                     .expect(200)
                     .end(function(err, res) {
                         if (err) done(err);
-                        isUserAuthorized(id, 'wrongToken',function(result) {
+                        isUserAuthorized(id, 'wrongToken', function(result) {
                             assert.equal(result.isAuth, false);
                             done();
                         });
