@@ -102,13 +102,38 @@ exports.userLogin = function(req, res) {
 }
 
 /**
- * Logs out a logged in forum user
- * @param req HTTP request object
+ * Logs out an authenticated logged-in forum user matching a given ID using HTTP request object data
+ * @param req HTTP request object containing forum user ID, and authorization token for verification
  * @param res HTTP request response object
  */
 exports.userLogout = function(req, res) {
-    // TODO: implement userLogout()
-    res.json({ dummyTest: "userLogout() dummy test passes" });
+    const
+        userID = req.body.userID ? req.body.userID : false,
+        authToken = req.get(configParams.get('authToken'));
+
+    if (isValidDocumentID(userID)) {
+        User.isUserAuthorized(userID, authToken, function(result) {
+            if (result.isAuth) {
+                User.removeUserAuthToken(userID, function(result) {
+                    if (result.err) {
+                        // Return the error message with the error status
+                        res.status(result.status).send(result.err);
+                    } else {
+                        res.status(result.status).send("Success");
+                    }
+                });
+            } else {
+                if (result.err) {
+                    // Return the error message with the error status
+                    res.status(result.status).send(result.err);
+                } else {
+                    res.status(401).send("Unauthorized");
+                }
+            }
+        });
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**

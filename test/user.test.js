@@ -265,18 +265,129 @@ describe("Log in forum user unsuccessfully - non-matching password", function() 
 });
 
 /**
- * A dummy test until the feature is implemented for responding to HTTP POST request with a hardcoded string
- * TODO: fix this test when the logout user feature is implemented
+ * Test successful logging out of a forum user using existing and valid ID
  */
-describe("Log out forum user dummy test", function() {
-    it("should return: { dummyTest: 'userLogout() dummy test passes' }", function(done) {
+describe("Logout forum user successfully", function() {
+    it("should return: 200", function(done) {
         request(app)
-            .post('/api/v1/users/logout')
-            .send({ dummyTestInput: 'this text is useless' })
-            .expect({ dummyTest: 'userLogout() dummy test passes' })
+            .post('/api/v1/users')
+            .send({
+                username: 'Todd123',
+                displayName: 'todd',
+                email: 'todd413@hotmail.com',
+                password: 'passwordtodd'
+            })
+            .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                done();
+                const id = res.body.userData._id;
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'Todd123',
+                        email: 'todd413@hotmail.com',
+                        password: 'passwordtodd'
+                    })
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        request(app)
+                            .post('/api/v1/users/logout')
+                            .set({ "X-Authorization": res.body.authToken })
+                            .send({
+                                userID: id
+                            })
+                            .expect(200)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                done();
+                            });
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful logging out of a forum user using invalid authorization token
+ */
+describe("Logout forum user unsuccessfully - invalid authorization token", function() {
+    it("should return: 401", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Todd123',
+                displayName: 'todd',
+                email: 'todd413@hotmail.com',
+                password: 'passwordtodd'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                const id = res.body.userData._id;
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'Todd123',
+                        email: 'todd413@hotmail.com',
+                        password: 'passwordtodd'
+                    })
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        request(app)
+                            .post('/api/v1/users/logout')
+                            .set({ "X-Authorization": 'wrongToken' })
+                            .send({
+                                userID: id
+                            })
+                            .expect(401)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                done();
+                            });
+                    });
+            });
+    });
+});
+
+/**
+ * Test unsuccessful logging out of a forum user using invalid user ID
+ */
+describe("Logout forum user unsuccessfully - invalid user ID", function() {
+    it("should return: 400", function(done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'Todd123',
+                displayName: 'todd',
+                email: 'todd413@hotmail.com',
+                password: 'passwordtodd'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'Todd123',
+                        email: 'todd413@hotmail.com',
+                        password: 'passwordtodd'
+                    })
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) done(err);
+                        request(app)
+                            .post('/api/v1/users/logout')
+                            .set({ "X-Authorization": res.body.authToken })
+                            .send({
+                                userID: 'wrong ID'
+                            })
+                            .expect(400)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                done();
+                            });
+                    });
             });
     });
 });
