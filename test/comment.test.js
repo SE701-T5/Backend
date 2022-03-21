@@ -379,7 +379,7 @@ describe("View forum post comment unsuccessfully by invalid postID", function() 
                                         if (err) done(err);
                                         request(app)
                                             .get(`/api/v1/posts/xxx/comments`)
-                                            .expect(404)
+                                            .expect(400)
                                             .end(function (err, res) {
                                                 if (err) done(err);
                                                 done();
