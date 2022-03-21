@@ -275,6 +275,125 @@ describe("View forum post comment by ID successfully", function() {
     });
 });
 
+describe("View forum post comment by ID successfully (no comment)", function() {
+    it("should return: status 200", function (done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                const id = res.body.userData._id;
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
+                    })
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (err) done(err);
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .get(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .expect(200)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        done();
+                                    });
+                            });
+                    });
+            });
+    });
+});
+
+describe("View forum post comment unsuccessfully by invalid postID", function() {
+    it("should return: status 400", function (done) {
+        request(app)
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) done(err);
+                const id = res.body.userData._id;
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
+                    })
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (err) done(err);
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .post(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .set({"X-Authorization": authToken})
+                                    .send({
+                                        authorID: id,
+                                        username: 'NewUser',
+                                        bodyText: 'Hi my name is George2'
+                                    })
+                                    .expect(201)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        request(app)
+                                            .get(`/api/v1/posts/xxx/comments`)
+                                            .expect(404)
+                                            .end(function (err, res) {
+                                                if (err) done(err);
+                                                done();
+                                            });
+                                    });
+
+                            });
+                    });
+            });
+    });
+});
+
+
+
 describe("Update forum post comment by ID dummy test", function() {
     it("should return: { dummyTest: 'commentUpdateById() dummy test passes' }", function(done) {
         request(app)
