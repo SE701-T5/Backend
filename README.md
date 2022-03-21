@@ -1,10 +1,10 @@
 # UniForum Server
 
-This is the backend server for the UniForum project developed using the [MERN stack](https://www.digitalocean.com/community/tutorials/getting-started-with-the-mern-stack).
-
-To view the deployment of the server from this repository, visit: [https://uni-forum.herokuapp.com/](https://uni-forum.herokuapp.com/)
+This is a Heroku deployed Node.js backend server developed by Team-5 using the [MERN stack](https://www.digitalocean.com/community/tutorials/getting-started-with-the-mern-stack) for the UniForum project associated with the University of Auckland SOFTENG 701 course. To view the deployment of the server from this repository, visit: [https://uni-forum.herokuapp.com/](https://uni-forum.herokuapp.com/)
 
 #### More Information
+
+For more information, visit the [repository Wiki](https://github.com/SE701-T5/Backend/wiki)
 
 To view the UniForum frontend repository, visit: [SE701-T5/Frontend](https://github.com/SE701-T5/Frontend)
 
@@ -40,7 +40,7 @@ DATABASE_NAME = <application-database-name>
 DATABASE_TEST_NAME = <test-database-name>
 ```
 
-It is recommended to use a different ```test-database-name``` for repository forks and local testing
+>It is recommended to use a different ```test-database-name``` for repository forks and local testing
 
 #### Deployment
 
@@ -73,7 +73,7 @@ The following instruction can be used to run the application
 npm start
 ```
 
-The application should be running locally at ```http://localhost:<port>```
+>The application should be running locally at ```http://localhost:<port>```
 
 The following instruction can be used to run the application with automatic restarts for local changes
 ```
