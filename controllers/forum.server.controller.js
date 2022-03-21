@@ -152,7 +152,7 @@ exports.commentViewById = function(req, res) {
                 res.status(result.status).send(result.err);
             } else {
                 // Return the forum post document object with 200 status
-                res.json({"comment": result.comments});
+                res.json({"forumPostComments": result.comments});
             }
         });
     } else {

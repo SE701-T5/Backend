@@ -261,13 +261,14 @@ describe("View forum post comment by ID successfully", function() {
                                     .end(function (err, res) {
                                         if (err) done(err);
                                         request(app)
-                                            .get(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                            .get(`/api/v1/posts/${ res.body.comment.postID }/comments`)
                                             .expect(200)
                                             .end(function (err, res) {
                                                 if (err) done(err);
                                                 done();
                                             });
                                     });
+
                             });
                     });
             });
