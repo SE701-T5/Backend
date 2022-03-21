@@ -143,8 +143,21 @@ exports.postUpdateById = function(req, res) {
  * @param res HTTP request response object
  */
 exports.commentViewById = function(req, res) {
-    // TODO: implement commentViewById()
-    res.json({ dummyTest: "commentViewById() dummy test passes" });
+    const postID = req.params.id ? req.params.id : false;
+
+    if (isValidDocumentID(postID)) {
+        Forum.searchPostById(req.params.id, function(result) {
+            if (result.err) {
+                // Return the error message with the error status
+                res.status(result.status).send(result.err);
+            } else {
+                // Return the forum post document object with 200 status
+                res.json({"forumPostComments": result.comments});
+            }
+        });
+    } else {
+        res.status(400).send("Bad request");
+    }
 }
 
 /**
