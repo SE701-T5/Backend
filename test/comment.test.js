@@ -210,14 +210,66 @@ describe("Create forum comment test unsuccessfully - field length requirement no
     });
 });
 
-describe("View forum post comment by ID dummy test", function() {
-    it("should return: { dummyTest: 'commentViewById() dummy test passes' }", function(done) {
+describe("View forum post comment by ID successfully", function() {
+    it("should return: status 200", function (done) {
         request(app)
-            .get('/api/v1/posts/:id/comments')
-            .expect({ dummyTest: 'commentViewById() dummy test passes' })
+            .post('/api/v1/users')
+            .send({
+                username: 'NewUser',
+                displayName: "NewUser",
+                email: 'new@user.com',
+                plaintextPassword: 'newUser'
+            })
+            .expect(201)
             .end(function(err, res) {
                 if (err) done(err);
-                done();
+                const id = res.body.userData._id;
+                request(app)
+                    .post('/api/v1/users/login')
+                    .send({
+                        username: 'NewUser',
+                        email: 'new@user.com',
+                        plaintextPassword: 'newUser'
+                    })
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (err) done(err);
+                        const authToken = res.body.authToken;
+                        request(app)
+                            .post('/api/v1/posts')
+                            .set({"X-Authorization": authToken})
+                            .send(
+                                {
+                                    userID: id,
+                                    title: "Happy St. Paddy's day!",
+                                    communityID: "communityID",
+                                    text: "What's the craic?",
+                                    images: ["image string"]
+                                })
+                            .expect(201)
+                            .end(function (err, res) {
+                                if (err) done(err);
+                                request(app)
+                                    .post(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                    .set({"X-Authorization": authToken})
+                                    .send({
+                                        authorID: id,
+                                        username: 'NewUser',
+                                        bodyText: 'Hi my name is George2'
+                                    })
+                                    .expect(201)
+                                    .end(function (err, res) {
+                                        if (err) done(err);
+                                        request(app)
+                                            .get(`/api/v1/posts/${ res.body.forumPostData._id }/comments`)
+                                            .expect(200)
+                                            .end(function (err, res) {
+                                                if (err) done(err);
+                                                done();
+                                            });
+                                    });
+                            });
+                    });
             });
     });
 });
