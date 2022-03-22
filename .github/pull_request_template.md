@@ -39,5 +39,4 @@ Before opening the PR for review:
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
-- [ ] I have added attributions to new dependencies and resources
 - [ ] I have moved the linked issue to the **Review in Progress** column
