@@ -1,6 +1,5 @@
-const
-    { connect } = require('./config/db.server.config'),
-    express = require('./config/express.server.config');
+import { connect } from './config/db.server.config'
+import express from './config/express.server.config';
 
 // Express.js application object
 const app = express();
@@ -9,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT;
 
 // Database name - use environment variable DATABASE_NAME or enter here
-const databaseName = process.env.DATABASE_NAME;
+const databaseName = process.env.DATABASE_NAME as string;
 
 // Connect to MongoDB database
 connect(databaseName)

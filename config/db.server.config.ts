@@ -1,6 +1,4 @@
-const
-    database = require('mongoose'),
-    testDatabase = require('mongoose');
+import database from "mongoose";
 
 /**
  * Configure and connect to MongoDB database
@@ -10,7 +8,7 @@ const
  * @param databaseName the name of the database being connected to
  * @param isTestDatabase conditional for if the database in use is for testing
  */
-function connect(databaseName, isTestDatabase=false) {
+export function connect(databaseName: string, isTestDatabase: boolean = false): Promise<typeof database> {
     // Database URI
     const databaseURI = `mongodb://${process.env.DATABASE_USER}:${process.env.DATABASE_PW}` +
         `@uniforumcluster-shard-00-00.wvdq3.mongodb.net:27017,uniforumcluster-shard-00-01.` +
@@ -24,12 +22,7 @@ function connect(databaseName, isTestDatabase=false) {
         retryWrites: true
     };
 
-    // returns testing database connection if being used for testing, otherwise normal database connection
-    if (isTestDatabase) {
-        return testDatabase.connect(databaseURI, databaseOptions);
-    } else {
-        return database.connect(databaseURI, databaseOptions);
-    }
+    return database.connect(databaseURI, databaseOptions);
 }
 
 /**
@@ -37,9 +30,9 @@ function connect(databaseName, isTestDatabase=false) {
  * @param isTestDatabase conditional for if the database in use is for testing
  * @returns {ConnectionStates} 0 for disconnected, 2 for connected, 1 for connecting, 3 for disconnecting
  */
-function getState(isTestDatabase=false) {
+export function getState(isTestDatabase=false) {
     if (isTestDatabase) {
-        return testDatabase.connection.readyState;
+        return database.connection.readyState;
     } else {
         return database.connection.readyState;
     }
@@ -50,8 +43,6 @@ function getState(isTestDatabase=false) {
  * @param isTestDatabase conditional for if the database in use is for testing
  * @returns {Promise<void>}
  */
-function closeConn(isTestDatabase=false) {
+export function closeConn(isTestDatabase=false) {
     return database.disconnect();
 }
-
-module.exports = { connect, getState, closeConn };
