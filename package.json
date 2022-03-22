@@ -25,10 +25,11 @@
   "homepage": "https://github.com/SE701-T5/Backend#readme",
   "devDependencies": {
     "assert": "^2.0.0",
+    "chai": "^4.3.6",
+    "eslint": "^8.11.0",
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
-    "supertest": "^6.2.2",
-    "chai": "^4.3.6"
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "body-parser": "^1.19.2",
