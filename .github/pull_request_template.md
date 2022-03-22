@@ -1,58 +1,43 @@
-<!-- Is there a relevant and understandable title succinctly summarizing the changes? -->
-
 # Description
 
-<!--- Give a description of the changes here in more detail -->
-<!--- Include screenshots if necessary -->
+Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
 
-## Related Issue
+Fixes/resolves # (issue)
 
-<!--- This project only accepts pull requests related to already existing open issues -->
-<!--- Please link to the open issue here: -->
+## Screenshots
 
-Solves #<!--issue-->
-
-<!--Don't forget to move the related issue to the 'Review in progress' column.-->
+Please include any screenshots or media that illustrates the changes made
 
 ## Type of change
 
-<!--Please delete options that are not relevant.-->
+Please delete options that are not relevant.
 
-- [ ] New feature (enhancement)
-- [ ] Bug fix
-- [ ] Refactor
-- [ ] Breaking change
-- [ ] Documentation
-
-<!--Don't forget to add a label to the pull request, if relevant.-->
-
-## How Has This Been Tested?
-
-<!--- Please describe in detail how the changes have been tested. -->
-<!--- Include details of the testing environment, the tests run, and the results. -->
-
-<!--Please delete options that are not relevant.-->
-
-- [ ] Automated testing
-- [ ] Manual testing
+- [ ] **Bug fix** (non-breaking change which fixes an issue)
+- [ ] **New feature** (non-breaking change which adds functionality)
+- [ ] **Improvement** (non-breaking change which improves existing functionality)
+- [ ] **Breaking change** (fix or feature that would cause existing functionality to not work as expected)
+- [ ] This change requires a documentation update
 
 # Checklist:
 
-<!--Please delete options that are not relevant.-->
+Leave blank if not applicable
 
-- [ ] Does a similar (open or closed) pull request not already exist?
-- [ ] Is the pull request _head_ repository a fork repository?
-- [ ] Is the pull request _compare_ branch a development branch?
-- [ ] Is the code documented, particularly in hard-to-understand areas?
-- [ ] Does the code build without new warnings?
-- [ ] Has testing been performed that proves changes are effective and work?
-- [ ] Has a self- and/or peer-review of the code been performed?
-- [ ] Have dependent changes been merged and published in downstream modules?
-- [ ] Does all new and existing automated testing pass?
-- [ ] Is the person responsible for the repository assigned to the pull request?
-- [ ] Is the pull request linked to a project?
-- [ ] Is the pull request linked to a milestone?
+I have completed these steps when making this pull request:
 
-For more information, refer to the Contributing Guidelines and Code of Conduct links at the bottom of this page.
+- [ ] I have checked that the PR is from a _forked_ repository
+- [ ] I have assigned my name to the issue
+- [ ] I have moved the issue to the **In Progress** column
+- [ ] I have labelled the PR appropriately
+- [ ] I have assigned people responsible to the PR
 
-<!--Don't forget to notify others of the pull request for a quick review.-->
+Before opening the PR for review:
+
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my code
+- [ ] I have documented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+- [ ] I have added attributions to new dependencies and resources
+- [ ] I have moved the linked issue to the **Review in Progress** column
