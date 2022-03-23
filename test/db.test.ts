@@ -5,7 +5,7 @@ import {closeConn, connect} from "../config/db.server.config";
 /**
  * Before all tests, the app database is disconnected
  */
-beforeAll(async function() {
+before(async function() {
     await closeConn(); // Disconnect from the app database
 });
 
@@ -20,7 +20,7 @@ beforeEach(async function() {
 /**
  * After all tests, the test database is disconnected
  */
-afterAll(async function() {
+after(async function() {
     await closeConn(true); // Disconnect from the app database
 });
 

@@ -9,7 +9,7 @@ import app from "../server";
 /**
  * Before all tests, the app database is disconnected before the test database is connected
  */
-beforeAll(async function() {
+before(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
@@ -25,7 +25,7 @@ beforeEach(async function() {
 /**
  * After all tests, all test database document data is deleted and the test database is disconnected
  */
-afterAll(async function() {
+after(async function() {
     await resetCollections(); // reset database for testing
     await closeConn(true); // Disconnect from the app database
 });
@@ -433,7 +433,7 @@ describe("Set user authentication token successfully with valid and logged-in us
                     .end(function(err, res) {
                         if (err) done(err);
                         setUserAuthToken(id, function(result) {
-                            assert.equal(result.authToken.length === 16, true);
+                            assert.equal(result.res.length === 16, true);
                             done();
                         });
                     });
