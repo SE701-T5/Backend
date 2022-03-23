@@ -86,7 +86,7 @@ exports.userLogin = function(req, res) {
                                     res.status(result.status).send(result.err);
                                 } else {
                                     // Return the newly set authorization token for the user
-                                    res.send({ status: 200, userID: userID, authToken: result.authToken });
+                                    res.send({ status: 200, userID: userID, authToken: result.res });
                                 }
                             });
                         }

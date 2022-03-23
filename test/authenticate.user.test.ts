@@ -1,16 +1,10 @@
-const
-    { closeConn, connect } = require("../config/db.server.config"),
-    { resetCollections } = require("../models/db.server.model"),
-    {
-        authenticateUser,
-        isUserAuthorized,
-        getUserAuthToken,
-        setUserAuthToken
-    } = require("../models/user.server.model"),
-    { hashPassword } = require("../models/user.server.model"),
-    request = require('supertest'),
-    assert = require("assert"),
-    app = require('../server');
+import { closeConn, connect } from "../config/db.server.config";
+import { resetCollections } from "../models/db.server.model";
+import { authenticateUser, isUserAuthorized, getUserAuthToken, setUserAuthToken } from "../models/user.server.model";
+import {hashPassword} from "../models/user.server.model";
+import request from "supertest";
+import assert from "assert";
+import app from "../server";
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected

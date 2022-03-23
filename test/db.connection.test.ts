@@ -1,6 +1,5 @@
-const
-    { connect, getState, closeConn } = require("../config/db.server.config"),
-    assert = require("assert");
+import assert from "assert";
+import {connect, getState, closeConn} from "../config/db.server.config";
 
 /**
  * Test the database connection

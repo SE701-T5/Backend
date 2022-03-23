@@ -1,9 +1,8 @@
-const
-    { closeConn, connect } = require("../config/db.server.config"),
-    { resetCollections } = require("../models/db.server.model"),
-    request = require('supertest'),
-    assert = require("assert"),
-    app = require('../server');
+import request from "supertest";
+import assert from "assert";
+import app from "../server";
+import {closeConn, connect} from "../config/db.server.config";
+import {resetCollections} from "../models/db.server.model";
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected

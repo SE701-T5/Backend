@@ -10,15 +10,12 @@ import database from "mongoose";
  */
 export function connect(databaseName: string, isTestDatabase: boolean = false): Promise<typeof database> {
     // Database URI
-    const databaseURI = `mongodb://${process.env.DATABASE_USER}:${process.env.DATABASE_PW}` +
-        `@uniforumcluster-shard-00-00.wvdq3.mongodb.net:27017,uniforumcluster-shard-00-01.` +
-        `wvdq3.mongodb.net:27017,uniforumcluster-shard-00-02.wvdq3.mongodb.net:27017/` +
-        `${databaseName}?replicaSet=atlas-13bh8b-shard-0&authSource=admin&w=majority`;
+    const databaseURI = `mongodb://localhost/uniforum`;
 
     // Database options
     const databaseOptions = {
         useNewUrlParser: true,
-        ssl: true,
+        ssl: false,
         retryWrites: true
     };
 

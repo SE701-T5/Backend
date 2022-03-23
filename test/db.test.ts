@@ -1,7 +1,6 @@
-const
-    { closeConn, connect } = require("../config/db.server.config"),
-    request = require('supertest'),
-    app = require('../server');
+import request from "supertest";
+import app from "../server";
+import {closeConn, connect} from "../config/db.server.config";
 
 /**
  * Before all tests, the app database is disconnected

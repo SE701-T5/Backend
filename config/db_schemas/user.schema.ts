@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-interface User {
+export interface IUser {
     username: string;
     displayName: string;
     email: string;
@@ -8,7 +8,10 @@ interface User {
     authToken: string;
 }
 
-const userSchema = new Schema<User>(
+export interface IUserDocument extends IUser, Document {}
+export interface IUserModel extends Model<IUserDocument>{}
+
+const userSchema = new Schema<IUser>(
 {
     // Username used for login
     username: {
@@ -48,5 +51,7 @@ const userSchema = new Schema<User>(
 });
 
 // User can be used to create new documents with the userSchema
-const UserModel = mongoose.model<User>('User', userSchema);
+const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;
+
+

@@ -1,6 +1,6 @@
-const convict = require('convict');
+import convict from 'convict';
 
-exports.configParams = convict({
+export const configParams = convict({
     authToken: {
         format: String,
         default: 'X-Authorization'
