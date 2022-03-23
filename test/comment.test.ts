@@ -24,7 +24,7 @@ beforeEach(async function() {
  */
 after(async function() {
     await resetCollections(); // reset database for testing
-    await closeConn(true); // Disconnect from the app database
+    await closeConn(); // Disconnect from the app database
 });
 
 /**

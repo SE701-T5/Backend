@@ -21,7 +21,7 @@ beforeEach(async function() {
  * After all tests, the test database is disconnected
  */
 after(async function() {
-    await closeConn(true); // Disconnect from the app database
+    await closeConn(); // Disconnect from the app database
 });
 
 /**
@@ -44,7 +44,7 @@ describe("Successfully reset database test - remove all documents", function() {
  */
 describe("Unsuccessfully reset database test - database is not connected", function() {
     it("should return: 500", function(done) {
-        closeConn(true) // Disconnect from the test database
+        closeConn() // Disconnect from the test database
             .then(() => {
                 request(app)
                     .post('/api/v1/reset')

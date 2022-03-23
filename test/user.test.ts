@@ -26,7 +26,7 @@ beforeEach(async function() {
  */
 after(async function() {
     await resetCollections(); // reset database for testing
-    await closeConn(true); // Disconnect from the app database
+    await closeConn(); // Disconnect from the app database
 });
 
 /**
@@ -871,7 +871,7 @@ describe("Delete forum user unsuccessfully using invalid authorization token", f
                         request(app)
                             .delete(`/api/v1/users/${id}`)
                             .set({ "X-Authorization": 'wrongToken' })
-                            .expect(401)
+                            .expect(403)
                             .end(function (err, res) {
                                 if (err) done(err);
                                 done();

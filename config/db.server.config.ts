@@ -24,22 +24,16 @@ export function connect(databaseName: string, isTestDatabase: boolean = false): 
 
 /**
  * Returns database connection state
- * @param isTestDatabase conditional for if the database in use is for testing
  * @returns {ConnectionStates} 0 for disconnected, 2 for connected, 1 for connecting, 3 for disconnecting
  */
-export function getState(isTestDatabase=false) {
-    if (isTestDatabase) {
-        return database.connection.readyState;
-    } else {
-        return database.connection.readyState;
-    }
+export function getState() {
+    return database.connection.readyState;
 }
 
 /**
  * Closes database connection
- * @param isTestDatabase conditional for if the database in use is for testing
  * @returns {Promise<void>}
  */
-export function closeConn(isTestDatabase=false) {
+export function closeConn() {
     return database.disconnect();
 }
