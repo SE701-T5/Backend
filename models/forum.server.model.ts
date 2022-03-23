@@ -1,13 +1,12 @@
-const
-    Forum = require("../config/db_schemas/forum.schema"),
-    Comment = require("../config/db_schemas/comment.schema");
+import Forum from "../config/db_schemas/forum.schema";
+import Comment from "../config/db_schemas/comment.schema";
 
 /**
  * Insert a new forum post to the database
  * @param params object containing forum post attributes
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-function insertPost (params, done) {
+export function insertPost (params, done) {
     // Set forum post attributes
     const
       userID = params.userID,
@@ -53,7 +52,7 @@ function insertPost (params, done) {
  * @param id forum post ID
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-function searchPostById (id, done) {
+export function searchPostById (id, done) {
     try {
         Forum.findById(id)
           .then((res) => done(res))
@@ -70,7 +69,7 @@ function searchPostById (id, done) {
  * @param id the ID for matching to the database document being deleted
  * @param done function callback, returns status code and message if error
  */
-function deletePostById (id, done) {
+export function deletePostById (id, done) {
     Forum.deleteOne({ _id: id })
       .then((res) => {
           if (res.deletedCount === 0) {
@@ -89,7 +88,7 @@ function deletePostById (id, done) {
  * @param updates the document field(s) being updated
  * @param done function callback, returns status code and message if error
  */
-function updatePostById (id, updates, done) {
+export function updatePostById (id, updates, done) {
     // Search for a document matching the given ID to increment upVotes and downVotes
     searchPostById(id, function (result) {
         if (result.err) {
@@ -122,7 +121,7 @@ function updatePostById (id, updates, done) {
  * @param params object containing forum post comment fields
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-function addComment (params, done) {
+export function addComment (params, done) {
     const
       postID = params.postID,
       authorID = params.authorID,
@@ -162,5 +161,3 @@ function addComment (params, done) {
           return done({ err: 'Internal server error', status: 500 })
       })
 }
-
-module.exports = { searchPostById, insertPost, deletePostById, updatePostById, addComment };

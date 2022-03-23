@@ -1,27 +1,27 @@
-const
-    User = require('../config/db_schemas/user.schema'),
-    saltedMd5 = require('salted-md5');
+import User from '../config/db_schemas/user.schema';
+import saltedMd5 from "salted-md5";
 
 /**
  * Hashes a given plaintext password
  * @param plaintextPassword plaintext password for hashing
  * @returns {String} hashed password
  */
-function hashPassword (plaintextPassword) {
+export function hashPassword (plaintextPassword: string) {
     return saltedMd5(plaintextPassword, 'UniForum-Salt')
 }
+
 
 /**
  * Creates and returns a new forum user using the userSchema
  * @param params object containing forum user attributes
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-const createUser = function(params, done) {
-    const username = params.username
-    const displayName = params.displayName
-    const email = params.email
-    const hashedPassword = hashPassword(params.plaintextPassword)
-    const authToken = "0"
+export function createUser(params, done) {
+    const username = params.username;
+    const displayName = params.displayName;
+    const email = params.email;
+    const hashedPassword = hashPassword(params.plaintextPassword);
+    const authToken = "0";
 
     const newUser = new User({
         username,
@@ -38,10 +38,10 @@ const createUser = function(params, done) {
         .catch((err) => {
             // Forum user is already in the database with unique attributes, return duplicate conflict error
             if (err.code === 11000) {
-                return done({ err: "Conflict", status: 409 });
+                return done({err: "Conflict", status: 409});
             }
             // Any other database error, return internal server error
-            return done({ err: "Internal server error", status: 500 });
+            return done({err: "Internal server error", status: 500});
         });
 }
 
@@ -50,7 +50,7 @@ const createUser = function(params, done) {
  * @param id the user ID for matching with a _id field in the database
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-function searchUserById (id, done) {
+export function searchUserById (id, done) {
     try {
         User.findById(id)
           .then((res) => done(res))
@@ -67,7 +67,7 @@ function searchUserById (id, done) {
  * @param authToken the authorization token for matching with an authToken field in the database
  * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-function searchUserByAuthToken (authToken, done) {
+export function searchUserByAuthToken (authToken, done) {
     try {
         User.findOne({ authToken: authToken })
           .then((res) => done({ status: 200, res: res }))
@@ -84,7 +84,7 @@ function searchUserByAuthToken (authToken, done) {
  * @param id the ID for matching to the database document being deleted
  * @param done function callback, returns status code and message if error
  */
-function deleteUserById (id, done) {
+export function deleteUserById (id, done) {
     User.deleteOne({ _id: id })
       .then((res) => {
           if (res.deletedCount === 0) {
@@ -103,7 +103,7 @@ function deleteUserById (id, done) {
  * @param updates the document field(s) being updated
  * @param done function callback, returns status code, and updated document data or message if error
  */
-function updateUserById (id, updates, done) {
+export function updateUserById (id, updates, done) {
     if ('plaintextPassword' in updates) {
         updates.hashedPassword = hashPassword(updates.plaintextPassword)
     }
@@ -127,7 +127,7 @@ function updateUserById (id, updates, done) {
  * @param plaintextPassword the given password being matched with the password of an existing user matched by the given login
  * @param done function callback, returns user data if authenticated, false if not or error message if server error
  */
-function authenticateUser (login, plaintextPassword, done) {
+export function authenticateUser (login, plaintextPassword, done) {
     if ('email' || 'username' in login) {
         try {
             User.findOne(login)
@@ -153,7 +153,7 @@ function authenticateUser (login, plaintextPassword, done) {
  * @param userID the user ID for matching with a _id field in the database
  * @param done function callback, returns authorization token if one, or false, or status code and message if error
  */
-function getUserAuthToken (userID, done) {
+export function getUserAuthToken (userID, done) {
     searchUserById(userID, function (result) {
         if (result.err) {
             // Return the error message with the error status
@@ -176,7 +176,7 @@ function getUserAuthToken (userID, done) {
  * @param userID the user ID for matching with a _id field in the database
  * @param done function callback, returns authorization token if one, or status code and message if error
  */
-function setUserAuthToken (userID, done) {
+export function setUserAuthToken (userID, done) {
     // Resourced from: https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
     const hexToken = [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
     updateUserById(userID, { authToken: hexToken }, function (result) {
@@ -196,7 +196,7 @@ function setUserAuthToken (userID, done) {
  * @param authToken the authorization token for matching with an authToken field in the database
  * @param done function callback, returns true if user is authorized, otherwise false, or status code and error message
  */
-function isUserAuthorized (userID, authToken, done) {
+export function isUserAuthorized (userID, authToken, done) {
     if (authToken && typeof authToken === 'string' && authToken.length === 16) {
         searchUserById(userID, function (result) {
             if (result.err) {
@@ -220,7 +220,7 @@ function isUserAuthorized (userID, authToken, done) {
  * @param userID the user ID for matching with a _id field in the database
  * @param done function callback, returns status code, and message if error
  */
-function removeUserAuthToken (userID, done) {
+export function removeUserAuthToken (userID, done) {
     updateUserById(userID, { authToken: '0' }, function (result) {
         if (result.err) {
             // Return the error message with the error status
@@ -231,17 +231,3 @@ function removeUserAuthToken (userID, done) {
         }
     })
 }
-
-module.exports = {
-    hashPassword,
-    updateUserById,
-    searchUserById,
-    createUser,
-    deleteUserById,
-    authenticateUser,
-    getUserAuthToken,
-    setUserAuthToken,
-    isUserAuthorized,
-    searchUserByAuthToken,
-    removeUserAuthToken
-};
