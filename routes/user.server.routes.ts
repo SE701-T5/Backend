@@ -1,5 +1,5 @@
 import {Express} from "express";
-import user from '../controllers/user.server.controller';
+import * as user from '../controllers/user.server.controller';
 import { isRequestTokenAuthorized } from '../lib/middleware.lib';
 
 /**

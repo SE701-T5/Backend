@@ -1,5 +1,5 @@
 import {Express} from "express";
-import database from '../controllers/db.server.controller';
+import * as database from '../controllers/db.server.controller';
 
 /**
  * Handles HTTP requests for the Database module using Express.js route()

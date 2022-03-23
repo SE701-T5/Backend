@@ -1,5 +1,5 @@
 import {Express} from "express";
-import forum from '../controllers/forum.server.controller';
+import * as forum from '../controllers/forum.server.controller';
 import {isRequestTokenAuthorized} from '../lib/middleware.lib';
 
 /**

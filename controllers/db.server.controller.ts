@@ -1,11 +1,12 @@
-const Database = require('../models/db.server.model');
+import * as Database from '../models/db.server.model';
+import {Request, Response} from "express";
 
 /**
  * Responds to HTTP request for removing all documents from database collections
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.resetDB = function(req, res) {
+export function resetDB(req: Request, res: Response) {
     const isAdminUserAuthenticated = true; // TODO: implement admin user authentication
 
     if (isAdminUserAuthenticated) {
@@ -29,7 +30,7 @@ exports.resetDB = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.resampleDB = function(req, res) {
+export function resampleDB(req: Request, res: Response) {
     // TODO: implement resampleDB()
     res.json({ dummyTest: "resampleDB() dummy test passes" });
 }
