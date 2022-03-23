@@ -1,9 +1,15 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from 'mongoose';
 
-const Schema = mongoose.Schema;
+interface User {
+    username: string;
+    displayName: string;
+    email: string;
+    hashedPassword: string;
+    authToken: string;
+}
 
-const userSchema = new Schema(
-{   
+const userSchema = new Schema<User>(
+{
     // Username used for login
     username: {
         type: String,
@@ -42,6 +48,5 @@ const userSchema = new Schema(
 });
 
 // User can be used to create new documents with the userSchema
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+const UserModel = mongoose.model<User>('User', userSchema);
+export default UserModel;

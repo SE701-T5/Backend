@@ -1,8 +1,18 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from "mongoose";
 
-const Schema = mongoose.Schema;
+interface Forum {
+    userID: string,
+    communityID: string,
+    title: string,
+    bodyText: string,
+    edited: boolean,
+    upVotes: number,
+    downVotes: number,
+    attachments?: string[],
+    comments?: string[]
+}
 
-const forumSchema = new Schema({
+const forumSchema = new Schema<Forum>({
     // The User's ID who owns the forum post - must be a document ID length
     userID: {
         type: String,
@@ -59,6 +69,5 @@ const forumSchema = new Schema({
 });
 
 // Forum can be used to create new documents with the forumSchema
-const Forum = mongoose.model('Forum', forumSchema);
-
-module.exports = Forum;
+const ForumModel = mongoose.model<Forum>('Forum', forumSchema);
+export default ForumModel;
