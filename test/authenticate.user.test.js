@@ -15,7 +15,7 @@ const
 /**
  * Before all tests, the app database is disconnected before the test database is connected
  */
-before(async function() {
+beforeAll(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
     await connect(testDatabaseName, true); // Connect to the test database
@@ -31,7 +31,7 @@ beforeEach(async function() {
 /**
  * After all tests, all test database document data is deleted and the test database is disconnected
  */
-after(async function() {
+afterAll(async function() {
     await resetCollections(); // reset database for testing
     await closeConn(true); // Disconnect from the app database
 });

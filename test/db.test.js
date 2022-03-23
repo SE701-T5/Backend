@@ -6,7 +6,7 @@ const
 /**
  * Before all tests, the app database is disconnected
  */
-before(async function() {
+beforeAll(async function() {
     await closeConn(); // Disconnect from the app database
 });
 
@@ -21,7 +21,7 @@ beforeEach(async function() {
 /**
  * After all tests, the test database is disconnected
  */
-after(async function() {
+afterAll(async function() {
     await closeConn(true); // Disconnect from the app database
 });
 
