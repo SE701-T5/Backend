@@ -1,7 +1,7 @@
 import emailValidator from "email-validator";
 import {Request, Response} from "express";
 import * as User from '../models/user.server.model';
-import {configParams} from '../config/config.server.config';
+import config from '../config/config.server.config';
 import {isValidDocumentID, isAnyFieldValid, isAllFieldsValid} from "../lib/validate.lib";
 
 /**
@@ -105,7 +105,7 @@ export function userLogin(req: Request, res: Response) {
 export function userLogout(req: Request, res: Response) {
     const
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken'));
+        authToken = req.get(config.get('authToken'));
 
     if (isValidDocumentID(userID)) {
         User.isUserAuthorized(userID, authToken, function(result) {
@@ -163,7 +163,7 @@ export function userViewById(req: Request, res: Response) {
 export function userUpdateById(req: Request, res: Response) {
     const
         reqParams = req.params,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
 
     // Set fields for updating to an object with either passed values or false to declare them as invalid
@@ -208,7 +208,7 @@ export function userUpdateById(req: Request, res: Response) {
 export function userDeleteById(req: Request, res: Response) {
    const
        reqParams = req.params,
-       authToken = req.get(configParams.get('authToken'));
+       authToken = req.get(config.get('authToken'));
 
    if (isValidDocumentID(reqParams.id)) {
        User.isUserAuthorized(reqParams.id, authToken, function(result) {

@@ -11,7 +11,7 @@ const PORT = process.env.PORT ?? 4200;
 const databaseName = process.env.DATABASE_NAME as string;
 
 // Connect to MongoDB database
-connect(databaseName)
+connect()
     .then(
         () => {
             app.listen(PORT, function () {

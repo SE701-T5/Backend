@@ -12,7 +12,7 @@ import app from "../server";
 before(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
     await closeConn(); // Disconnect from the app database
-    await connect(testDatabaseName, true); // Connect to the test database
+    await connect(); // Connect to the test database
 });
 
 /**

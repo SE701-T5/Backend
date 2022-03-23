@@ -13,12 +13,12 @@ describe("Database connection test", function() {
             await closeConn(); // Disconnect from the app database
             assert.equal(getState(), 0); // Assert app database is not connected
 
-            connect(testDatabaseName, true); // Connect to the test database
+            connect(); // Connect to the test database
             assert.equal(getState(), 2); // Assert test database is connecting
             await closeConn(); // Disconnect from the test database
             assert.equal(getState(), 0); // Assert test database is not connected
 
-            await connect(testDatabaseName, true); // Connect to the test database
+            await connect(); // Connect to the test database
             assert.equal(getState(), 1); // Assert test database is connected
             await closeConn(); // Disconnect from the test database
             assert.equal(getState(), 0); // Assert test database is not connected

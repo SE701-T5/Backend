@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import * as Forum from '../models/forum.server.model';
 import * as User from "../models/user.server.model";
-import {configParams} from "../config/config.server.config";
+import config from "../config/config.server.config";
 import {isValidDocumentID, parseInteger, isAnyFieldValid, isAllFieldsValid} from "../lib/validate.lib";
 
 /**
@@ -21,7 +21,7 @@ export function postViews(req: Request, res: Response) {
  */
 export function postCreate(req: Request, res: Response) {
     const
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
 
     // Set forum post fields to an object for passing to the model
@@ -92,7 +92,7 @@ export function postUpdateById(req: Request, res: Response) {
     const
         postID = req.params.id ? req.params.id : false,
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
     let forumUpdateParams;
 
@@ -164,7 +164,7 @@ export function commentGiveById(req: Request, res: Response) {
     const
         reqParams = req.params,
         reqBody = req.body,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         commentParams = {
             'postID': isValidDocumentID(reqParams.id) ? reqParams.id : false,
             'authorID': isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
@@ -219,7 +219,7 @@ export function postDeleteById(req: Request, res: Response) {
     const
         postID = req.params.id ? req.params.id : false,
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken'));
+        authToken = req.get(config.get('authToken'));
 
     if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
         User.isUserAuthorized(userID, authToken, function(result) {

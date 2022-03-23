@@ -1,5 +1,5 @@
 import * as User from "../models/user.server.model";
-import { configParams } from "../config/config.server.config";
+import config from "../config/config.server.config";
 import {Request, Response, NextFunction} from "express";
 
 /**
@@ -10,7 +10,7 @@ import {Request, Response, NextFunction} from "express";
  */
 export function isRequestTokenAuthorized(req: Request, res: Response, next: NextFunction) {
     console.log('started auth')
-    const authToken = req.header(configParams.get('authToken'));
+    const authToken = req.header(config.get('authToken'));
     User.searchUserByAuthToken(authToken, function (result) {
         console.log(result)
         if (result.res == null) {

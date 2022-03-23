@@ -1,23 +1,14 @@
 import database from "mongoose";
+import config from './config.server.config';
 
 /**
  * Configure and connect to MongoDB database
  * Uses environment variables:
- *  - DATABASE_USER
- *  - DATABASE_PW
- * @param databaseName the name of the database being connected to
- * @param isTestDatabase conditional for if the database in use is for testing
+ * @param options optional value to configure database connection
  */
-export function connect(databaseName: string, isTestDatabase: boolean = false): Promise<typeof database> {
-    // Database URI
-    const databaseURI = `mongodb://localhost/uniforum`;
-
-    // Database options
-    const databaseOptions = {
-        useNewUrlParser: true,
-        ssl: false,
-        retryWrites: true
-    };
+export function connect(options?: database.ConnectOptions): Promise<typeof database> {
+    const databaseURI = process.env.DATABASE_URI ?? config.get('databaseURI');
+    const databaseOptions = options ?? config.get('databaseOptions');
 
     return database.connect(databaseURI, databaseOptions);
 }

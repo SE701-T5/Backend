@@ -14,7 +14,7 @@ before(async function() {
  */
 beforeEach(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
-    await connect(testDatabaseName, true); // Connect to the test database
+    await connect(); // Connect to the test database
 });
 
 /**
