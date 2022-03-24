@@ -19,5 +19,10 @@ export default convict({
             retryWrites: true,
         },
         env: 'DATABASE_OPTIONS'
+    },
+    port: {
+        format: 'nat',
+        default: 4200,
+        env: 'PORT'
     }
 });

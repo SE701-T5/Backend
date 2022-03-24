@@ -25,7 +25,7 @@ export default function () {
     });
 
     // HTTP GET request to homepage with a message response stating the server is running
-    app.get('/', function(req, res){
+    app.get('/health', function(req, res){
         res.status(200).json({ "msg": "The server is up and running!" });
     });
 

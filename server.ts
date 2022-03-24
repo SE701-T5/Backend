@@ -1,14 +1,11 @@
+import config from "./config/config.server.config";
 import { connect } from './config/db.server.config'
-import express from './config/express.server.config';
+import createApp from './config/express.server.config';
 
 // Express.js application object
-const app = express();
+const app = createApp();
 
-// Server port - use environment variable PORT or enter here
-const PORT = process.env.PORT ?? 4200;
-
-// Database name - use environment variable DATABASE_NAME or enter here
-const databaseName = process.env.DATABASE_NAME as string;
+const PORT = config.get('port');
 
 // Connect to MongoDB database
 connect()
