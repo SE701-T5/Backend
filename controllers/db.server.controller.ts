@@ -1,5 +1,5 @@
-import * as Database from "../models/db.server.model";
-import { Request, Response } from "express";
+import * as Database from '../models/db.server.model';
+import { Request, Response } from 'express';
 
 /**
  * Responds to HTTP request for removing all documents from database collections
@@ -16,11 +16,11 @@ export function resetDB(req: Request, res: Response) {
         // Return the error message with the error status
         res.status(result.status).send(result.err);
       } else {
-        res.status(result.status).send("OK");
+        res.status(result.status).send('OK');
       }
     });
   } else {
-    res.status(401).send("Unauthorized");
+    res.status(401).send('Unauthorized');
   }
 }
 
@@ -31,5 +31,5 @@ export function resetDB(req: Request, res: Response) {
  */
 export function resampleDB(req: Request, res: Response) {
   // TODO: implement resampleDB()
-  res.json({ dummyTest: "resampleDB() dummy test passes" });
+  res.json({ dummyTest: 'resampleDB() dummy test passes' });
 }

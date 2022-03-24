@@ -1,6 +1,6 @@
-import request from "supertest";
-import app from "../server";
-import { closeConn, connect } from "../config/db.server.config";
+import request from 'supertest';
+import app from '../server';
+import { closeConn, connect } from '../config/db.server.config';
 
 /**
  * Before all tests, the app database is disconnected
@@ -27,10 +27,10 @@ after(async function () {
 /**
  * Test successful deletion of all collection documents from test database
  */
-describe("Successfully reset database test - remove all documents", function () {
+describe('Successfully reset database test - remove all documents', function () {
   it("should return: 200 'OK'", function (done) {
     request(app)
-      .post("/api/v1/reset")
+      .post('/api/v1/reset')
       .expect(200)
       .end(function (err, res) {
         if (err) done(err);
@@ -42,12 +42,12 @@ describe("Successfully reset database test - remove all documents", function () 
 /**
  * Test unsuccessful deletion of collection documents from disconnected test database
  */
-describe("Unsuccessfully reset database test - database is not connected", function () {
-  it("should return: 500", function (done) {
+describe('Unsuccessfully reset database test - database is not connected', function () {
+  it('should return: 500', function (done) {
     closeConn() // Disconnect from the test database
       .then(() => {
         request(app)
-          .post("/api/v1/reset")
+          .post('/api/v1/reset')
           .expect(500)
           .end(function (err, res) {
             if (err) done(err);
@@ -57,12 +57,12 @@ describe("Unsuccessfully reset database test - database is not connected", funct
   });
 });
 
-describe("Resample database dummy test", function () {
+describe('Resample database dummy test', function () {
   it("should return: { dummyTest: 'resampleDB() dummy test passes' }", function (done) {
     request(app)
-      .post("/api/v1/resample")
-      .send({ dummyTestInput: "this text is useless" })
-      .expect({ dummyTest: "resampleDB() dummy test passes" })
+      .post('/api/v1/resample')
+      .send({ dummyTestInput: 'this text is useless' })
+      .expect({ dummyTest: 'resampleDB() dummy test passes' })
       .end(function (err, res) {
         if (err) done(err);
         done();

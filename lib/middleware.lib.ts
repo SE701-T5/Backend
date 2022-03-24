@@ -1,6 +1,6 @@
-import * as User from "../models/user.server.model";
-import config from "../config/config.server.config";
-import { Request, Response, NextFunction } from "express";
+import * as User from '../models/user.server.model';
+import config from '../config/config.server.config';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Verify if an authorization token exists in the database at API gateway to determine whether to continue or not
@@ -11,13 +11,13 @@ import { Request, Response, NextFunction } from "express";
 export function isRequestTokenAuthorized(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  console.log("started auth");
-  const authToken = req.header(config.get("authToken"));
+  console.log('started auth');
+  const authToken = req.header(config.get('authToken'));
   User.searchUserByAuthToken(authToken, function (result) {
     if (result.res == null) {
-      res.status(403).send(result.err ?? "user is not authorised");
+      res.status(403).send(result.err ?? 'user is not authorised');
     }
     next();
   });

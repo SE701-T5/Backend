@@ -1,5 +1,5 @@
-import Forum from "../config/db_schemas/forum.schema";
-import Comment from "../config/db_schemas/comment.schema";
+import Forum from '../config/db_schemas/forum.schema';
+import Comment from '../config/db_schemas/comment.schema';
 
 /**
  * Insert a new forum post to the database
@@ -16,7 +16,7 @@ export function insertPost(params, done) {
     upVotes = 0,
     downVotes = 0,
     attachments = params.attachments,
-    comments = [""];
+    comments = [''];
 
   // Create new forum post document
   const newPost = new Forum({
@@ -40,10 +40,10 @@ export function insertPost(params, done) {
     .catch((err) => {
       // Forum post is already in the database with unique attributes, return duplicate conflict error
       if (err.code === 11000) {
-        return done({ err: "Conflict", status: 409 });
+        return done({ err: 'Conflict', status: 409 });
       }
       // Any other database error, return internal server error
-      return done({ err: "Internal server error", status: 500 });
+      return done({ err: 'Internal server error', status: 500 });
     });
 }
 
@@ -60,7 +60,7 @@ export function searchPostById(id, done) {
         return done({ status: 404, err: err });
       });
   } catch (err) {
-    return done({ err: "Internal server error", status: 500 });
+    return done({ err: 'Internal server error', status: 500 });
   }
 }
 
@@ -73,12 +73,12 @@ export function deletePostById(id, done) {
   Forum.deleteOne({ _id: id })
     .then((res) => {
       if (res.deletedCount === 0) {
-        return done({ err: "Not found", status: 404 });
+        return done({ err: 'Not found', status: 404 });
       }
       return done(res);
     })
     .catch((err) => {
-      return done({ err: "Internal server error", status: 500 });
+      return done({ err: 'Internal server error', status: 500 });
     });
 }
 
@@ -95,19 +95,19 @@ export function updatePostById(id, updates, done) {
       // Return the error message with the error status
       return done(result);
     } else {
-      updates["upVotes"] = updates.upVotes
+      updates['upVotes'] = updates.upVotes
         ? updates.upVotes + result.upVotes
         : result.upVotes;
-      updates["downVotes"] = updates.downVotes
+      updates['downVotes'] = updates.downVotes
         ? updates.downVotes + result.downVotes
         : result.downVotes;
-      updates["comments"] = updates.comments
+      updates['comments'] = updates.comments
         ? result.comments.concat(updates.comments)
         : result.comments;
 
       // If the update does not just involve up votes, down votes, or comments, and actual edits
       if (Object.keys(updates).length > 3) {
-        updates["edited"] = true; // set the edited field to true
+        updates['edited'] = true; // set the edited field to true
       }
 
       // Find the document and update the changed fields
@@ -116,7 +116,7 @@ export function updatePostById(id, updates, done) {
           return done(res);
         })
         .catch((err) => {
-          return done({ err: "Internal server error", status: 500 });
+          return done({ err: 'Internal server error', status: 500 });
         });
     }
   });
@@ -162,8 +162,8 @@ export function addComment(params, done) {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return done({ err: "Conflict", status: 409 });
+        return done({ err: 'Conflict', status: 409 });
       }
-      return done({ err: "Internal server error", status: 500 });
+      return done({ err: 'Internal server error', status: 500 });
     });
 }

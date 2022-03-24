@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 interface Comment {
   postID: string;
@@ -68,9 +68,9 @@ const commentSchema = new Schema<Comment>(
   {
     // Assigns createdAt and updatedAt fields
     timestamps: true,
-  }
+  },
 );
 
 // User can be used to create new documents with the userSchema
-const CommentModel = mongoose.model<Comment>("Comment", commentSchema);
+const CommentModel = mongoose.model<Comment>('Comment', commentSchema);
 export default CommentModel;

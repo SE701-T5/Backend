@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import User, { IUserDocument } from "../config/db_schemas/user.schema";
-import saltedMd5 from "salted-md5";
-import { DeleteResult } from "mongodb";
+import mongoose from 'mongoose';
+import User, { IUserDocument } from '../config/db_schemas/user.schema';
+import saltedMd5 from 'salted-md5';
+import { DeleteResult } from 'mongodb';
 
 interface UserResponse<R = IUserDocument> {
   status: number;
@@ -15,7 +15,7 @@ interface UserResponse<R = IUserDocument> {
  * @returns {String} hashed password
  */
 export function hashPassword(plaintextPassword: string) {
-  return saltedMd5(plaintextPassword, "UniForum-Salt");
+  return saltedMd5(plaintextPassword, 'UniForum-Salt');
 }
 
 /**
@@ -28,7 +28,7 @@ export function createUser(params, done: (result: UserResponse) => void) {
   const displayName = params.displayName;
   const email = params.email;
   const hashedPassword = hashPassword(params.plaintextPassword);
-  const authToken = "0";
+  const authToken = '0';
 
   const newUser = new User({
     username,
@@ -46,10 +46,10 @@ export function createUser(params, done: (result: UserResponse) => void) {
     .catch((err) => {
       // Forum user is already in the database with unique attributes, return duplicate conflict error
       if (err.code === 11000) {
-        return done({ err: "Conflict", status: 409 });
+        return done({ err: 'Conflict', status: 409 });
       }
       // Any other database error, return internal server error
-      return done({ err: "Internal server error", status: 500 });
+      return done({ err: 'Internal server error', status: 500 });
     });
 }
 
@@ -77,7 +77,7 @@ export function searchUserById(id, done: (result: UserResponse) => void) {
  */
 export function searchUserByAuthToken(
   authToken: string,
-  done: (result: UserResponse) => void
+  done: (result: UserResponse) => void,
 ) {
   try {
     User.findOne({ authToken })
@@ -99,17 +99,17 @@ export function searchUserByAuthToken(
  */
 export function deleteUserById(
   id,
-  done: (result: UserResponse<DeleteResult>) => void
+  done: (result: UserResponse<DeleteResult>) => void,
 ) {
   User.deleteOne({ _id: id })
     .then((res) => {
       if (res.deletedCount === 0) {
-        return done({ err: "Not found", status: 404 });
+        return done({ err: 'Not found', status: 404 });
       }
       return done({ status: 204, res });
     })
     .catch((err) => {
-      return done({ err: "Internal server error", status: 500 });
+      return done({ err: 'Internal server error', status: 500 });
     });
 }
 
@@ -122,9 +122,9 @@ export function deleteUserById(
 export function updateUserById(
   id,
   updates,
-  done: (result: UserResponse) => void
+  done: (result: UserResponse) => void,
 ) {
-  if ("plaintextPassword" in updates) {
+  if ('plaintextPassword' in updates) {
     updates.hashedPassword = hashPassword(updates.plaintextPassword);
   }
   try {
@@ -133,13 +133,13 @@ export function updateUserById(
       .then((res) => {
         return res
           ? done({ status: 200, res })
-          : done({ err: "Not found", status: 404 });
+          : done({ err: 'Not found', status: 404 });
       })
       .catch((err) => {
-        return done({ err: "Not found", status: 404 });
+        return done({ err: 'Not found', status: 404 });
       });
   } catch (err) {
-    return done({ err: "Internal server error", status: 500 });
+    return done({ err: 'Internal server error', status: 500 });
   }
 }
 
@@ -150,7 +150,7 @@ export function updateUserById(
  * @param done function callback, returns user data if authenticated, false if not or error message if server error
  */
 export function authenticateUser(login, plaintextPassword, done) {
-  if ("email" in login || "username" in login) {
+  if ('email' in login || 'username' in login) {
     try {
       User.findOne(login)
         .then((res) => {
@@ -200,12 +200,12 @@ export function getUserAuthToken(userID, done) {
  */
 export function setUserAuthToken(
   userID,
-  done: (result: UserResponse<string>) => void
+  done: (result: UserResponse<string>) => void,
 ) {
   // Resourced from: https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
   const hexToken = [...Array(16)]
     .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join("");
+    .join('');
   updateUserById(userID, { authToken: hexToken }, function (result) {
     if (result.err) {
       // Return the error message with the error status
@@ -224,7 +224,7 @@ export function setUserAuthToken(
  * @param done function callback, returns true if user is authorized, otherwise false, or status code and error message
  */
 export function isUserAuthorized(userID, authToken, done) {
-  if (authToken && typeof authToken === "string" && authToken.length === 16) {
+  if (authToken && typeof authToken === 'string' && authToken.length === 16) {
     searchUserById(userID, function (result) {
       if (result.err) {
         // Return the error message with the error status
@@ -249,9 +249,9 @@ export function isUserAuthorized(userID, authToken, done) {
  */
 export function removeUserAuthToken(
   userID,
-  done: (result: UserResponse<undefined>) => void
+  done: (result: UserResponse<undefined>) => void,
 ) {
-  updateUserById(userID, { authToken: "0" }, function (result) {
+  updateUserById(userID, { authToken: '0' }, function (result) {
     if (result.err) {
       // Return the error message with the error status
       return done({ status: result.status, err: result.err });

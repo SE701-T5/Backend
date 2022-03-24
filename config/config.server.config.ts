@@ -1,14 +1,14 @@
-import convict from "convict";
+import convict from 'convict';
 
 export default convict({
   authToken: {
     format: String,
-    default: "X-Authorization",
+    default: 'X-Authorization',
   },
   databaseURI: {
     format: String,
-    default: "mongodb://localhost/uniforum",
-    env: "DATABASE_URI",
+    default: 'mongodb://localhost/uniforum',
+    env: 'DATABASE_URI',
     sensitive: true,
   },
   databaseOptions: {
@@ -18,11 +18,11 @@ export default convict({
       ssl: false,
       retryWrites: true,
     },
-    env: "DATABASE_OPTIONS",
+    env: 'DATABASE_OPTIONS',
   },
   port: {
-    format: "nat",
+    format: 'nat',
     default: 4200,
-    env: "PORT",
+    env: 'PORT',
   },
 });

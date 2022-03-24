@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 interface Forum {
   userID: string;
@@ -72,9 +72,9 @@ const forumSchema = new Schema<Forum>(
   {
     // Assigns createdAt and updatedAt fields
     timestamps: true,
-  }
+  },
 );
 
 // Forum can be used to create new documents with the forumSchema
-const ForumModel = mongoose.model<Forum>("Forum", forumSchema);
+const ForumModel = mongoose.model<Forum>('Forum', forumSchema);
 export default ForumModel;

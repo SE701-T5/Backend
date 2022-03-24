@@ -1,6 +1,6 @@
-import Forum from "../config/db_schemas/forum.schema";
-import User from "../config/db_schemas/user.schema";
-import Comment from "../config/db_schemas/comment.schema";
+import Forum from '../config/db_schemas/forum.schema';
+import User from '../config/db_schemas/user.schema';
+import Comment from '../config/db_schemas/comment.schema';
 
 /**
  * Remove all documents in the database collections

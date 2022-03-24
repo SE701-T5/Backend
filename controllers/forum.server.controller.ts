@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
-import * as Forum from "../models/forum.server.model";
-import * as User from "../models/user.server.model";
-import config from "../config/config.server.config";
+import { Request, Response } from 'express';
+import * as Forum from '../models/forum.server.model';
+import * as User from '../models/user.server.model';
+import config from '../config/config.server.config';
 import {
   isValidDocumentID,
   parseInteger,
   isAnyFieldValid,
   isAllFieldsValid,
-} from "../lib/validate.lib";
+} from '../lib/validate.lib';
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
@@ -16,7 +16,7 @@ import {
  */
 export function postViews(req: Request, res: Response) {
   // TODO: implement postViews()
-  res.json({ dummyTest: "postViews() dummy test passes" });
+  res.json({ dummyTest: 'postViews() dummy test passes' });
 }
 
 /**
@@ -25,7 +25,7 @@ export function postViews(req: Request, res: Response) {
  * @param res HTTP request response status code, and message if error, or JSON with post data if successful
  */
 export function postCreate(req: Request, res: Response) {
-  const authToken = req.get(config.get("authToken")),
+  const authToken = req.get(config.get('authToken')),
     reqBody = req.body;
 
   // Set forum post fields to an object for passing to the model
@@ -37,8 +37,8 @@ export function postCreate(req: Request, res: Response) {
       reqBody.communityID && reqBody.communityID.length > 2
         ? reqBody.communityID
         : false,
-    bodyText: reqBody.text || "",
-    attachments: reqBody.images || [""],
+    bodyText: reqBody.text || '',
+    attachments: reqBody.images || [''],
   };
 
   if (isAllFieldsValid(forumPostParams)) {
@@ -59,12 +59,12 @@ export function postCreate(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -87,7 +87,7 @@ export function postViewById(req: Request, res: Response) {
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -99,7 +99,7 @@ export function postViewById(req: Request, res: Response) {
 export function postUpdateById(req: Request, res: Response) {
   const postID = req.params.id ? req.params.id : false,
     userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get("authToken")),
+    authToken = req.get(config.get('authToken')),
     reqBody = req.body;
   let forumUpdateParams;
 
@@ -137,12 +137,12 @@ export function postUpdateById(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -165,7 +165,7 @@ export function commentViewById(req: Request, res: Response) {
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -177,7 +177,7 @@ export function commentViewById(req: Request, res: Response) {
 export function commentGiveById(req: Request, res: Response) {
   const reqParams = req.params,
     reqBody = req.body,
-    authToken = req.get(config.get("authToken")),
+    authToken = req.get(config.get('authToken')),
     commentParams = {
       postID: isValidDocumentID(reqParams.id) ? reqParams.id : false,
       authorID: isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
@@ -189,7 +189,7 @@ export function commentGiveById(req: Request, res: Response) {
         reqBody.bodyText && reqBody.bodyText.length > 0
           ? reqBody.bodyText
           : false,
-      attachments: reqBody.images ? reqBody.images : [""],
+      attachments: reqBody.images ? reqBody.images : [''],
     };
 
   if (isAllFieldsValid(commentParams)) {
@@ -209,12 +209,12 @@ export function commentGiveById(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -225,7 +225,7 @@ export function commentGiveById(req: Request, res: Response) {
  */
 export function commentUpdateById(req: Request, res: Response) {
   // TODO: implement postUpdateById()
-  res.json({ dummyTest: "commentUpdateById() dummy test passes" });
+  res.json({ dummyTest: 'commentUpdateById() dummy test passes' });
 }
 
 /**
@@ -236,7 +236,7 @@ export function commentUpdateById(req: Request, res: Response) {
 export function postDeleteById(req: Request, res: Response) {
   const postID = req.params.id ? req.params.id : false,
     userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get("authToken"));
+    authToken = req.get(config.get('authToken'));
 
   if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
     User.isUserAuthorized(userID, authToken, function (result) {
@@ -255,11 +255,11 @@ export function postDeleteById(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }

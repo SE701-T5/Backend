@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IUser {
   username: string;
@@ -49,9 +49,9 @@ const userSchema = new Schema<IUser>(
   {
     // Assigns createdAt and updatedAt fields
     timestamps: true,
-  }
+  },
 );
 
 // User can be used to create new documents with the userSchema
-const UserModel = mongoose.model<IUser>("User", userSchema);
+const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;

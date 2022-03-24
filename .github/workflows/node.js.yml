@@ -16,7 +16,7 @@ on:
 # The workflow jobs: builds and tests the backend
 jobs:
   build_pull_request:
-    name: "Job for PR Action With Secrets Access"
+    name: 'Job for PR Action With Secrets Access'
     if: github.event_name == 'pull_request_target'
 
     # Workflow job is run on the latest Ubuntu runner
@@ -62,7 +62,7 @@ jobs:
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
 
   build_fork:
-    name: "Job for Non-PR Action in Fork Repo With Secrets Access"
+    name: 'Job for Non-PR Action in Fork Repo With Secrets Access'
     if: github.event_name != 'pull_request_target' && github.ref_name != 'main'
 
     # Workflow job is run on the latest Ubuntu runner
@@ -106,7 +106,7 @@ jobs:
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
 
   build_main:
-    name: "Job for Non-PR Action in Main Repo With Secrets Access"
+    name: 'Job for Non-PR Action in Main Repo With Secrets Access'
     if: github.event_name != 'pull_request_target' && github.repository == 'SE701-T5/Backend' && github.ref_name == 'main'
 
     # Workflow job is run on the latest Ubuntu runner
@@ -150,7 +150,7 @@ jobs:
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
 
   deploy_main:
-    name: "Job for Heroku Deploy Main Repo With Secrets Access"
+    name: 'Job for Heroku Deploy Main Repo With Secrets Access'
     needs: build_main
 
     # Workflow job is run on the latest Ubuntu runner
@@ -167,4 +167,4 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: "web: npm start"
+          procfile: 'web: npm start'

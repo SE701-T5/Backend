@@ -1,12 +1,12 @@
-import emailValidator from "email-validator";
-import { Request, Response } from "express";
-import * as User from "../models/user.server.model";
-import config from "../config/config.server.config";
+import emailValidator from 'email-validator';
+import { Request, Response } from 'express';
+import * as User from '../models/user.server.model';
+import config from '../config/config.server.config';
 import {
   isValidDocumentID,
   isAnyFieldValid,
   isAllFieldsValid,
-} from "../lib/validate.lib";
+} from '../lib/validate.lib';
 
 /**
  * Returns a random displayName (e.g. User0001)
@@ -14,7 +14,7 @@ import {
 function generateDisplayName() {
   const maxValue = 9999;
   const randomNumber = Math.floor(Math.random() * maxValue);
-  return "User" + randomNumber.toString();
+  return 'User' + randomNumber.toString();
 }
 
 /**
@@ -54,7 +54,7 @@ export function userCreate(req: Request, res: Response) {
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -117,13 +117,13 @@ export function userLogin(req: Request, res: Response) {
               }
             });
           } else {
-            res.status(404).send("Not found");
+            res.status(404).send('Not found');
           }
         }
-      }
+      },
     );
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -134,7 +134,7 @@ export function userLogin(req: Request, res: Response) {
  */
 export function userLogout(req: Request, res: Response) {
   const userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get("authToken"));
+    authToken = req.get(config.get('authToken'));
 
   if (isValidDocumentID(userID)) {
     User.isUserAuthorized(userID, authToken, function (result) {
@@ -144,7 +144,7 @@ export function userLogout(req: Request, res: Response) {
             // Return the error message with the error status
             res.status(result.status).send(result.err);
           } else {
-            res.status(result.status).send("Success");
+            res.status(result.status).send('Success');
           }
         });
       } else {
@@ -152,12 +152,12 @@ export function userLogout(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -180,7 +180,7 @@ export function userViewById(req: Request, res: Response) {
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -191,7 +191,7 @@ export function userViewById(req: Request, res: Response) {
  */
 export function userUpdateById(req: Request, res: Response) {
   const reqParams = req.params,
-    authToken = req.get(config.get("authToken")),
+    authToken = req.get(config.get('authToken')),
     reqBody = req.body;
 
   // Set fields for updating to an object with either passed values or false to declare them as invalid
@@ -231,12 +231,12 @@ export function userUpdateById(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }
 
@@ -247,7 +247,7 @@ export function userUpdateById(req: Request, res: Response) {
  */
 export function userDeleteById(req: Request, res: Response) {
   const reqParams = req.params,
-    authToken = req.get(config.get("authToken"));
+    authToken = req.get(config.get('authToken'));
 
   if (isValidDocumentID(reqParams.id)) {
     User.isUserAuthorized(reqParams.id, authToken, function (result) {
@@ -266,11 +266,11 @@ export function userDeleteById(req: Request, res: Response) {
           // Return the error message with the error status
           res.status(result.status).send(result.err);
         } else {
-          res.status(401).send("Unauthorized");
+          res.status(401).send('Unauthorized');
         }
       }
     });
   } else {
-    res.status(400).send("Bad request");
+    res.status(400).send('Bad request');
   }
 }

@@ -1,7 +1,7 @@
-import request from "supertest";
-import app from "../server";
-import { closeConn, connect } from "../config/db.server.config";
-import { resetCollections } from "../models/db.server.model";
+import request from 'supertest';
+import app from '../server';
+import { closeConn, connect } from '../config/db.server.config';
+import { resetCollections } from '../models/db.server.model';
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected
@@ -30,51 +30,51 @@ after(async function () {
 /**
  * Test successfully creating a new forum post comment to a blog post
  */
-describe("Create forum comment test successfully", function () {
-  it("should return: status 201", function (done) {
+describe('Create forum comment test successfully', function () {
+  it('should return: status 201', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .post(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .set({ "X-Authorization": authToken })
+                  .set({ 'X-Authorization': authToken })
                   .send({
                     authorID: id,
-                    username: "NewUser",
-                    bodyText: "Hi my name is George",
+                    username: 'NewUser',
+                    bodyText: 'Hi my name is George',
                   })
                   .expect(201)
                   .end(function (err, res) {
@@ -91,49 +91,49 @@ describe("Create forum comment test successfully", function () {
  * Test unsuccessfully creating a new forum post comment to a blog post - missing field 'authorID'
  */
 describe("Create forum comment test unsuccessfully - missing field 'authorID'", function () {
-  it("should return: status 400", function (done) {
+  it('should return: status 400', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .post(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .set({ "X-Authorization": authToken })
+                  .set({ 'X-Authorization': authToken })
                   .send({
-                    username: "NewUser",
-                    bodyText: "Hi my name is George",
+                    username: 'NewUser',
+                    bodyText: 'Hi my name is George',
                   })
                   .expect(400)
                   .end(function (err, res) {
@@ -149,51 +149,51 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
 /**
  * Test unsuccessfully creating a new forum post comment to a blog post - field length too short 'username'
  */
-describe("Create forum comment test unsuccessfully - field length requirement not met", function () {
-  it("should return: status 400", function (done) {
+describe('Create forum comment test unsuccessfully - field length requirement not met', function () {
+  it('should return: status 400', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .post(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .set({ "X-Authorization": authToken })
+                  .set({ 'X-Authorization': authToken })
                   .send({
                     authorID: id,
-                    username: "",
-                    bodyText: "Hi my name is George",
+                    username: '',
+                    bodyText: 'Hi my name is George',
                   })
                   .expect(400)
                   .end(function (err, res) {
@@ -206,51 +206,51 @@ describe("Create forum comment test unsuccessfully - field length requirement no
   });
 });
 
-describe("View forum post comment by ID successfully", function () {
-  it("should return: status 200", function (done) {
+describe('View forum post comment by ID successfully', function () {
+  it('should return: status 200', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .post(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .set({ "X-Authorization": authToken })
+                  .set({ 'X-Authorization': authToken })
                   .send({
                     authorID: id,
-                    username: "NewUser",
-                    bodyText: "Hi my name is George2",
+                    username: 'NewUser',
+                    bodyText: 'Hi my name is George2',
                   })
                   .expect(201)
                   .end(function (err, res) {
@@ -269,40 +269,40 @@ describe("View forum post comment by ID successfully", function () {
   });
 });
 
-describe("View forum post comment by ID successfully (no comment)", function () {
-  it("should return: status 200", function (done) {
+describe('View forum post comment by ID successfully (no comment)', function () {
+  it('should return: status 200', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
@@ -320,57 +320,57 @@ describe("View forum post comment by ID successfully (no comment)", function () 
   });
 });
 
-describe("View forum post comment unsuccessfully by invalid postID", function () {
-  it("should return: status 400", function (done) {
+describe('View forum post comment unsuccessfully by invalid postID', function () {
+  it('should return: status 400', function (done) {
     request(app)
-      .post("/api/v1/users")
+      .post('/api/v1/users')
       .send({
-        username: "NewUser",
-        displayName: "NewUser",
-        email: "new@user.com",
-        plaintextPassword: "newUser",
+        username: 'NewUser',
+        displayName: 'NewUser',
+        email: 'new@user.com',
+        plaintextPassword: 'newUser',
       })
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
         request(app)
-          .post("/api/v1/users/login")
+          .post('/api/v1/users/login')
           .send({
-            username: "NewUser",
-            email: "new@user.com",
-            plaintextPassword: "newUser",
+            username: 'NewUser',
+            email: 'new@user.com',
+            plaintextPassword: 'newUser',
           })
           .expect(200)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
             request(app)
-              .post("/api/v1/posts")
-              .set({ "X-Authorization": authToken })
+              .post('/api/v1/posts')
+              .set({ 'X-Authorization': authToken })
               .send({
                 userID: id,
                 title: "Happy St. Paddy's day!",
-                communityID: "communityID",
+                communityID: 'communityID',
                 text: "What's the craic?",
-                images: ["image string"],
+                images: ['image string'],
               })
               .expect(201)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .post(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .set({ "X-Authorization": authToken })
+                  .set({ 'X-Authorization': authToken })
                   .send({
                     authorID: id,
-                    username: "NewUser",
-                    bodyText: "Hi my name is George2",
+                    username: 'NewUser',
+                    bodyText: 'Hi my name is George2',
                   })
                   .expect(201)
                   .end(function (err, res) {
                     if (err) done(err);
                     request(app)
-                      .get("/api/v1/posts/xxx/comments")
+                      .get('/api/v1/posts/xxx/comments')
                       .expect(400)
                       .end(function (err, res) {
                         if (err) done(err);
@@ -383,12 +383,12 @@ describe("View forum post comment unsuccessfully by invalid postID", function ()
   });
 });
 
-describe("Update forum post comment by ID dummy test", function () {
+describe('Update forum post comment by ID dummy test', function () {
   it("should return: { dummyTest: 'commentUpdateById() dummy test passes' }", function (done) {
     request(app)
-      .patch("/api/v1/posts/:id/comments/:id")
-      .send({ dummyTestInput: "this text is useless" })
-      .expect({ dummyTest: "commentUpdateById() dummy test passes" })
+      .patch('/api/v1/posts/:id/comments/:id')
+      .send({ dummyTestInput: 'this text is useless' })
+      .expect({ dummyTest: 'commentUpdateById() dummy test passes' })
       .end(function (err, res) {
         if (err) done(err);
         done();

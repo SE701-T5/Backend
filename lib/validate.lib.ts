@@ -4,10 +4,10 @@
  * @returns {boolean} true if the given ID is a valid document ID, otherwise false
  */
 export function isValidDocumentID(id) {
-  const regExpDocumentID = new RegExp("^[a-fA-F0-9]{24}$");
+  const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
   return (
     id &&
-    typeof id === "string" &&
+    typeof id === 'string' &&
     id.length === 24 &&
     regExpDocumentID.test(id)
   );

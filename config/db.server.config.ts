@@ -1,5 +1,5 @@
-import database from "mongoose";
-import config from "./config.server.config";
+import database from 'mongoose';
+import config from './config.server.config';
 
 /**
  * Configure and connect to MongoDB database
@@ -9,10 +9,10 @@ import config from "./config.server.config";
  */
 export function connect(
   uri?: string,
-  options?: database.ConnectOptions
+  options?: database.ConnectOptions,
 ): Promise<typeof database> {
-  const databaseURI = uri ?? config.get("databaseURI");
-  const databaseOptions = options ?? config.get("databaseOptions");
+  const databaseURI = uri ?? config.get('databaseURI');
+  const databaseOptions = options ?? config.get('databaseOptions');
 
   return database.connect(databaseURI, databaseOptions);
 }
