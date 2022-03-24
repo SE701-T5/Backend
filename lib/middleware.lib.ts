@@ -12,7 +12,6 @@ export function isRequestTokenAuthorized(req: Request, res: Response, next: Next
     console.log('started auth')
     const authToken = req.header(config.get('authToken'));
     User.searchUserByAuthToken(authToken, function (result) {
-        console.log(result)
         if (result.res == null) {
             res.status(403).send(result.err ?? "user is not authorised");
         }
