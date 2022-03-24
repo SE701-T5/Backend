@@ -1,7 +1,6 @@
-const
-    { closeConn, connect } = require("../config/db.server.config"),
-    request = require('supertest'),
-    app = require('../server');
+import request from "supertest";
+import app from "../server";
+import {closeConn, connect} from "../config/db.server.config";
 
 /**
  * Before all tests, the app database is disconnected
@@ -15,14 +14,14 @@ before(async function() {
  */
 beforeEach(async function() {
     const testDatabaseName = process.env.DATABASE_TEST_NAME;
-    await connect(testDatabaseName, true); // Connect to the test database
+    await connect(); // Connect to the test database
 });
 
 /**
  * After all tests, the test database is disconnected
  */
 after(async function() {
-    await closeConn(true); // Disconnect from the app database
+    await closeConn(); // Disconnect from the app database
 });
 
 /**
@@ -45,7 +44,7 @@ describe("Successfully reset database test - remove all documents", function() {
  */
 describe("Unsuccessfully reset database test - database is not connected", function() {
     it("should return: 500", function(done) {
-        closeConn(true) // Disconnect from the test database
+        closeConn() // Disconnect from the test database
             .then(() => {
                 request(app)
                     .post('/api/v1/reset')

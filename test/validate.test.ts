@@ -1,6 +1,5 @@
-const
-    { isValidDocumentID } = require("../lib/validate.lib"),
-    assert = require("assert");
+import assert from "assert";
+import {isValidDocumentID} from "../lib/validate.lib";
 
 /**
  * Test the validation of a given ID is the correct format for a database document ID

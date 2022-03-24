@@ -1,8 +1,17 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from "mongoose";
 
-const Schema = mongoose.Schema;
+interface Comment {
+    postID: string,
+    authorID: string,
+    authorUserName: string,
+    bodyText: string,
+    edited: boolean,
+    upVotes: number,
+    downVotes: number,
+    attachments?: string[]
+}
 
-const commentSchema = new Schema({
+const commentSchema = new Schema<Comment>({
     // The Forum post ID the comment is made to - must be a document ID length
     postID: {
         type: String,
@@ -58,6 +67,5 @@ const commentSchema = new Schema({
 });
 
 // User can be used to create new documents with the userSchema
-const Comment = mongoose.model('Comment', commentSchema);
-
-module.exports = Comment;
+const CommentModel = mongoose.model<Comment>('Comment', commentSchema);
+export default CommentModel;

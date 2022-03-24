@@ -1,20 +1,15 @@
-const
-    Forum = require('../models/forum.server.model'),
-    User = require("../models/user.server.model"),
-    { configParams } = require("../config/config.server.config"),
-    {
-        isValidDocumentID,
-        parseInteger,
-        isAnyFieldValid,
-        isAllFieldsValid
-    } = require("../lib/validate.lib");
+import {Request, Response} from "express";
+import * as Forum from '../models/forum.server.model';
+import * as User from "../models/user.server.model";
+import config from "../config/config.server.config";
+import {isValidDocumentID, parseInteger, isAnyFieldValid, isAllFieldsValid} from "../lib/validate.lib";
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.postViews = function(req, res) {
+export function postViews(req: Request, res: Response) {
     // TODO: implement postViews()
     res.json({ dummyTest: "postViews() dummy test passes" });
 }
@@ -24,9 +19,9 @@ exports.postViews = function(req, res) {
  * @param req HTTP request object containing forum post field data, user ID, and authorization token for verification
  * @param res HTTP request response status code, and message if error, or JSON with post data if successful
  */
-exports.postCreate = function(req, res) {
+export function postCreate(req: Request, res: Response) {
     const
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
 
     // Set forum post fields to an object for passing to the model
@@ -70,7 +65,7 @@ exports.postCreate = function(req, res) {
  * @param req HTTP request object containing forum post ID for identifying the post being viewed
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
-exports.postViewById = function(req, res) {
+export function postViewById(req: Request, res: Response) {
     const postID = req.params.id ? req.params.id : false;
 
     if (isValidDocumentID(postID)) {
@@ -93,11 +88,11 @@ exports.postViewById = function(req, res) {
  * @param req HTTP request object containing forum post fields being updated, user ID and auth token for verification
  * @param res HTTP request response status code and updated forum post data in JSON format or error message
  */
-exports.postUpdateById = function(req, res) {
+export function postUpdateById(req: Request, res: Response) {
     const
         postID = req.params.id ? req.params.id : false,
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
     let forumUpdateParams;
 
@@ -142,7 +137,7 @@ exports.postUpdateById = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.commentViewById = function(req, res) {
+export function commentViewById(req: Request, res: Response) {
     const postID = req.params.id ? req.params.id : false;
 
     if (isValidDocumentID(postID)) {
@@ -165,11 +160,11 @@ exports.commentViewById = function(req, res) {
  * @param req HTTP request object containing forum post comment field data, and post ID, and authorization token
  * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
-exports.commentGiveById = function(req, res) {
+export function commentGiveById(req: Request, res: Response) {
     const
         reqParams = req.params,
         reqBody = req.body,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         commentParams = {
             'postID': isValidDocumentID(reqParams.id) ? reqParams.id : false,
             'authorID': isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
@@ -210,7 +205,7 @@ exports.commentGiveById = function(req, res) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-exports.commentUpdateById = function(req, res) {
+export function commentUpdateById(req: Request, res: Response) {
     // TODO: implement postUpdateById()
     res.json({ dummyTest: "commentUpdateById() dummy test passes" });
 }
@@ -220,11 +215,11 @@ exports.commentUpdateById = function(req, res) {
  * @param req HTTP request object containing forum post ID, user ID, and authorization token for verification
  * @param res HTTP request response status code with message whether with error or success
  */
-exports.postDeleteById = function(req, res) {
+export function postDeleteById(req: Request, res: Response) {
     const
         postID = req.params.id ? req.params.id : false,
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken'));
+        authToken = req.get(config.get('authToken'));
 
     if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
         User.isUserAuthorized(userID, authToken, function(result) {

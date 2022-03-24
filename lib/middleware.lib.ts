@@ -1,6 +1,6 @@
-const
-    User = require("../models/user.server.model"),
-    { configParams } = require("../config/config.server.config");
+import * as User from "../models/user.server.model";
+import config from "../config/config.server.config";
+import {Request, Response, NextFunction} from "express";
 
 /**
  * Verify if an authorization token exists in the database at API gateway to determine whether to continue or not
@@ -8,11 +8,12 @@ const
  * @param res HTTP request response status code with message if the verification fails
  * @param next continue to the next function if the status code returned from authorization token verification is 200
  */
-exports.isRequestTokenAuthorized = function(req, res, next) {
-    const authToken = req.get(configParams.get('authToken'));
+export function isRequestTokenAuthorized(req: Request, res: Response, next: NextFunction) {
+    console.log('started auth')
+    const authToken = req.header(config.get('authToken'));
     User.searchUserByAuthToken(authToken, function (result) {
-        if (result.status !== 200) {
-            return res.sendStatus(result.status).message(result.message);
+        if (result.res == null) {
+            res.status(403).send(result.err ?? "user is not authorised");
         }
         next();
     });

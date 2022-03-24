@@ -1,17 +1,18 @@
-const
-    expect = require('chai').expect,
-    user = require('../config/db_schemas/user.schema'),
-    forum = require('../config/db_schemas/forum.schema'),
-    comment = require('../config/db_schemas/comment.schema');
+import {expect} from "chai";
+import mongoose from "mongoose";
+
+import User from '../config/db_schemas/user.schema';
+import Forum from '../config/db_schemas/forum.schema';
+import Comment from '../config/db_schemas/comment.schema';
 
 /**
  * Test successful forum user schema fields exist
  */
 describe('Forum user schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
-        const f = new user();
+        const f = new User();
 
-        f.validate(function(err) {
+        f.validate(function(err: mongoose.Error.ValidationError) {
             expect(err.errors.username).to.exist;
             expect(err.errors.displayName).to.exist;
             expect(err.errors.email).to.exist;
@@ -27,9 +28,9 @@ describe('Forum user schema test', function() {
  */
 describe('Forum post schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
-        const f = new forum();
- 
-        f.validate(function(err) {
+        const f = new Forum();
+
+        f.validate(function(err: mongoose.Error.ValidationError) {
             expect(err.errors.userID).to.exist;
             expect(err.errors.communityID).to.exist;
             expect(err.errors.title).to.exist;
@@ -47,9 +48,9 @@ describe('Forum post schema test', function() {
  */
 describe('Comment schema test', function() {
     it('should be invalid if required fields are empty', function(done) {
-        const f = new comment();
- 
-        f.validate(function(err) {
+        const f = new Comment();
+
+        f.validate(function(err: mongoose.Error.ValidationError) {
             expect(err.errors.postID).to.exist;
             expect(err.errors.authorID).to.exist;
             expect(err.errors.authorUserName).to.exist;
