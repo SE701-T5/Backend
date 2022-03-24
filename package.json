@@ -4,7 +4,7 @@
   "description": "RESTful API for a forum site.",
   "main": "server.ts",
   "scripts": {
-    "test": "mocha ./test/* --timeout 10000 --exit --require ts-node/register",
+    "test": "mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --exit",
     "start": "ts-node server.ts",
     "dev": "nodemon server.ts"
   },
@@ -33,6 +33,7 @@
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "mocha": "^9.2.2",
+    "mongodb-memory-server": "^8.4.1",
     "nodemon": "^2.0.15",
     "supertest": "^6.2.2",
     "ts-node": "^10.7.0"
