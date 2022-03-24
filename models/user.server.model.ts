@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User, {IUserDocument} from '../config/db_schemas/user.schema';
 import saltedMd5 from "salted-md5";
 import { DeleteResult } from "mongodb";
@@ -136,21 +137,21 @@ export function updateUserById (id, updates, done: (result: UserResponse) => voi
  * @param plaintextPassword the given password being matched with the password of an existing user matched by the given login
  * @param done function callback, returns user data if authenticated, false if not or error message if server error
  */
-export function authenticateUser (login, plaintextPassword, done) {
-    if ('email' || 'username' in login) {
+export function authenticateUser(login, plaintextPassword, done) {
+    if ('email' in login || 'username' in login) {
         try {
             User.findOne(login)
-              .then((res) => {
-                  if (res.hashedPassword.match(hashPassword(plaintextPassword))) {
-                      return done({status: 200, res})
-                  }
-                  return done(false)
-              })
-              .catch((err) => {
-                  return done(false)
-              })
+                .then((res) => {
+                    if (res.hashedPassword.match(hashPassword(plaintextPassword))) {
+                        return done({status: 200, res})
+                    }
+                    return done(false)
+                })
+                .catch((err) => {
+                    return done(false)
+                })
         } catch (err) {
-            return done({ status: 500, err: err })
+            return done({status: 500, err: err})
         }
     } else {
         return done(false)

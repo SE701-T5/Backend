@@ -65,8 +65,8 @@ export function userLogin(req: Request, res: Response) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
             } else {
-                if (result) {
-                    const userID = result._id;
+                if (result.res) {
+                    const userID = result.res._id;
                     User.getUserAuthToken(userID, function(result) {
                         if (result.err) {
                             // Return the error message with the error status
