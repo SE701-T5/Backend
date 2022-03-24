@@ -1,10 +1,10 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from "mongoose";
-import {closeConn, connect} from "../config/db.server.config";
+import mongoose from 'mongoose';
+import {closeConn, connect} from '../config/db.server.config';
 
 export const mochaHooks = {
 	async beforeAll() {
-		this.timeout('60s')
+		this.timeout('60s');
 		console.error('starting server');
 
 		this.mongoServer = await MongoMemoryServer.create();
@@ -26,7 +26,7 @@ export const mochaHooks = {
 		await this.mongoServer.stop();
 		console.log('MongoDB server stopped!');
 	}
-}
+};
 
 
 

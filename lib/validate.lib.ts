@@ -4,8 +4,8 @@
  * @returns {boolean} true if the given ID is a valid document ID, otherwise false
  */
 export function isValidDocumentID(id) {
-    const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
-    return id && typeof id === 'string' && id.length === 24 && regExpDocumentID.test(id);
+	const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
+	return id && typeof id === 'string' && id.length === 24 && regExpDocumentID.test(id);
 }
 
 /**
@@ -15,7 +15,7 @@ export function isValidDocumentID(id) {
  * @returns {*|number} the string integer value as a number if valid, otherwise the given minimum value
  */
 export function parseInteger(str, min) {
-    return isNaN(parseInt(str, 10)) ? min : parseInt(str, 10);
+	return isNaN(parseInt(str, 10)) ? min : parseInt(str, 10);
 }
 
 /**
@@ -24,12 +24,12 @@ export function parseInteger(str, min) {
  * @returns {boolean} true if all fields in an object have valid and true values, otherwise false
  */
 export function isAllFieldsValid(obj) {
-    for (let field in obj) {
-        if (!obj[field]) {
-            return false;
-        }
-    }
-    return true;
+	for (const field in obj) {
+		if (!obj[field]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -38,10 +38,10 @@ export function isAllFieldsValid(obj) {
  * @returns {boolean} true if any one field in an object has a valid and true value, otherwise false
  */
 export function isAnyFieldValid(obj) {
-    for (let field in obj) {
-        if (!obj[field]) {
-            delete obj[field];
-        }
-    }
-    return Object.keys(obj).length !== 0;
+	for (const field in obj) {
+		if (!obj[field]) {
+			delete obj[field];
+		}
+	}
+	return Object.keys(obj).length !== 0;
 }

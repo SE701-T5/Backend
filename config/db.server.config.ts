@@ -1,4 +1,4 @@
-import database from "mongoose";
+import database from 'mongoose';
 import config from './config.server.config';
 
 /**
@@ -8,10 +8,10 @@ import config from './config.server.config';
  * @param options optional value to configure database connection
  */
 export function connect(uri?: string, options?: database.ConnectOptions): Promise<typeof database> {
-    const databaseURI = uri ?? config.get('databaseURI');
-    const databaseOptions = options ?? config.get('databaseOptions');
+	const databaseURI = uri ?? config.get('databaseURI');
+	const databaseOptions = options ?? config.get('databaseOptions');
 
-    return database.connect(databaseURI, databaseOptions);
+	return database.connect(databaseURI, databaseOptions);
 }
 
 /**
@@ -19,7 +19,7 @@ export function connect(uri?: string, options?: database.ConnectOptions): Promis
  * @returns {ConnectionStates} 0 for disconnected, 2 for connected, 1 for connecting, 3 for disconnecting
  */
 export function getState() {
-    return database.connection.readyState;
+	return database.connection.readyState;
 }
 
 /**
@@ -27,5 +27,5 @@ export function getState() {
  * @returns {Promise<void>}
  */
 export function closeConn() {
-    return database.disconnect();
+	return database.disconnect();
 }

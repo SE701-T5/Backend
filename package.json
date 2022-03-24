@@ -31,6 +31,8 @@
     "@types/mongoose": "^5.11.97",
     "@types/node": "^17.0.22",
     "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "eslint": "^8.11.0",
