@@ -1,12 +1,15 @@
-const
-    express = require('express'),
-    bodyParser = require('body-parser');
+import express from "express";
+import bodyParser from "body-parser";
+
+import dbServerRoutes from "../routes/db.server.routes";
+import forumServerRoutes from '../routes/forum.server.routes';
+import userServerRoutes from '../routes/user.server.routes';
 
 /**
  * Configure Express.js application
  * @returns Express.js application object
  */
-module.exports = function() {
+export default function () {
     // Create Express.js application
     const app = express();
 
@@ -22,14 +25,14 @@ module.exports = function() {
     });
 
     // HTTP GET request to homepage with a message response stating the server is running
-    app.get('/', function(req, res){
+    app.get('/health', function(req, res){
         res.status(200).json({ "msg": "The server is up and running!" });
     });
 
     // Configure HTTP routes
-    require('../routes/db.server.routes.js')(app);
-    require('../routes/forum.server.routes.js')(app);
-    require('../routes/user.server.routes.js')(app);
+    dbServerRoutes(app);
+    forumServerRoutes(app);
+    userServerRoutes(app);
 
     return app;
-};
+}

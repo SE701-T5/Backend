@@ -1,12 +1,8 @@
-const
-    User = require('../models/user.server.model'),
-    { configParams } = require('../config/config.server.config'),
-    emailValidator = require('email-validator'),
-    {
-        isValidDocumentID,
-        isAnyFieldValid,
-        isAllFieldsValid
-    } = require("../lib/validate.lib");
+import emailValidator from "email-validator";
+import {Request, Response} from "express";
+import * as User from '../models/user.server.model';
+import config from '../config/config.server.config';
+import {isValidDocumentID, isAnyFieldValid, isAllFieldsValid} from "../lib/validate.lib";
 
 /**
  * Returns a random displayName (e.g. User0001)
@@ -22,7 +18,7 @@ function generateDisplayName() {
  * @param req HTTP request object containing the data used for creating a new forum user document in the database
  * @param res HTTP request response object status code and user data in JSON format, or error message
  */
-exports.userCreate = function(req, res) {
+export function userCreate(req: Request, res: Response) {
     const
         reqBody = req.body,
         forumUserParams = {
@@ -53,7 +49,7 @@ exports.userCreate = function(req, res) {
  * @param req HTTP request object containing the user login (email or username) and password for authentication
  * @param res HTTP request response object status code and user ID and authorization token, or error message
  */
-exports.userLogin = function(req, res) {
+export function userLogin(req: Request, res: Response) {
     const
         reqBody = req.body,
         plaintextPassword = reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0 ? reqBody.plaintextPassword : false;
@@ -69,8 +65,8 @@ exports.userLogin = function(req, res) {
                 // Return the error message with the error status
                 res.status(result.status).send(result.err);
             } else {
-                if (result) {
-                    const userID = result._id;
+                if (result.res) {
+                    const userID = result.res._id;
                     User.getUserAuthToken(userID, function(result) {
                         if (result.err) {
                             // Return the error message with the error status
@@ -86,7 +82,7 @@ exports.userLogin = function(req, res) {
                                     res.status(result.status).send(result.err);
                                 } else {
                                     // Return the newly set authorization token for the user
-                                    res.send({ status: 200, userID: userID, authToken: result.authToken });
+                                    res.send({ status: 200, userID: userID, authToken: result.res });
                                 }
                             });
                         }
@@ -106,10 +102,10 @@ exports.userLogin = function(req, res) {
  * @param req HTTP request object containing forum user ID, and authorization token for verification
  * @param res HTTP request response status code and message
  */
-exports.userLogout = function(req, res) {
+export function userLogout(req: Request, res: Response) {
     const
         userID = req.body.userID ? req.body.userID : false,
-        authToken = req.get(configParams.get('authToken'));
+        authToken = req.get(config.get('authToken'));
 
     if (isValidDocumentID(userID)) {
         User.isUserAuthorized(userID, authToken, function(result) {
@@ -141,7 +137,7 @@ exports.userLogout = function(req, res) {
  * @param req HTTP request object containing user ID and authorization token for verification
  * @param res HTTP request response status code and user data in JSON format or error message
  */
-exports.userViewById = function(req, res) {
+export function userViewById(req: Request, res: Response) {
     const id = req.params.id;
 
     if (isValidDocumentID(id)){
@@ -164,10 +160,10 @@ exports.userViewById = function(req, res) {
  * @param req HTTP request object containing the user fields being updated, user ID and auth token for verification
  * @param res HTTP request response object status code and updated user data in JSON format or error message
  */
-exports.userUpdateById = function(req, res) {
+export function userUpdateById(req: Request, res: Response) {
     const
         reqParams = req.params,
-        authToken = req.get(configParams.get('authToken')),
+        authToken = req.get(config.get('authToken')),
         reqBody = req.body;
 
     // Set fields for updating to an object with either passed values or false to declare them as invalid
@@ -209,33 +205,33 @@ exports.userUpdateById = function(req, res) {
  * @param req HTTP request object containing the user ID and authorization token for verification
  * @param res HTTP request response status code with message for whether in error or success
  */
- exports.userDeleteById = function(req, res) {
-    const
-        reqParams = req.params,
-        authToken = req.get(configParams.get('authToken'));
+export function userDeleteById(req: Request, res: Response) {
+   const
+       reqParams = req.params,
+       authToken = req.get(config.get('authToken'));
 
-    if (isValidDocumentID(reqParams.id)) {
-        User.isUserAuthorized(reqParams.id, authToken, function(result) {
-            if (result.isAuth) {
-                User.deleteUserById(reqParams.id, function (result) {
-                    if (result.err) {
-                        // Return the error message with the error status
-                        res.status(result.status).send(result.err);
-                    } else {
-                        // Return a message body { success: true } with 200 status
-                        res.status(200).json({ "success": true });
-                    }
-                });
-            } else {
-                if (result.err) {
-                    // Return the error message with the error status
-                    res.status(result.status).send(result.err);
-                } else {
-                    res.status(401).send("Unauthorized");
-                }
-            }
-        });
-    } else {
-        res.status(400).send("Bad request");
-    }
+   if (isValidDocumentID(reqParams.id)) {
+       User.isUserAuthorized(reqParams.id, authToken, function(result) {
+           if (result.isAuth) {
+               User.deleteUserById(reqParams.id, function (result) {
+                   if (result.err) {
+                       // Return the error message with the error status
+                       res.status(result.status).send(result.err);
+                   } else {
+                       // Return a message body { success: true } with 200 status
+                       res.status(200).json({ "success": true });
+                   }
+               });
+           } else {
+               if (result.err) {
+                   // Return the error message with the error status
+                   res.status(result.status).send(result.err);
+               } else {
+                   res.status(401).send("Unauthorized");
+               }
+           }
+       });
+   } else {
+       res.status(400).send("Bad request");
+   }
 }

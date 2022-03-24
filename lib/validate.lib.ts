@@ -3,7 +3,7 @@
  * @param id the ID being validated
  * @returns {boolean} true if the given ID is a valid document ID, otherwise false
  */
-exports.isValidDocumentID = function(id) {
+export function isValidDocumentID(id) {
     const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
     return id && typeof id === 'string' && id.length === 24 && regExpDocumentID.test(id);
 }
@@ -14,7 +14,7 @@ exports.isValidDocumentID = function(id) {
  * @param min the value being returned if the string fails to pass as an integer
  * @returns {*|number} the string integer value as a number if valid, otherwise the given minimum value
  */
-exports.parseInteger = function(str, min) {
+export function parseInteger(str, min) {
     return isNaN(parseInt(str, 10)) ? min : parseInt(str, 10);
 }
 
@@ -23,7 +23,7 @@ exports.parseInteger = function(str, min) {
  * @param obj the object being validated
  * @returns {boolean} true if all fields in an object have valid and true values, otherwise false
  */
-exports.isAllFieldsValid = function(obj) {
+export function isAllFieldsValid(obj) {
     for (let field in obj) {
         if (!obj[field]) {
             return false;
@@ -37,7 +37,7 @@ exports.isAllFieldsValid = function(obj) {
  * @param obj the object being validated
  * @returns {boolean} true if any one field in an object has a valid and true value, otherwise false
  */
-exports.isAnyFieldValid = function(obj) {
+export function isAnyFieldValid(obj) {
     for (let field in obj) {
         if (!obj[field]) {
             delete obj[field];

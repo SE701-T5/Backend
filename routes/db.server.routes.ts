@@ -1,10 +1,11 @@
-const database = require('../controllers/db.server.controller');
+import {Express} from "express";
+import * as database from '../controllers/db.server.controller';
 
 /**
  * Handles HTTP requests for the Database module using Express.js route()
  * @param app Express.js application object
  */
-module.exports = function(app) {
+export default function (app: Express) {
     app.route('/api/v1/reset')
         .post(database.resetDB);
 
