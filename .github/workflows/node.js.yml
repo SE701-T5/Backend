@@ -27,7 +27,7 @@ jobs:
       # Set to sequential testing to prevent test conflicts between jobs
       max-parallel: 1
       matrix:
-        node-version: [ 16.x, 17.x ]
+        node-version: [16.x, 17.x]
 
     # Sequence of tasks for completing the workflow job
     steps:
@@ -73,7 +73,7 @@ jobs:
       # Set to sequential testing to prevent test conflicts between jobs
       max-parallel: 1
       matrix:
-        node-version: [ 16.x, 17.x ]
+        node-version: [16.x, 17.x]
 
     # Sequence of tasks for completing the workflow job
     steps:
@@ -117,7 +117,7 @@ jobs:
       # Set to sequential testing to prevent test conflicts between jobs
       max-parallel: 1
       matrix:
-        node-version: [ 16.x, 17.x ]
+        node-version: [16.x, 17.x]
 
     # Sequence of tasks for completing the workflow job
     steps:
@@ -167,4 +167,4 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: "web: npm start"
+          procfile: 'web: npm start'
