@@ -1,8 +1,13 @@
-import {Request, Response} from 'express';
-import * as Forum from '../models/forum.server.model';
-import * as User from '../models/user.server.model';
-import config from '../config/config.server.config';
-import {isValidDocumentID, parseInteger, isAnyFieldValid, isAllFieldsValid} from '../lib/validate.lib';
+import { Request, Response } from "express";
+import * as Forum from "../models/forum.server.model";
+import * as User from "../models/user.server.model";
+import config from "../config/config.server.config";
+import {
+  isValidDocumentID,
+  parseInteger,
+  isAnyFieldValid,
+  isAllFieldsValid,
+} from "../lib/validate.lib";
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
@@ -10,8 +15,8 @@ import {isValidDocumentID, parseInteger, isAnyFieldValid, isAllFieldsValid} from
  * @param res HTTP request response object
  */
 export function postViews(req: Request, res: Response) {
-	// TODO: implement postViews()
-	res.json({ dummyTest: 'postViews() dummy test passes' });
+  // TODO: implement postViews()
+  res.json({ dummyTest: "postViews() dummy test passes" });
 }
 
 /**
@@ -20,44 +25,47 @@ export function postViews(req: Request, res: Response) {
  * @param res HTTP request response status code, and message if error, or JSON with post data if successful
  */
 export function postCreate(req: Request, res: Response) {
-	const
-		authToken = req.get(config.get('authToken')),
-		reqBody = req.body;
+  const authToken = req.get(config.get("authToken")),
+    reqBody = req.body;
 
-	// Set forum post fields to an object for passing to the model
-	const forumPostParams = {
-		'userID': isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
-		'title': reqBody.title.length && reqBody.title.length > 0 ? reqBody.title : false,
-		'communityID': reqBody.communityID && reqBody.communityID.length > 2 ? reqBody.communityID : false,
-		'bodyText': reqBody.text || '',
-		'attachments': reqBody.images || ['']
-	};
+  // Set forum post fields to an object for passing to the model
+  const forumPostParams = {
+    userID: isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
+    title:
+      reqBody.title.length && reqBody.title.length > 0 ? reqBody.title : false,
+    communityID:
+      reqBody.communityID && reqBody.communityID.length > 2
+        ? reqBody.communityID
+        : false,
+    bodyText: reqBody.text || "",
+    attachments: reqBody.images || [""],
+  };
 
-	if (isAllFieldsValid(forumPostParams)) {
-		User.isUserAuthorized(forumPostParams.userID, authToken, function(result) {
-			if (result.isAuth) {
-				// Insert new forum post to database
-				Forum.insertPost(forumPostParams, function (result) {
-					if (result.err) {
-						// Return the error message with the error status
-						res.status(result.status).send(result.err);
-					} else {
-						// Return the forum post document object with 201 status
-						res.status(201).json({'forumPostData': result});
-					}
-				});
-			} else {
-				if (result.err) {
-					// Return the error message with the error status
-					res.status(result.status).send(result.err);
-				} else {
-					res.status(401).send('Unauthorized');
-				}
-			}
-		});
-	} else {
-		res.status(400).send('Bad request');
-	}
+  if (isAllFieldsValid(forumPostParams)) {
+    User.isUserAuthorized(forumPostParams.userID, authToken, function (result) {
+      if (result.isAuth) {
+        // Insert new forum post to database
+        Forum.insertPost(forumPostParams, function (result) {
+          if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+          } else {
+            // Return the forum post document object with 201 status
+            res.status(201).json({ forumPostData: result });
+          }
+        });
+      } else {
+        if (result.err) {
+          // Return the error message with the error status
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(401).send("Unauthorized");
+        }
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }
 
 /**
@@ -66,21 +74,21 @@ export function postCreate(req: Request, res: Response) {
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
 export function postViewById(req: Request, res: Response) {
-	const postID = req.params.id ? req.params.id : false;
+  const postID = req.params.id ? req.params.id : false;
 
-	if (isValidDocumentID(postID)) {
-		Forum.searchPostById(req.params.id, function(result) {
-			if (result.err) {
-				// Return the error message with the error status
-				res.status(result.status).send(result.err);
-			} else {
-				// Return the forum post document object with 200 status
-				res.json({'forumPost': result});
-			}
-		});
-	} else {
-		res.status(400).send('Bad request');
-	}
+  if (isValidDocumentID(postID)) {
+    Forum.searchPostById(req.params.id, function (result) {
+      if (result.err) {
+        // Return the error message with the error status
+        res.status(result.status).send(result.err);
+      } else {
+        // Return the forum post document object with 200 status
+        res.json({ forumPost: result });
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }
 
 /**
@@ -89,47 +97,53 @@ export function postViewById(req: Request, res: Response) {
  * @param res HTTP request response status code and updated forum post data in JSON format or error message
  */
 export function postUpdateById(req: Request, res: Response) {
-	const
-		postID = req.params.id ? req.params.id : false,
-		userID = req.body.userID ? req.body.userID : false,
-		authToken = req.get(config.get('authToken')),
-		reqBody = req.body;
-	let forumUpdateParams;
+  const postID = req.params.id ? req.params.id : false,
+    userID = req.body.userID ? req.body.userID : false,
+    authToken = req.get(config.get("authToken")),
+    reqBody = req.body;
+  let forumUpdateParams;
 
-	// Set fields for updating to an object with either passed values or false to declare them as invalid
-	forumUpdateParams = {
-		'communityID': reqBody.communityID && reqBody.communityID.length > 2 ? reqBody.communityID : false,
-		'title': reqBody.title && reqBody.title.length > 0 ? reqBody.title : false,
-		'bodyText': reqBody.text || false,
-		'upVotes': reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
-		'downVotes': reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
-		'attachments': reqBody.images || false
-	};
+  // Set fields for updating to an object with either passed values or false to declare them as invalid
+  forumUpdateParams = {
+    communityID:
+      reqBody.communityID && reqBody.communityID.length > 2
+        ? reqBody.communityID
+        : false,
+    title: reqBody.title && reqBody.title.length > 0 ? reqBody.title : false,
+    bodyText: reqBody.text || false,
+    upVotes: reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
+    downVotes: reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
+    attachments: reqBody.images || false,
+  };
 
-	if (isValidDocumentID(postID) && isValidDocumentID(userID) && isAnyFieldValid(forumUpdateParams)) {
-		User.isUserAuthorized(userID, authToken, function(result) {
-			if (result.isAuth) {
-				Forum.updatePostById(postID, forumUpdateParams, function (result) {
-					if (result.err) {
-						// Return the error message with the error status
-						res.status(result.status).send(result.err);
-					} else {
-						// Return the forum post document object with 201 status
-						res.status(201).json({'forumPost': result});
-					}
-				});
-			} else {
-				if (result.err) {
-					// Return the error message with the error status
-					res.status(result.status).send(result.err);
-				} else {
-					res.status(401).send('Unauthorized');
-				}
-			}
-		});
-	} else {
-		res.status(400).send('Bad request');
-	}
+  if (
+    isValidDocumentID(postID) &&
+    isValidDocumentID(userID) &&
+    isAnyFieldValid(forumUpdateParams)
+  ) {
+    User.isUserAuthorized(userID, authToken, function (result) {
+      if (result.isAuth) {
+        Forum.updatePostById(postID, forumUpdateParams, function (result) {
+          if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+          } else {
+            // Return the forum post document object with 201 status
+            res.status(201).json({ forumPost: result });
+          }
+        });
+      } else {
+        if (result.err) {
+          // Return the error message with the error status
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(401).send("Unauthorized");
+        }
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }
 
 /**
@@ -138,21 +152,21 @@ export function postUpdateById(req: Request, res: Response) {
  * @param res HTTP request response object
  */
 export function commentViewById(req: Request, res: Response) {
-	const postID = req.params.id ? req.params.id : false;
+  const postID = req.params.id ? req.params.id : false;
 
-	if (isValidDocumentID(postID)) {
-		Forum.searchPostById(req.params.id, function(result) {
-			if (result.err) {
-				// Return the error message with the error status
-				res.status(result.status).send(result.err);
-			} else {
-				// Return the forum post document object with 200 status
-				res.json({'forumPostComments': result.comments});
-			}
-		});
-	} else {
-		res.status(400).send('Bad request');
-	}
+  if (isValidDocumentID(postID)) {
+    Forum.searchPostById(req.params.id, function (result) {
+      if (result.err) {
+        // Return the error message with the error status
+        res.status(result.status).send(result.err);
+      } else {
+        // Return the forum post document object with 200 status
+        res.json({ forumPostComments: result.comments });
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }
 
 /**
@@ -161,43 +175,47 @@ export function commentViewById(req: Request, res: Response) {
  * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
 export function commentGiveById(req: Request, res: Response) {
-	const
-		reqParams = req.params,
-		reqBody = req.body,
-		authToken = req.get(config.get('authToken')),
-		commentParams = {
-			'postID': isValidDocumentID(reqParams.id) ? reqParams.id : false,
-			'authorID': isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
-			'authorUserName': reqBody.username && reqBody.username.length > 2 ? reqBody.username : false,
-			'bodyText': reqBody.bodyText && reqBody.bodyText.length > 0 ? reqBody.bodyText : false,
-			'attachments': reqBody.images ? reqBody.images : ['']
-		};
+  const reqParams = req.params,
+    reqBody = req.body,
+    authToken = req.get(config.get("authToken")),
+    commentParams = {
+      postID: isValidDocumentID(reqParams.id) ? reqParams.id : false,
+      authorID: isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
+      authorUserName:
+        reqBody.username && reqBody.username.length > 2
+          ? reqBody.username
+          : false,
+      bodyText:
+        reqBody.bodyText && reqBody.bodyText.length > 0
+          ? reqBody.bodyText
+          : false,
+      attachments: reqBody.images ? reqBody.images : [""],
+    };
 
-	if (isAllFieldsValid(commentParams)) {
-		User.isUserAuthorized(commentParams.authorID, authToken, function(result) {
-			if (result.isAuth) {
-				Forum.addComment(commentParams, function(result) {
-					if (result.err) {
-						// Return the error message with the error status
-						res.status(result.status).send(result.err);
-					} else {
-						// Comment was created successfully, return 201 status
-						res.status(201).json({'comment': result});
-					}
-				});
-			} else {
-				if (result.err) {
-					// Return the error message with the error status
-					res.status(result.status).send(result.err);
-				} else {
-					res.status(401).send('Unauthorized');
-				}
-			}
-		});
-	}
-	else {
-		res.status(400).send('Bad request');
-	}
+  if (isAllFieldsValid(commentParams)) {
+    User.isUserAuthorized(commentParams.authorID, authToken, function (result) {
+      if (result.isAuth) {
+        Forum.addComment(commentParams, function (result) {
+          if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+          } else {
+            // Comment was created successfully, return 201 status
+            res.status(201).json({ comment: result });
+          }
+        });
+      } else {
+        if (result.err) {
+          // Return the error message with the error status
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(401).send("Unauthorized");
+        }
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }
 
 /**
@@ -206,8 +224,8 @@ export function commentGiveById(req: Request, res: Response) {
  * @param res HTTP request response object
  */
 export function commentUpdateById(req: Request, res: Response) {
-	// TODO: implement postUpdateById()
-	res.json({ dummyTest: 'commentUpdateById() dummy test passes' });
+  // TODO: implement postUpdateById()
+  res.json({ dummyTest: "commentUpdateById() dummy test passes" });
 }
 
 /**
@@ -216,33 +234,32 @@ export function commentUpdateById(req: Request, res: Response) {
  * @param res HTTP request response status code with message whether with error or success
  */
 export function postDeleteById(req: Request, res: Response) {
-	const
-		postID = req.params.id ? req.params.id : false,
-		userID = req.body.userID ? req.body.userID : false,
-		authToken = req.get(config.get('authToken'));
+  const postID = req.params.id ? req.params.id : false,
+    userID = req.body.userID ? req.body.userID : false,
+    authToken = req.get(config.get("authToken"));
 
-	if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
-		User.isUserAuthorized(userID, authToken, function(result) {
-			if (result.isAuth) {
-				Forum.deletePostById(postID, function (result) {
-					if (result.err) {
-						// Return the error message with the error status
-						res.status(result.status).send(result.err);
-					} else {
-						// Return a message body { success: true } with 200 status
-						res.status(200).json({ 'success': true });
-					}
-				});
-			} else {
-				if (result.err) {
-					// Return the error message with the error status
-					res.status(result.status).send(result.err);
-				} else {
-					res.status(401).send('Unauthorized');
-				}
-			}
-		});
-	} else {
-		res.status(400).send('Bad request');
-	}
+  if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
+    User.isUserAuthorized(userID, authToken, function (result) {
+      if (result.isAuth) {
+        Forum.deletePostById(postID, function (result) {
+          if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+          } else {
+            // Return a message body { success: true } with 200 status
+            res.status(200).json({ success: true });
+          }
+        });
+      } else {
+        if (result.err) {
+          // Return the error message with the error status
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(401).send("Unauthorized");
+        }
+      }
+    });
+  } else {
+    res.status(400).send("Bad request");
+  }
 }

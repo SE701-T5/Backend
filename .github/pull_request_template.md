@@ -31,6 +31,7 @@ I have completed these steps when making this pull request:
 - [ ] I have assigned people responsible to the PR
 
 Before opening the PR for review:
+
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my code
 - [ ] I have documented my code, particularly in hard-to-understand areas
@@ -39,4 +40,3 @@ Before opening the PR for review:
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have moved the linked issue to the **Review in Progress** column
-
