@@ -9,6 +9,7 @@ import {
   setUserAuthToken,
 } from '../models/user.server.model';
 import { hashPassword } from '../models/user.server.model';
+import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 import assert from 'assert';
 import app from '../server';
@@ -79,7 +80,7 @@ describe('Authenticate user with matching email and password', function () {
         expect(result).to.have.property('res');
         expect(result.res.email).to.equal('test@dummy.com');
         expect(result).to.have.property('status');
-        expect(result.status).to.equal(200);
+        expect(result.status).to.equal(StatusCodes.OK);
         done();
       },
     );
@@ -93,7 +94,7 @@ describe('Authenticate user with matching email and password', function () {
         expect(result).to.have.property('res');
         expect(result.res.email).to.equal('test@dummy.com');
         expect(result).to.have.property('status');
-        expect(result.status).to.equal(200);
+        expect(result.status).to.equal(StatusCodes.OK);
         done();
       },
     );
@@ -116,7 +117,7 @@ describe('Login to app', function () {
       email: 'todd413@hotmail.com',
       plaintextPassword: 'passwordtodd',
     });
-    expect(response.status).to.equal(200);
+    expect(response.status).to.equal(StatusCodes.OK);
     expect(response.body).to.have.property('authToken');
   });
 
@@ -126,7 +127,7 @@ describe('Login to app', function () {
       email: 'todd413@hotmail.com',
       plaintextPassword: 'passwordtodd',
     });
-    expect(response.status).to.equal(403);
+    expect(response.status).to.equal(StatusCodes.FORBIDDEN);
     expect(response.body).to.not.have.property('authToken');
   });
 });
@@ -134,36 +135,34 @@ describe('Login to app', function () {
 /**
  * Test successful verification of user authentication using a valid user ID and authentication token
  */
-describe.skip('Verify user authentication successfully with valid ID and authentication token', function () {
-  it('should return: true', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(201)
-      .end(function (err, res) {
-        if (err) done(err);
-        const id = res.body.userData._id;
-        const response = request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(200)
-          .end(function (err, res) {
-            if (err) done(err);
-            isUserAuthorized(id, res.body.authToken, function (result) {
-              assert.equal(result.isAuth, true);
-              done();
-            });
-          });
+describe('Verify user authentication successfully with valid ID and authentication token', function () {
+  it('should return: true', async function () {
+    const userReponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+    expect(userReponse.status).to.equal(StatusCodes.CREATED);
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+    expect(loginResponse.body).to.have.property('userID');
+    expect(loginResponse.body).to.have.property('authToken');
+    const userId = loginResponse.body.userID;
+    const authToken = loginResponse.body.authToken;
+    new Promise((resolve, reject) => {
+      isUserAuthorized(userId, authToken, (result) => {
+        if (result.isAuth === true) {
+          resolve(true);
+        } else {
+          reject('bad auth state');
+        }
       });
+    });
   });
 });
 
@@ -180,7 +179,7 @@ describe.skip('Verify user authentication unsuccessfully with valid ID and inval
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -191,7 +190,7 @@ describe.skip('Verify user authentication unsuccessfully with valid ID and inval
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             isUserAuthorized(id, 'wrongToken', function (result) {
@@ -216,7 +215,7 @@ describe.skip('Verify user authentication unsuccessfully with invalid ID and val
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -227,7 +226,7 @@ describe.skip('Verify user authentication unsuccessfully with invalid ID and val
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             isUserAuthorized('wrongID', res.body.authToken, function (result) {
@@ -252,7 +251,7 @@ describe.skip('Get user authentication token successfully with valid and logged-
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -263,7 +262,7 @@ describe.skip('Get user authentication token successfully with valid and logged-
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             getUserAuthToken(id, function (result) {
@@ -288,7 +287,7 @@ describe.skip('Get user authentication token unsuccessfully with invalid user ID
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -298,11 +297,11 @@ describe.skip('Get user authentication token unsuccessfully with invalid user ID
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             getUserAuthToken('wrong ID', function (result) {
-              assert.equal(result.status, 404);
+              assert.equal(result.status, StatusCodes.NOT_FOUND);
               done();
             });
           });
@@ -323,7 +322,7 @@ describe.skip('Set user authentication token successfully with valid and logged-
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -334,7 +333,7 @@ describe.skip('Set user authentication token successfully with valid and logged-
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             setUserAuthToken(id, function (result) {
@@ -359,7 +358,7 @@ describe.skip('set user authentication token unsuccessfully with invalid user ID
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -369,11 +368,11 @@ describe.skip('set user authentication token unsuccessfully with invalid user ID
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             setUserAuthToken('wrong ID', function (result) {
-              assert.equal(result.status, 404);
+              assert.equal(result.status, StatusCodes.NOT_FOUND);
               done();
             });
           });

@@ -4,6 +4,7 @@ import assert from 'assert';
 import { closeConn, connect } from '../config/db.server.config';
 import { resetCollections } from '../models/db.server.model';
 import { hashPassword } from '../models/user.server.model';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected
@@ -41,7 +42,7 @@ describe('Create forum user successfully without displayName', function () {
         email: 'bob420@hotmail.com',
         plaintextPassword: 'passwordbob',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -62,7 +63,7 @@ describe('Create forum user successfully with displayName', function () {
         email: 'gary283@hotmail.com',
         plaintextPassword: 'passwordgary',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -81,7 +82,7 @@ describe("Create forum user test unsuccessfully - missing field 'email'", functi
         username: 'Tim123',
         plaintextPassword: 'passwordtim',
       })
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -101,7 +102,7 @@ describe('Create forum user test unsuccessfully - username field length requirem
         email: 'yi14123@gmail.com',
         plaintextPassword: 'passwordtim',
       })
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -121,7 +122,7 @@ describe('Test password hashing works correctly', function () {
         email: 'Jim420@hotmail.com',
         plaintextPassword: 'passwordjim',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         assert.equal(
@@ -146,7 +147,7 @@ describe('Log in forum user successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -156,7 +157,7 @@ describe('Log in forum user successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -178,7 +179,7 @@ describe('Log in forum user unsuccessfully - no valid login', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -186,7 +187,7 @@ describe('Log in forum user unsuccessfully - no valid login', function () {
           .send({
             plaintextPassword: 'newUser',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -208,7 +209,7 @@ describe('Log in forum user unsuccessfully - no valid password', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -217,7 +218,7 @@ describe('Log in forum user unsuccessfully - no valid password', function () {
             username: 'NewUser',
             email: 'new@user.com',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -239,7 +240,7 @@ describe('Log in forum user unsuccessfully - non-matching login', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -248,7 +249,7 @@ describe('Log in forum user unsuccessfully - non-matching login', function () {
             username: 'Nobody',
             plaintextPassword: 'newUser',
           })
-          .expect(404)
+          .expect(StatusCodes.NOT_FOUND)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -270,7 +271,7 @@ describe('Log in forum user unsuccessfully - non-matching password', function ()
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -279,7 +280,7 @@ describe('Log in forum user unsuccessfully - non-matching password', function ()
             username: 'NewUser',
             plaintextPassword: 'noUser',
           })
-          .expect(404)
+          .expect(StatusCodes.NOT_FOUND)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -301,7 +302,7 @@ describe('Logout forum user successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -312,7 +313,7 @@ describe('Logout forum user successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -321,7 +322,7 @@ describe('Logout forum user successfully', function () {
               .send({
                 userID: id,
               })
-              .expect(200)
+              .expect(StatusCodes.OK)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -344,7 +345,7 @@ describe('Logout forum user unsuccessfully - invalid authorization token', funct
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -355,7 +356,7 @@ describe('Logout forum user unsuccessfully - invalid authorization token', funct
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -364,7 +365,7 @@ describe('Logout forum user unsuccessfully - invalid authorization token', funct
               .send({
                 userID: id,
               })
-              .expect(401)
+              .expect(StatusCodes.UNAUTHORIZED)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -387,7 +388,7 @@ describe('Logout forum user unsuccessfully - invalid user ID', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -398,7 +399,7 @@ describe('Logout forum user unsuccessfully - invalid user ID', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -407,7 +408,7 @@ describe('Logout forum user unsuccessfully - invalid user ID', function () {
               .send({
                 userID: 'wrong ID',
               })
-              .expect(400)
+              .expect(StatusCodes.BAD_REQUEST)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -430,12 +431,12 @@ describe('View forum user by ID successfully', function () {
         email: 'bob420@hotmail.com',
         plaintextPassword: 'passwordbob',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
           .get(`/api/v1/users/${res.body.userData._id}`)
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -451,7 +452,7 @@ describe('View forum user by ID unsuccessfully with invalid ID', function () {
   it('should return a 400 response for invalid id', function (done) {
     request(app)
       .get('/api/v1/users/x')
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -472,7 +473,7 @@ describe('Update forum user successfully with valid ID', function () {
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -483,7 +484,7 @@ describe('Update forum user successfully with valid ID', function () {
             email: 'bobby@joe.com',
             plaintextPassword: 'BobbyJoe',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -495,7 +496,7 @@ describe('Update forum user successfully with valid ID', function () {
                 email: 'joe@bobby.com',
                 plaintextPassword: 'JoeBob',
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 assert.equal(res.body.updatedForumUser.username, 'OldBob');
@@ -525,7 +526,7 @@ describe('Update forum user unsuccessfully with invalid authorization token', fu
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -536,7 +537,7 @@ describe('Update forum user unsuccessfully with invalid authorization token', fu
             email: 'bobby@joe.com',
             plaintextPassword: 'BobbyJoe',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -548,7 +549,7 @@ describe('Update forum user unsuccessfully with invalid authorization token', fu
                 email: 'joe@bobby.com',
                 plaintextPassword: 'JoeBob',
               })
-              .expect(401)
+              .expect(StatusCodes.UNAUTHORIZED)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -571,7 +572,7 @@ describe('Update forum user unsuccessfully with valid but un-matching ID', funct
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -582,7 +583,7 @@ describe('Update forum user unsuccessfully with valid but un-matching ID', funct
             email: 'bobby@joe.com',
             plaintextPassword: 'BobbyJoe',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -594,7 +595,7 @@ describe('Update forum user unsuccessfully with valid but un-matching ID', funct
                 email: 'what@email.com',
                 plaintextPassword: 'password',
               })
-              .expect(404)
+              .expect(StatusCodes.NOT_FOUND)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -617,7 +618,7 @@ describe('Update forum user unsuccessfully with invalid ID', function () {
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -628,7 +629,7 @@ describe('Update forum user unsuccessfully with invalid ID', function () {
             email: 'bobby@joe.com',
             plaintextPassword: 'BobbyJoe',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -650,13 +651,13 @@ describe('Update forum user unsuccessfully with empty update object', function (
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
           .patch(`/api/v1/users/${res.body.userData._id}`)
           .send({})
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -678,7 +679,7 @@ describe('Update forum user unsuccessfully with invalid username update field', 
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -686,7 +687,7 @@ describe('Update forum user unsuccessfully with invalid username update field', 
           .send({
             username: 'yo',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -708,7 +709,7 @@ describe('Update forum user unsuccessfully with invalid displayName update field
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -716,7 +717,7 @@ describe('Update forum user unsuccessfully with invalid displayName update field
           .send({
             displayName: 'A',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -738,7 +739,7 @@ describe('Update forum user unsuccessfully with invalid email update field', fun
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -746,7 +747,7 @@ describe('Update forum user unsuccessfully with invalid email update field', fun
           .send({
             email: 'not an email',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -768,7 +769,7 @@ describe('Update forum user unsuccessfully with invalid password update field', 
         email: 'bobby@joe.com',
         plaintextPassword: 'BobbyJoe',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         request(app)
@@ -776,7 +777,7 @@ describe('Update forum user unsuccessfully with invalid password update field', 
           .send({
             password: '',
           })
-          .expect(400)
+          .expect(StatusCodes.BAD_REQUEST)
           .end(function (err, res) {
             if (err) done(err);
             done();
@@ -798,7 +799,7 @@ describe('Delete forum user successfully', function () {
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -809,13 +810,13 @@ describe('Delete forum user successfully', function () {
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
               .delete(`/api/v1/users/${id}`)
               .set({ 'X-Authorization': res.body.authToken })
-              .expect(200)
+              .expect(StatusCodes.OK)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -838,7 +839,7 @@ describe('Delete forum user unsuccessfully using invalid authorization token', f
         email: 'todd413@hotmail.com',
         plaintextPassword: 'passwordtodd',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -849,13 +850,13 @@ describe('Delete forum user unsuccessfully using invalid authorization token', f
             email: 'todd413@hotmail.com',
             plaintextPassword: 'passwordtodd',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
               .delete(`/api/v1/users/${id}`)
               .set({ 'X-Authorization': 'wrongToken' })
-              .expect(403)
+              .expect(StatusCodes.FORBIDDEN)
               .end(function (err, res) {
                 if (err) done(err);
                 done();

@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../server';
 import { closeConn, connect } from '../config/db.server.config';
 import { resetCollections } from '../models/db.server.model';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected
@@ -40,7 +41,7 @@ describe('Create forum comment test successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -51,7 +52,7 @@ describe('Create forum comment test successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -65,7 +66,7 @@ describe('Create forum comment test successfully', function () {
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -76,7 +77,7 @@ describe('Create forum comment test successfully', function () {
                     username: 'NewUser',
                     bodyText: 'Hi my name is George',
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -100,7 +101,7 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -111,7 +112,7 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -125,7 +126,7 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -135,7 +136,7 @@ describe("Create forum comment test unsuccessfully - missing field 'authorID'", 
                     username: 'NewUser',
                     bodyText: 'Hi my name is George',
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -159,7 +160,7 @@ describe('Create forum comment test unsuccessfully - field length requirement no
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -170,7 +171,7 @@ describe('Create forum comment test unsuccessfully - field length requirement no
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -184,7 +185,7 @@ describe('Create forum comment test unsuccessfully - field length requirement no
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -195,7 +196,7 @@ describe('Create forum comment test unsuccessfully - field length requirement no
                     username: '',
                     bodyText: 'Hi my name is George',
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -216,7 +217,7 @@ describe('View forum post comment by ID successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -227,7 +228,7 @@ describe('View forum post comment by ID successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -241,7 +242,7 @@ describe('View forum post comment by ID successfully', function () {
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -252,12 +253,12 @@ describe('View forum post comment by ID successfully', function () {
                     username: 'NewUser',
                     bodyText: 'Hi my name is George2',
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     request(app)
                       .get(`/api/v1/posts/${res.body.comment.postID}/comments`)
-                      .expect(200)
+                      .expect(StatusCodes.OK)
                       .end(function (err, res) {
                         if (err) done(err);
                         done();
@@ -279,7 +280,7 @@ describe('View forum post comment by ID successfully (no comment)', function () 
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -290,7 +291,7 @@ describe('View forum post comment by ID successfully (no comment)', function () 
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -304,12 +305,12 @@ describe('View forum post comment by ID successfully (no comment)', function () 
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .get(`/api/v1/posts/${res.body.forumPostData._id}/comments`)
-                  .expect(200)
+                  .expect(StatusCodes.OK)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -330,7 +331,7 @@ describe('View forum post comment unsuccessfully by invalid postID', function ()
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -341,7 +342,7 @@ describe('View forum post comment unsuccessfully by invalid postID', function ()
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -355,7 +356,7 @@ describe('View forum post comment unsuccessfully by invalid postID', function ()
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -366,12 +367,12 @@ describe('View forum post comment unsuccessfully by invalid postID', function ()
                     username: 'NewUser',
                     bodyText: 'Hi my name is George2',
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     request(app)
                       .get('/api/v1/posts/xxx/comments')
-                      .expect(400)
+                      .expect(StatusCodes.BAD_REQUEST)
                       .end(function (err, res) {
                         if (err) done(err);
                         done();

@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../server';
 import { closeConn, connect } from '../config/db.server.config';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Before all tests, the app database is disconnected
@@ -31,7 +32,7 @@ describe('Successfully reset database test - remove all documents', function () 
   it("should return: 200 'OK'", function (done) {
     request(app)
       .post('/api/v1/reset')
-      .expect(200)
+      .expect(StatusCodes.OK)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -48,7 +49,7 @@ describe('Unsuccessfully reset database test - database is not connected', funct
       .then(() => {
         request(app)
           .post('/api/v1/reset')
-          .expect(500)
+          .expect(StatusCodes.INTERNAL_SERVER_ERROR)
           .end(function (err, res) {
             if (err) done(err);
             done();

@@ -3,6 +3,7 @@ import assert from 'assert';
 import app from '../server';
 import { closeConn, connect } from '../config/db.server.config';
 import { resetCollections } from '../models/db.server.model';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Before all tests, the app database is disconnected before the test database is connected
@@ -41,7 +42,7 @@ describe('Create forum post successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -52,7 +53,7 @@ describe('Create forum post successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -65,7 +66,7 @@ describe('Create forum post successfully', function () {
                 text: "Help me, I don't know how to turn my computer on!",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -88,7 +89,7 @@ describe('Create forum post unsuccessfully with an invalid authentication token'
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -99,7 +100,7 @@ describe('Create forum post unsuccessfully with an invalid authentication token'
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -112,7 +113,7 @@ describe('Create forum post unsuccessfully with an invalid authentication token'
                 text: "Help me, I don't know how to turn my computer on!",
                 images: ['image string'],
               })
-              .expect(401)
+              .expect(StatusCodes.UNAUTHORIZED)
               .end(function (err, res) {
                 if (err) done(err);
                 done();
@@ -135,7 +136,7 @@ describe('Create forum post unsuccessfully - missing field: userID', function ()
         text: "I really don't understand the words I have just typed, truly",
         images: ['image string'],
       })
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -157,7 +158,7 @@ describe('Create forum post unsuccessfully - communityID less than 3 chars', fun
         text: "I really don't understand the words I have just typed, truly",
         images: ['image string'],
       })
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -179,7 +180,7 @@ describe('Create forum post unsuccessfully - title less than 1 char', function (
         text: "I really don't understand the words I have just typed, truly",
         images: ['image string'],
       })
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -216,7 +217,7 @@ describe('View forum post successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -227,7 +228,7 @@ describe('View forum post successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             request(app)
@@ -240,12 +241,12 @@ describe('View forum post successfully', function () {
                 text: "Help me, I don't know how to turn my computer on!",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .get(`/api/v1/posts/${res.body.forumPostData._id}`)
-                  .expect(200)
+                  .expect(StatusCodes.OK)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -263,7 +264,7 @@ describe('View forum post unsuccessfully for invalid id', function () {
   it('should return: 400', function (done) {
     request(app)
       .get('/api/v1/posts/62328e357ec3446e40e1b29b')
-      .expect(404)
+      .expect(StatusCodes.NOT_FOUND)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -284,7 +285,7 @@ describe('Update forum post successfully with valid ID for edits and votes', fun
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -295,7 +296,7 @@ describe('Update forum post successfully with valid ID for edits and votes', fun
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -309,7 +310,7 @@ describe('Update forum post successfully with valid ID for edits and votes', fun
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -321,7 +322,7 @@ describe('Update forum post successfully with valid ID for edits and votes', fun
                     text: ':(',
                     downVotes: 1,
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     assert.equal(
@@ -352,7 +353,7 @@ describe('Update forum post successfully with valid ID for only votes', function
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -363,7 +364,7 @@ describe('Update forum post successfully with valid ID for only votes', function
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -377,7 +378,7 @@ describe('Update forum post successfully with valid ID for only votes', function
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -388,7 +389,7 @@ describe('Update forum post successfully with valid ID for only votes', function
                     upVotes: 1,
                     downVotes: 1000,
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     assert.equal(res.body.forumPost.upVotes, 1);
@@ -415,7 +416,7 @@ describe('Update forum post successfully with valid ID for only edits', function
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -426,7 +427,7 @@ describe('Update forum post successfully with valid ID for only edits', function
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -440,7 +441,7 @@ describe('Update forum post successfully with valid ID for only edits', function
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -451,7 +452,7 @@ describe('Update forum post successfully with valid ID for only edits', function
                     title: 'A new title',
                     text: 'A new body text',
                   })
-                  .expect(201)
+                  .expect(StatusCodes.CREATED)
                   .end(function (err, res) {
                     if (err) done(err);
                     assert.equal(res.body.forumPost.title, 'A new title');
@@ -481,7 +482,7 @@ describe('Update forum post unsuccessfully using invalid authorization token', f
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -492,7 +493,7 @@ describe('Update forum post unsuccessfully using invalid authorization token', f
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -506,7 +507,7 @@ describe('Update forum post unsuccessfully using invalid authorization token', f
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -517,7 +518,7 @@ describe('Update forum post unsuccessfully using invalid authorization token', f
                     title: 'A new title',
                     text: 'A new body text',
                   })
-                  .expect(401)
+                  .expect(StatusCodes.UNAUTHORIZED)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -541,7 +542,7 @@ describe('Update forum post unsuccessfully with invalid ID', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -552,7 +553,7 @@ describe('Update forum post unsuccessfully with invalid ID', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -566,7 +567,7 @@ describe('Update forum post unsuccessfully with invalid ID', function () {
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -577,7 +578,7 @@ describe('Update forum post unsuccessfully with invalid ID', function () {
                     title: 'A new title',
                     text: 'A new body text',
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -601,7 +602,7 @@ describe('Update forum post unsuccessfully with empty update object', function (
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -612,7 +613,7 @@ describe('Update forum post unsuccessfully with empty update object', function (
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -626,14 +627,14 @@ describe('Update forum post unsuccessfully with empty update object', function (
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
                   .patch(`/api/v1/posts/${res.body.forumPostData._id}`)
                   .set({ 'X-Authorization': authToken })
                   .send({})
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -657,7 +658,7 @@ describe('Update forum post unsuccessfully with invalid communityID update field
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -668,7 +669,7 @@ describe('Update forum post unsuccessfully with invalid communityID update field
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -682,7 +683,7 @@ describe('Update forum post unsuccessfully with invalid communityID update field
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -691,7 +692,7 @@ describe('Update forum post unsuccessfully with invalid communityID update field
                   .send({
                     communityID: '12',
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -715,7 +716,7 @@ describe('Update forum post unsuccessfully with invalid title update field', fun
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -726,7 +727,7 @@ describe('Update forum post unsuccessfully with invalid title update field', fun
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -740,7 +741,7 @@ describe('Update forum post unsuccessfully with invalid title update field', fun
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -749,7 +750,7 @@ describe('Update forum post unsuccessfully with invalid title update field', fun
                   .send({
                     title: '',
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -773,7 +774,7 @@ describe('Update forum post unsuccessfully with invalid upVotes update field', f
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -784,7 +785,7 @@ describe('Update forum post unsuccessfully with invalid upVotes update field', f
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -798,7 +799,7 @@ describe('Update forum post unsuccessfully with invalid upVotes update field', f
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -807,7 +808,7 @@ describe('Update forum post unsuccessfully with invalid upVotes update field', f
                   .send({
                     upVotes: NaN,
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -831,7 +832,7 @@ describe('Update forum post unsuccessfully with invalid downVotes update field',
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -842,7 +843,7 @@ describe('Update forum post unsuccessfully with invalid downVotes update field',
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -856,7 +857,7 @@ describe('Update forum post unsuccessfully with invalid downVotes update field',
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -865,7 +866,7 @@ describe('Update forum post unsuccessfully with invalid downVotes update field',
                   .send({
                     downVotes: NaN,
                   })
-                  .expect(400)
+                  .expect(StatusCodes.BAD_REQUEST)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -889,7 +890,7 @@ describe('Delete forum post successfully', function () {
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -900,7 +901,7 @@ describe('Delete forum post successfully', function () {
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -914,7 +915,7 @@ describe('Delete forum post successfully', function () {
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -923,7 +924,7 @@ describe('Delete forum post successfully', function () {
                   .send({
                     userID: id,
                   })
-                  .expect(200)
+                  .expect(StatusCodes.OK)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -942,7 +943,7 @@ describe('Delete forum post unsuccessfully - invalid ID', function () {
     const invalidID = 'Ab345678901234567890123'; // one char too short
     request(app)
       .delete(`/api/v1/posts/${invalidID}`)
-      .expect(400)
+      .expect(StatusCodes.BAD_REQUEST)
       .end(function (err, res) {
         if (err) done(err);
         done();
@@ -964,7 +965,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function (
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -975,7 +976,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function (
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -989,7 +990,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function (
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -998,7 +999,7 @@ describe("Delete forum post unsuccessfully - ID doesn't exist in DB", function (
                   .send({
                     userID: id,
                   })
-                  .expect(404)
+                  .expect(StatusCodes.NOT_FOUND)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();
@@ -1022,7 +1023,7 @@ describe('Delete forum post unsuccessfully using invalid authorization token', f
         email: 'new@user.com',
         plaintextPassword: 'newUser',
       })
-      .expect(201)
+      .expect(StatusCodes.CREATED)
       .end(function (err, res) {
         if (err) done(err);
         const id = res.body.userData._id;
@@ -1033,7 +1034,7 @@ describe('Delete forum post unsuccessfully using invalid authorization token', f
             email: 'new@user.com',
             plaintextPassword: 'newUser',
           })
-          .expect(200)
+          .expect(StatusCodes.OK)
           .end(function (err, res) {
             if (err) done(err);
             const authToken = res.body.authToken;
@@ -1047,7 +1048,7 @@ describe('Delete forum post unsuccessfully using invalid authorization token', f
                 text: "What's the craic?",
                 images: ['image string'],
               })
-              .expect(201)
+              .expect(StatusCodes.CREATED)
               .end(function (err, res) {
                 if (err) done(err);
                 request(app)
@@ -1056,7 +1057,7 @@ describe('Delete forum post unsuccessfully using invalid authorization token', f
                   .send({
                     userID: id,
                   })
-                  .expect(401)
+                  .expect(StatusCodes.UNAUTHORIZED)
                   .end(function (err, res) {
                     if (err) done(err);
                     done();

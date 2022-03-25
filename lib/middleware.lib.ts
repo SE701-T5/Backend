@@ -1,6 +1,7 @@
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { Request, Response, NextFunction } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Verify if an authorization token exists in the database at API gateway to determine whether to continue or not
@@ -17,7 +18,9 @@ export function isRequestTokenAuthorized(
   const authToken = req.header(config.get('authToken'));
   User.searchUserByAuthToken(authToken, function (result) {
     if (result.res == null) {
-      res.status(403).send(result.err ?? 'user is not authorised');
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .send(result.err ?? 'user is not authorised');
     }
     next();
   });
