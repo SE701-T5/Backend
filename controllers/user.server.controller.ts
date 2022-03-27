@@ -123,7 +123,7 @@ export function userLogin(req: Request, res: Response) {
       },
     );
   } else {
-    res.status(400).send('Bad request');
+    res.status(400).send(reqBody);
   }
 }
 
@@ -273,4 +273,44 @@ export function userDeleteById(req: Request, res: Response) {
   } else {
     res.status(400).send('Bad request');
   }
+}
+
+export function userViewCurrent(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
+  User.searchUserByAuthToken(authToken, (result) => {
+    if (result.err) {
+      res.status(result.status).send(result.err);
+    } else {
+      res.json({ user: result });
+    }
+  });
+}
+
+export function userUpdateCurrent(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
+  const reqBody = req.body;
+
+  const userUpdateParams = {};
+  if (reqBody.username && reqBody.username.length > 2) {
+    userUpdateParams['username'] = reqBody.username;
+  }
+  if (reqBody.displayName && reqBody.displayName.length > 2) {
+    userUpdateParams['displayName'] = reqBody.displayName;
+  }
+  if (reqBody.email && emailValidator.validate(reqBody.email)) {
+    userUpdateParams['email'] = reqBody.email;
+  }
+  if (reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0) {
+    userUpdateParams['plaintextPassword'] = reqBody.plaintextPassword;
+  }
+
+  User.searchUserByAuthToken(authToken, (result) => {
+    User.updateUserById(result.res.id, userUpdateParams, (result) => {
+      if (result.err) {
+        res.status(result.status).send(result.err);
+      } else {
+        res.status(201).json({ updatedForumUser: result });
+      }
+    });
+  });
 }

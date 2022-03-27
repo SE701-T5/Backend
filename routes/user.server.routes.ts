@@ -16,6 +16,11 @@ export default function (app: Express) {
     .post(isRequestTokenAuthorized, user.userLogout);
 
   app
+    .route('/api/v1/users/current')
+    .get(user.userViewCurrent)
+    .put(user.userUpdateCurrent);
+
+  app
     .route('/api/v1/users/:id')
     .get(user.userViewById)
     .patch(isRequestTokenAuthorized, user.userUpdateById)

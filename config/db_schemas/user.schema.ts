@@ -6,6 +6,7 @@ export interface IUser {
   email: string;
   hashedPassword: string;
   authToken: string;
+  profilePicture: string;
 }
 
 export interface IUserDocument extends IUser, Document {}
@@ -44,6 +45,9 @@ const userSchema = new Schema<IUser>(
     authToken: {
       type: String,
       required: true,
+    },
+    profilePicture: {
+      type: String,
     },
   },
   {
