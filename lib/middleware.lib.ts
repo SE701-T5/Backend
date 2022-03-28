@@ -14,7 +14,7 @@ export function isRequestTokenAuthorized(
   res: Response,
   next: NextFunction,
 ) {
-  console.log('started auth');
+  // console.log('started auth');
   const authToken = req.header(config.get('authToken'));
   User.searchUserByAuthToken(authToken, function (result) {
     if (result.res == null) {

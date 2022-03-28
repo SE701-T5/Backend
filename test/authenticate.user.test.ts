@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { randomUUID } from 'crypto';
 import { describe } from 'mocha';
 import User from '../config/db_schemas/user.schema';
 import {
@@ -11,7 +10,6 @@ import {
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
-import assert from 'assert';
 import app from '../server';
 import { customPromisify } from './global-fixtures';
 
