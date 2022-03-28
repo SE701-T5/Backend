@@ -13,6 +13,7 @@ import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 import assert from 'assert';
 import app from '../server';
+import { customPromisify } from './global-fixtures';
 
 /**
  * Test successful user authentication using a matching email login and password
@@ -154,228 +155,182 @@ describe('Verify user authentication successfully with valid ID and authenticati
     expect(loginResponse.body).to.have.property('authToken');
     const userId = loginResponse.body.userID;
     const authToken = loginResponse.body.authToken;
-    new Promise((resolve, reject) => {
-      isUserAuthorized(userId, authToken, (result) => {
-        if (result.isAuth === true) {
-          resolve(true);
-        } else {
-          reject('bad auth state');
-        }
-      });
-    });
+    const authResponse: any = await customPromisify(isUserAuthorized)(
+      userId,
+      authToken,
+    );
+    expect(authResponse).to.have.property('isAuth');
+    expect(authResponse.isAuth).to.be.true;
   });
 });
 
 /**
  * Test unsuccessful verification of user authentication using a valid user ID and invalid authentication token
  */
-describe.skip('Verify user authentication unsuccessfully with valid ID and invalid authentication token', function () {
-  it('should return: true', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        const id = res.body.userData._id;
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            isUserAuthorized(id, 'wrongToken', function (result) {
-              assert.equal(result.isAuth, false);
-              done();
-            });
-          });
-      });
+describe('Verify user authentication unsuccessfully with valid ID and invalid authentication token', function () {
+  it('should return: true', async function () {
+    const userResponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+    // expect(userResponse.body.userData).to.have.property('_id');
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+    expect(loginResponse.body).to.have.property('userID');
+    expect(loginResponse.body).to.have.property('authToken');
+    const userId = loginResponse.body.userID;
+    const authTokenInvalid = 'invalidAuthToken';
+
+    const authResponse: any = await customPromisify(isUserAuthorized)(
+      userId,
+      authTokenInvalid,
+    );
+    expect(authResponse).to.have.property('isAuth');
+    expect(authResponse.isAuth).to.be.false;
   });
 });
 
 /**
  * Test unsuccessful verification of user authentication using an invalid user ID and valid authentication token
  */
-describe.skip('Verify user authentication unsuccessfully with invalid ID and valid authentication token', function () {
-  it('should return: true', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        const id = res.body.userData._id;
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            isUserAuthorized('wrongID', res.body.authToken, function (result) {
-              assert.equal(result.isAuth, false);
-              done();
-            });
-          });
-      });
+describe('Verify user authentication unsuccessfully with invalid ID and valid authentication token', function () {
+  it('should return: true', async function () {
+    const userResponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+    expect(loginResponse.body).to.have.property('userID');
+    expect(loginResponse.body).to.have.property('authToken');
+    const userIdInvalid = 'invalidUserID';
+    const authToken = loginResponse.body.authToken;
+    const authResponse: any = await customPromisify(isUserAuthorized)(
+      userIdInvalid,
+      authToken,
+    );
+    expect(authResponse).to.have.property('isAuth');
+    expect(authResponse.isAuth).to.be.false;
   });
 });
 
 /**
  * Test successful getting of a user authentication token with valid and logged-in user ID
  */
-describe.skip('Get user authentication token successfully with valid and logged-in user ID', function () {
-  it('should return: authToken', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        const id = res.body.userData._id;
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            getUserAuthToken(id, function (result) {
-              assert.equal(result.length === 16, true);
-              done();
-            });
-          });
-      });
+describe('Get user authentication token successfully with valid and logged-in user ID', function () {
+  it('should return: authToken', async function () {
+    const userResponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+    expect(loginResponse.body).to.have.property('userID');
+    const userId = loginResponse.body.userID;
+    const userAuthTokenResponse = await customPromisify(getUserAuthToken)(
+      userId,
+    );
+    expect(userAuthTokenResponse).lengthOf(16);
   });
 });
 
 /**
  * Test unsuccessful getting of a user authentication token with invalid user ID
  */
-describe.skip('Get user authentication token unsuccessfully with invalid user ID', function () {
-  it('should return: 404', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            getUserAuthToken('wrong ID', function (result) {
-              assert.equal(result.status, StatusCodes.NOT_FOUND);
-              done();
-            });
-          });
-      });
+describe('Get user authentication token unsuccessfully with invalid user ID', function () {
+  it('should return: 404', async function () {
+    const userId = 'invalidUserId';
+    const userAuthTokenResponse: any = await customPromisify(getUserAuthToken)(
+      userId,
+    );
+    expect(userAuthTokenResponse.status).to.equal(StatusCodes.NOT_FOUND);
   });
 });
 
 /**
  * Test successful setting of a user authentication token with valid and logged-in user ID
  */
-describe.skip('Set user authentication token successfully with valid and logged-in user ID', function () {
-  it('should return: authToken', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        const id = res.body.userData._id;
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            setUserAuthToken(id, function (result) {
-              assert.equal(result.res.length === 16, true);
-              done();
-            });
-          });
-      });
+describe('Set user authentication token successfully with valid and logged-in user ID', function () {
+  it('should return: authToken', async function () {
+    const userResponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+
+    expect(loginResponse.body).to.have.property('userID');
+    expect(loginResponse.body).to.have.property('authToken');
+    const userId = loginResponse.body.userID;
+    const authToken = loginResponse.body.authToken;
+    const setUserAuthTokenResponse: any = await customPromisify(
+      setUserAuthToken,
+    )(userId);
+    const newAuthToken = setUserAuthTokenResponse.res;
+    expect(newAuthToken).lengthOf(16);
+    expect(authToken).not.to.equal(newAuthToken);
   });
 });
 
 /**
  * Test unsuccessful setting of a user authentication token with invalid user ID
  */
-describe.skip('set user authentication token unsuccessfully with invalid user ID', function () {
-  it('should return: 404', function (done) {
-    request(app)
-      .post('/api/v1/users')
-      .send({
-        username: 'Todd123',
-        displayName: 'todd',
-        email: 'todd413@hotmail.com',
-        plaintextPassword: 'passwordtodd',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        request(app)
-          .post('/api/v1/users/login')
-          .send({
-            username: 'Todd123',
-            email: 'todd413@hotmail.com',
-            plaintextPassword: 'passwordtodd',
-          })
-          .expect(StatusCodes.OK)
-          .end(function (err, res) {
-            if (err) done(err);
-            setUserAuthToken('wrong ID', function (result) {
-              assert.equal(result.status, StatusCodes.NOT_FOUND);
-              done();
-            });
-          });
-      });
+describe('set user authentication token unsuccessfully with invalid user ID', function () {
+  it('should return: 404', async function () {
+    const userResponse = await request(app).post('/api/v1/users').send({
+      username: 'Todd123',
+      displayName: 'todd',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+
+    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+    const loginResponse = await request(app).post('/api/v1/users/login').send({
+      username: 'Todd123',
+      email: 'todd413@hotmail.com',
+      plaintextPassword: 'passwordtodd',
+    });
+    expect(loginResponse.status).to.equal(StatusCodes.OK);
+
+    const invalidUserId = 'invalidUserId';
+    const setUserAuthTokenResponse: any = await customPromisify(
+      setUserAuthToken,
+    )(invalidUserId);
+
+    expect(setUserAuthTokenResponse.status).equals(StatusCodes.NOT_FOUND);
   });
 });
