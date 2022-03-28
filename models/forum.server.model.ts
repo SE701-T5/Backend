@@ -181,3 +181,43 @@ export function addComment(params, done) {
     return done({ err: 'Internal server error', status: 500 });
   }
 }
+
+export function updateCommentsById(id, updates, done) {
+  // Search for a document matching the given ID to increment upVotes and downVotes
+  searchCommentById(id, function (result) {
+    if (result.err) {
+      // Return the error message with the error status
+      return done(result);
+    } else {
+
+      updates['upVotes'] = updates.upVotes
+      updates['downVotes'] = updates.downVotes
+      updates['bodyText'] = updates.bodyText
+
+      if (updates['bodyText']) {
+        updates['edited'] = true; // set the edited field to true
+      }
+
+      // Find the document and update the changed fields
+      Comment.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
+        .then((res) => {
+          return done(res);
+        })
+        .catch((err) => {
+          return done({ err: 'Internal server error', status: 500 });
+        });
+    }
+  });
+}
+
+export function searchCommentById(id, done) {
+  try {
+    Comment.findById(id)
+      .then((res) => done(res))
+      .catch((err) => {
+        return done({ status: 404, err: err });
+      });
+  } catch (err) {
+    return done({ err: 'Internal server error', status: 500 });
+  }
+}

@@ -231,8 +231,45 @@ export function commentGiveById(req: Request, res: Response) {
  * @param res HTTP request response object
  */
 export function commentUpdateById(req: Request, res: Response) {
-  // TODO: implement postUpdateById()
-  res.json({ dummyTest: 'commentUpdateById() dummy test passes' });
+  const commentID = req.params.id ? req.params.id : false,
+  userID = req.body.userID ? req.body.userID : false,
+  authToken = req.get(config.get('authToken')),
+  reqBody = req.body;
+  let commentUpdateParams;
+  // Set fields for updating to an object with either passed values or false to declare them as invalid
+  commentUpdateParams = {
+    bodyText: reqBody.text || false,
+    upVotes: reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
+    downVotes: reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
+  };
+
+  if (
+    isValidDocumentID(userID) &&
+    isAnyFieldValid(commentUpdateParams)
+  ) {
+    User.isUserAuthorized(userID, authToken, function (result) {
+      if (result.isAuth) {
+        Forum.updateCommentsById(commentID, commentUpdateParams, function (result) {
+          if (result.err) {
+            // Return the error message with the error status
+            res.status(result.status).send(result.err);
+          } else {
+            // Return the comment post document object with 201 status
+            res.status(201).json({ commentPost: result });
+          }
+        });
+      } else {
+        if (result.err) {
+          // Return the error message with the error status
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(401).send('Unauthorized');
+        }
+      }
+    });
+  } else {
+    res.status(400).send('Bad request');
+  }
 }
 
 /**
