@@ -167,3 +167,17 @@ export function addComment(params, done) {
       return done({ err: 'Internal server error', status: 500 });
     });
 }
+
+
+/**
+ * Search for a forum post in the database
+ * @param done function callback, returns status code, and message if error, or JSON if successful
+ */
+ export function getPosts(done) {
+  try {
+    Forum.find()
+      .then((res) => done(res));
+  } catch (err) {
+    return done({ err: 'Internal server error', status: 500 });
+  }
+}

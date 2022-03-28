@@ -15,8 +15,15 @@ import {
  * @param res HTTP request response object
  */
 export function postViews(req: Request, res: Response) {
-  // TODO: implement postViews()
-  res.json({ dummyTest: 'postViews() dummy test passes' });
+  Forum.getPosts(function (result) {
+    if (result.err) {
+      // Return the error message with the error status
+      res.status(result.status).send(result.err);
+    } else {
+      // Return the forum post document object with 200 status
+      res.json({ forumPost: result });
+    }
+  });
 }
 
 /**
