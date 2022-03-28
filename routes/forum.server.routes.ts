@@ -23,5 +23,5 @@ export default function (app: Express) {
     .get(forum.commentViewById)
     .post(forum.commentGiveById);
 
-  app.route('/api/v1/posts/:id/comments/:id').patch(forum.commentUpdateById);
+  app.route('/api/v1/posts/comments/:id').patch(forum.commentUpdateById);
 }
