@@ -3,13 +3,13 @@ import Community from '../config/db_schemas/community.schema';
 
 
 export function insertCommunity(params, done) {
-    // Set forum Community attributes
+    // Set Community attributes
     const name = params.name,
       description = params.description,
       members = params.members,
       img = params.img;
   
-    // Create new forum Community document
+    // Create new Community document
     const newCommunity = new Community({
       name,
       description,
@@ -17,14 +17,14 @@ export function insertCommunity(params, done) {
       img,
     });
   
-    // Save new forum Community document to database collection
+    // Save new Community document to database collection
     newCommunity
       .save()
       .then((res) => {
         return done(res);
       })
       .catch((err) => {
-        // Forum Community is already in the database with unique attributes, return duplicate conflict error
+        // Community is already in the database with unique attributes, return duplicate conflict error
         if (err.code === 11000) {
           return done({ err: 'Conflict', status: 409 });
         }

@@ -14,7 +14,7 @@ export function communityCreate(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken')),
     reqBody = req.body;
 
-  // Set community post fields to an object for passing to the model
+  // Set community fields to an object for passing to the model
   const communityParams = {
     userID: isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
     name:
@@ -27,13 +27,13 @@ export function communityCreate(req: Request, res: Response) {
   if (isAllFieldsValid(communityParams)) {
     User.isUserAuthorized(communityParams.userID, authToken, function (result) {
       if (result.isAuth) {
-        // Insert new community post to database
+        // Insert new community to database
         Community.insertCommunity(communityParams, function (result) {
           if (result.err) {
             // Return the error message with the error status
             res.status(result.status).send(result.err);
           } else {
-            // Return the community post document object with 201 status
+            // Return the community document object with 201 status
             res.status(201).json({ communityPostData: result });
           }
         });
