@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
+import communityServerRoutes from '../routes/community.routes';
 
 /**
  * Configure Express.js application
@@ -36,6 +37,7 @@ export default function () {
   dbServerRoutes(app);
   forumServerRoutes(app);
   userServerRoutes(app);
+  communityServerRoutes(app);
 
   return app;
 }
