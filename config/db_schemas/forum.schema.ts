@@ -76,5 +76,5 @@ const forumSchema = new Schema<Forum>(
 );
 
 // Forum can be used to create new documents with the forumSchema
-const ForumModel = mongoose.model<Forum>('Forum', forumSchema);
+const ForumModel = mongoose.models.Forum || mongoose.model<Forum>('Forum', forumSchema);
 export default ForumModel;

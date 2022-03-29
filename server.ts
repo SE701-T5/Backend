@@ -10,9 +10,11 @@ const PORT = config.get('port');
 // Connect to MongoDB database
 connect().then(
   () => {
-    app.listen(PORT, function () {
-      console.log(`Listening on port ${PORT}`);
-    });
+    if (!module.parent) {
+      app.listen(PORT, function () {
+        console.log(`Listening on port ${PORT}`);
+      });
+    }
   },
   (err) => {
     console.log('Unable to connect to MongoB');

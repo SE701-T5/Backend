@@ -5,6 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "test": "mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --exit",
+    "test:dev": "mocha --require ts-node/register --require ./test/global-fixtures.ts --watch --watch-files test, test/**/*.test.ts",
     "start": "ts-node server.ts",
     "dev": "nodemon server.ts",
     "prepare": "husky install"

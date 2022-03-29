@@ -8,7 +8,7 @@ import Comment from '../config/db_schemas/comment.schema';
 /**
  * Test successful forum user schema fields exist
  */
-describe.only('Schemas', () => {
+describe('Schemas', () => {
   describe('User', () => {
     it('Empty fields', () => {
       const user = new User();

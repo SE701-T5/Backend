@@ -72,5 +72,5 @@ const commentSchema = new Schema<Comment>(
 );
 
 // User can be used to create new documents with the userSchema
-const CommentModel = mongoose.model<Comment>('Comment', commentSchema);
+const CommentModel = mongoose.models.Comment || mongoose.model<Comment>('Comment', commentSchema);
 export default CommentModel;

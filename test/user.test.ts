@@ -1,15 +1,11 @@
 import request from 'supertest';
 import app from '../server';
 import assert from 'assert';
-import { closeConn, connect } from '../config/db.server.config';
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
 
-/**
- * Test successful forum user database document creation without a displayName input
- */
-describe('Create forum user successfully without displayName', function () {
-  it('should return: status 201', function (done) {
+describe.only('User', () => {
+  it('Create without displayName', async () => {
     request(app)
       .post('/api/v1/users')
       .send({
@@ -17,51 +13,29 @@ describe('Create forum user successfully without displayName', function () {
         email: 'bob420@hotmail.com',
         plaintextPassword: 'passwordbob',
       })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        done();
-      });
+      .expect(StatusCodes.CREATED);
   });
-});
 
-/**
- * Test successfully creating a new forum user with using a displayName field
- */
-describe('Create forum user successfully with displayName', function () {
-  it('should return: status 201', function (done) {
+  it('Create with displayName', async () => {
     request(app)
       .post('/api/v1/users')
       .send({
-        username: 'Gary143',
-        displayName: 'Gary',
-        email: 'gary283@hotmail.com',
-        plaintextPassword: 'passwordgary',
+        username: 'Bob123',
+        displayName: 'Bob123',
+        email: 'bob420@hotmail.com',
+        plaintextPassword: 'passwordbob',
       })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        done();
-      });
+      .expect(StatusCodes.CREATED);
   });
-});
 
-/**
- * Test unsuccessfully creating a new forum user with a missing email field
- */
-describe("Create forum user test unsuccessfully - missing field 'email'", function () {
-  it('should return: status 400', function (done) {
+  it('Create with missing email', async () => {
     request(app)
       .post('/api/v1/users')
       .send({
-        username: 'Tim123',
-        plaintextPassword: 'passwordtim',
+        username: 'Bob123',
+        plaintextPassword: 'passwordbob',
       })
-      .expect(StatusCodes.BAD_REQUEST)
-      .end(function (err, res) {
-        if (err) done(err);
-        done();
-      });
+      .expect(StatusCodes.BAD_REQUEST);
   });
 });
 
