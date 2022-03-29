@@ -4,11 +4,51 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
   isValidDocumentID,
-  parseInteger,
-  isAnyFieldValid,
   isAllFieldsValid,
 } from '../lib/validate.lib';
 
+
+export function communityUpdateById(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
+  const reqBody = req.body;
+  const communityID = req.params.id;
+
+  // Set community fields to an object for passing to the model
+  const communityParams = {
+    userID: isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
+    name: reqBody.name.length && reqBody.name.length > 0 ? reqBody.name : false,
+    description: reqBody.description || '',
+    members: reqBody.members || 0,
+    img: reqBody.img || '',
+  };
+
+  if (!isAllFieldsValid(communityParams)) {
+    res.status(400).send('Bad request');
+  }
+
+  User.isUserAuthorized(
+    communityParams.userID,
+    authToken,
+    function (authResult) {
+      if (authResult.err) {
+        res.status(authResult.status).send(authResult.err);
+      } else if (!authResult.isAuth) {
+        res.status(401).send('Unauthorized');
+      }
+
+      Community.updateCommunityById(
+        communityID,
+        communityParams,
+        function (updateResult) {
+          if (updateResult.err) {
+            res.status(updateResult.status).send(updateResult.err);
+          }
+          res.status(201).json({ communityPostData: updateResult });
+        },
+      );
+    },
+  );
+}
 
 export function communityCreate(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken')),
@@ -17,8 +57,7 @@ export function communityCreate(req: Request, res: Response) {
   // Set community fields to an object for passing to the model
   const communityParams = {
     userID: isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
-    name:
-      reqBody.name.length && reqBody.name.length > 0 ? reqBody.name : false,
+    name: reqBody.name.length && reqBody.name.length > 0 ? reqBody.name : false,
     description: reqBody.description || '',
     members: reqBody.members || 0,
     img: reqBody.img || '',
