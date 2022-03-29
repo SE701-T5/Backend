@@ -58,6 +58,7 @@ describe('Unsuccessfully reset database test - database is not connected', funct
   });
 });
 
+// XXX: Awaiting implementation
 describe('Resample database dummy test', function () {
   it("should return: { dummyTest: 'resampleDB() dummy test passes' }", function (done) {
     request(app)

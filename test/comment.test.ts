@@ -100,7 +100,7 @@ describe('Comment', () => {
   });
 
   it('Update (dummy)', async () => {
-    // XXX: Test uses dummy data
+    // XXX: Awaiting implementation
     await request(app)
       .patch('/api/v1/posts/:id/comments/:id')
       .send({ dummyTestInput: 'this text is useless' })
