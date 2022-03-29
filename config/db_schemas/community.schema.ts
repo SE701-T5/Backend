@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
 interface Community {
-  communityID: string;
   name: string;
   description: string;
   members: number;
@@ -10,13 +9,6 @@ interface Community {
 
 const communitySchema = new Schema<Community>(
   {
-    communityID: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
-    },
     name: {
       type: String,
       required: true,
