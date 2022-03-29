@@ -1,55 +1,45 @@
 import request from 'supertest';
 import app from '../server';
 import User from '../config/db_schemas/user.schema';
+import Forum from '../config/db_schemas/forum.schema';
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
 import { expect } from 'chai';
 
-describe.only('Comment', function () {
-  let userId, authToken, forumPostId;
-  beforeEach(async function () {
+describe('Comment', () => {
+  let userId, authToken, forumId: string;
+
+  beforeEach(async () => {
     // Create user
-    const plaintextPassword = 'authentication-test';
-    await new User({
-      username: 'TestDummy',
+    const username = 'TestDummy';
+    const userDoc = await new User({
+      username: username,
       displayName: 'MostValuedTest',
       email: 'test@dummy.com',
-      hashedPassword: hashPassword(plaintextPassword),
-      authToken: '6a95b47e-c37d-492e-8278-faca6824ada6',
+      hashedPassword: hashPassword('authentication-test'),
+      authToken: 'a'.repeat(16), // Valid authTokens are 16chars wide
     }).save();
 
-    // Login
-    const loginResponse = await request(app).post('/api/v1/users/login').send({
-      username: 'TestDummy',
-      email: 'test@dummy.com',
-      plaintextPassword: plaintextPassword,
-    });
-    expect(loginResponse.status).to.equal(StatusCodes.OK);
-    expect(loginResponse.body).to.have.property('userID');
-    expect(loginResponse.body).to.have.property('authToken');
-    userId = loginResponse.body.userID;
-    authToken = loginResponse.body.authToken;
+    userId = userDoc._id;
+    authToken = userDoc.authToken;
 
-    // Create post
-    const createPostResponse: any = await request(app)
-      .post('/api/v1/posts')
-      .set({ 'X-Authorization': authToken })
-      .send({
-        userID: userId,
-        title: "Happy St. Paddy's day!",
-        communityID: 'communityID',
-        text: "What's the craic?",
-        images: ['image string'],
-      });
+    // Create forum
+    const forumDoc = await new Forum({
+      userID: userId,
+      communityID: userId,
+      title: 'asdf',
+      bodyText: 'hasdfasd',
+      edited: false,
+      upVotes: 0,
+      downVotes: 0,
+    }).save();
 
-    expect(createPostResponse.status).to.equal(StatusCodes.CREATED);
-    expect(createPostResponse.body.forumPostData).to.have.property('_id');
-    forumPostId = createPostResponse.body.forumPostData._id;
+    forumId = forumDoc._id.toString();
   });
 
-  it('Create', async function () {
+  it('Create', async () => {
     const commentReponse = await request(app)
-      .post(`/api/v1/posts/${forumPostId}/comments`)
+      .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
       .send({
         authorID: userId,
@@ -59,9 +49,9 @@ describe.only('Comment', function () {
     expect(commentReponse.status).to.equal(StatusCodes.CREATED);
   });
 
-  it('Create (missing authorId)', async function () {
+  it('Create (missing authorId)', async () => {
     const commentReponse = await request(app)
-      .post(`/api/v1/posts/${forumPostId}/comments`)
+      .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
       .send({
         username: 'NewUser',
@@ -70,9 +60,9 @@ describe.only('Comment', function () {
     expect(commentReponse.status).to.equal(StatusCodes.BAD_REQUEST);
   });
 
-  it('Create (invalid length)', async function () {
+  it('Create (invalid length)', async () => {
     const commentReponse = await request(app)
-      .post(`/api/v1/posts/${forumPostId}/comments`)
+      .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
       .send({
         authorID: userId,
@@ -82,9 +72,9 @@ describe.only('Comment', function () {
     expect(commentReponse.status).to.equal(StatusCodes.BAD_REQUEST);
   });
 
-  it('View', async function () {
+  it('View', async () => {
     await request(app)
-      .post(`/api/v1/posts/${forumPostId}/comments`)
+      .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
       .send({
         authorID: userId,
@@ -93,24 +83,24 @@ describe.only('Comment', function () {
       })
       .expect(StatusCodes.CREATED);
     await request(app)
-      .get(`/api/v1/posts/${forumPostId}/comments`)
+      .get(`/api/v1/posts/${forumId}/comments`)
       .expect(StatusCodes.OK);
   });
 
-  it('View (no comments)', async function () {
+  it('View (no comments)', async () => {
     await request(app)
-      .get(`/api/v1/posts/${forumPostId}/comments`)
+      .get(`/api/v1/posts/${forumId}/comments`)
       .expect(StatusCodes.OK);
   });
 
-  it('View (bad forumPostId)', async function () {
+  it('View (bad forumPostId)', async () => {
     await request(app)
       .get(`/api/v1/posts/invalidForumPostId/comments`)
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update (dummy)', async function () {
-    // XXX
+  it('Update (dummy)', async () => {
+    // XXX: Test uses dummy data
     await request(app)
       .patch('/api/v1/posts/:id/comments/:id')
       .send({ dummyTestInput: 'this text is useless' })
