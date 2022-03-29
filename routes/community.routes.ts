@@ -8,13 +8,13 @@ import { isRequestTokenAuthorized } from '../lib/middleware.lib';
  * @param app Express.js application object
  */
 export default function (app: Express) {
-  app
-    .route('/api/v1/communities/:id')
-    .get(community.userViewById)
-    .patch(isRequestTokenAuthorized, community.userUpdateById);
+  // app
+  //   .route('/api/v1/communities/:id')
+  //   .get(community.userViewById)
+  //   .patch(isRequestTokenAuthorized, community.userUpdateById);
 
   app
     .route('/api/v1/communities')
-    .post(isRequestTokenAuthorized, community.userUpdateById);
+    .post(isRequestTokenAuthorized, community.communityCreate);
 
 }
