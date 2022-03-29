@@ -3,7 +3,7 @@ import app from '../server';
 import { closeConn, connect, getState } from '../config/db.server.config';
 import { StatusCodes } from 'http-status-codes';
 
-describe.only('Database', () => {
+describe('Database', () => {
   beforeEach(async () => {
     await connect();
   });

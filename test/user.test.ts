@@ -2,33 +2,8 @@ import request from 'supertest';
 import app from '../server';
 import assert from 'assert';
 import { closeConn, connect } from '../config/db.server.config';
-import { resetCollections } from '../models/db.server.model';
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
-
-/**
- * Before all tests, the app database is disconnected before the test database is connected
- */
-before(async function () {
-  const testDatabaseName = process.env.DATABASE_TEST_NAME;
-  await closeConn(); // Disconnect from the app database
-  await connect(); // Connect to the test database
-});
-
-/**
- * Before each test, all data in the test database is deleted
- */
-beforeEach(async function () {
-  await resetCollections(); // reset database for testing
-});
-
-/**
- * After all tests, all test database document data is deleted and the test database is disconnected
- */
-after(async function () {
-  await resetCollections(); // reset database for testing
-  await closeConn(); // Disconnect from the app database
-});
 
 /**
  * Test successful forum user database document creation without a displayName input

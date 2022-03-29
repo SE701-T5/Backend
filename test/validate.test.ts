@@ -1,6 +1,8 @@
 import assert from 'assert';
 import { isValidDocumentID } from '../lib/validate.lib';
 
+// XXX: Ideally these tests will not be needed when we are using proper types in the codebase! Going to leave for now until we get some more mature backend work merged!
+
 /**
  * Test the validation of a given ID is the correct format for a database document ID
  */
