@@ -1,10 +1,11 @@
 import request from 'supertest';
 import app from '../server';
-import assert from 'assert';
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
+import { expect } from 'chai';
+import assert from 'assert';
 
-describe.only('User', () => {
+describe('User', () => {
   it('Create without displayName', async () => {
     request(app)
       .post('/api/v1/users')
@@ -37,52 +38,39 @@ describe.only('User', () => {
       })
       .expect(StatusCodes.BAD_REQUEST);
   });
-});
 
-/**
- * Test unsuccessfully creating a new forum user with an invalid username field
- */
-describe('Create forum user test unsuccessfully - username field length requirement not met', function () {
-  it('should return: status 400', function (done) {
+  it('Create with unmet username length requirement ', async () => {
     request(app)
       .post('/api/v1/users')
       .send({
         username: 'Yi',
-        email: 'yi14123@gmail.com',
-        plaintextPassword: 'passwordtim',
+        email: 'bob420@hotmail.com',
+        plaintextPassword: 'passwordbob',
       })
-      .expect(StatusCodes.BAD_REQUEST)
-      .end(function (err, res) {
-        if (err) done(err);
-        done();
-      });
+      .expect(StatusCodes.BAD_REQUEST);
   });
-});
 
-/**
- * Test successful password hashing when a forum user document is created
- */
-describe('Test password hashing works correctly', function () {
-  it('should return: status 201', function (done) {
-    request(app)
+  it('Create and check password hash', async () => {
+    const createUserPayload = {
+      username: 'Jim123',
+      email: 'Jim420@hotmail.com',
+      plaintextPassword: 'passwordjim',
+    };
+    const createUserRequest = await request(app)
       .post('/api/v1/users')
-      .send({
-        username: 'Jim123',
-        email: 'Jim420@hotmail.com',
-        plaintextPassword: 'passwordjim',
-      })
-      .expect(StatusCodes.CREATED)
-      .end(function (err, res) {
-        if (err) done(err);
-        assert.equal(
-          res.body.userData.hashedPassword,
-          hashPassword('passwordjim'),
-        );
-        done();
-      });
+      .send(createUserPayload)
+      .expect(StatusCodes.CREATED);
+
+    expect(createUserRequest.body.userData.res.hashedPassword).equals(
+      hashPassword(createUserPayload.plaintextPassword),
+    );
   });
 });
 
+  it('Login', async () => {
+
+
+  });
 /**
  * Test successfully logging in a forum user
  */

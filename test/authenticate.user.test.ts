@@ -27,15 +27,12 @@ describe('Authenticate user with matching email and password', function () {
     }).save();
   });
 
-  it('should fail on incorrect password', function (done) {
-    authenticateUser(
+  it('should fail on incorrect password', async () => {
+    const result = await customPromisify(authenticateUser)(
       { email: 'test@dummy.com' },
       'incorrectPassword',
-      (result) => {
-        expect(result).to.be.false;
-        done();
-      },
     );
+    expect(result).to.be.false;
   });
 
   it('should fail on incorrect username', function (done) {

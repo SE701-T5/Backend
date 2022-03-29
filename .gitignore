@@ -1,5 +1,7 @@
 # Dependency directories
 node_modules/
 
+coverage/
+.nyc_output/
 # Jetbrains IDE files
 .idea/

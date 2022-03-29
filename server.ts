@@ -10,7 +10,7 @@ const PORT = config.get('port');
 // Connect to MongoDB database
 connect().then(
   () => {
-    if (!module.parent) {
+    if (require.main === module) {
       app.listen(PORT, function () {
         console.log(`Listening on port ${PORT}`);
       });

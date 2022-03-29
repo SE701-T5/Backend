@@ -6,7 +6,7 @@ import Forum from '../config/db_schemas/forum.schema';
 import { hashPassword } from '../models/user.server.model';
 import { expect } from 'chai';
 
-describe('Forum', () => {
+describe.only('Forum', () => {
   let userId, authToken, forumId: string;
 
   beforeEach(async () => {
