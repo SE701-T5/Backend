@@ -6,14 +6,13 @@ import Forum from '../config/db_schemas/forum.schema';
 import { hashPassword } from '../models/user.server.model';
 import { expect } from 'chai';
 
-describe.only('Forum', () => {
+describe('Forum', () => {
   let userId, authToken, forumId: string;
 
   beforeEach(async () => {
     // Create user
-    const username = 'TestDummy';
     const userDoc = await new User({
-      username: username,
+      username: 'TestDummy',
       displayName: 'MostValuedTest',
       email: 'test@dummy.com',
       hashedPassword: hashPassword('authentication-test'),
