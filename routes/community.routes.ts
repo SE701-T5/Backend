@@ -1,8 +1,7 @@
 import { Express } from 'express';
 // import * as user from '../controllers/user.server.controller';
-import * as community from '../controllers/community.controller'
+import * as community from '../controllers/community.server.controller'
 import { isRequestTokenAuthorized } from '../lib/middleware.lib';
-import {}
 
 /**
  * Handles HTTP requests for the Communities module using Express.js route()
