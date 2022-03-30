@@ -200,6 +200,13 @@ export async function getPosts(): Promise<ForumDocument[]> {
   }
 }
 
+/**
+ * Updates given fields of a database collection document matching a given ID
+ * @param id the ID of the document being updated
+ * @param updates the document field(s) being updated
+ * @param checkForEdits if set to true, will automatically update the edited field in certain cases
+ * @param deltaVotes if set to true, upVote and downVote counts will be added to the existing count instead of replacing.
+ */
 export async function updateCommentById(
   id: mongoose.Types.ObjectId,
   updates: Partial<IComment>,

@@ -1,6 +1,5 @@
-import mongoose from 'mongoose';
+import * as Crypto from 'crypto';
 import User, { IUserDocument } from '../config/db_schemas/user.schema';
-import saltedMd5 from 'salted-md5';
 import { DeleteResult } from 'mongodb';
 
 interface UserResponse<R = IUserDocument> {
@@ -9,13 +8,30 @@ interface UserResponse<R = IUserDocument> {
   err?: string;
 }
 
+interface HashedPassword {
+  hash: string;
+  salt: string;
+}
+
 /**
  * Hashes a given plaintext password
  * @param plaintextPassword plaintext password for hashing
  * @returns {String} hashed password
  */
-export function hashPassword(plaintextPassword: string) {
-  return saltedMd5(plaintextPassword, 'UniForum-Salt');
+export function hashPassword(plaintextPassword: string): HashedPassword {
+  const salt = Crypto.randomBytes(16).toString('hex');
+  const hash = Crypto.scryptSync(plaintextPassword, salt, 64).toString('hex');
+
+  return { hash, salt };
+}
+
+export function checkPassword(
+  plainPassword: string,
+  hash: HashedPassword,
+): boolean {
+  const plainHash = Crypto.scryptSync(plainPassword, hash.salt, 64);
+  const storedHash = Buffer.from(hash.hash, 'hex');
+  return Crypto.timingSafeEqual(plainHash, storedHash);
 }
 
 /**
