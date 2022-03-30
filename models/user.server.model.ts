@@ -1,12 +1,24 @@
 import * as Crypto from 'crypto';
-import User, { IUserDocument } from '../config/db_schemas/user.schema';
+import mongoose from 'mongoose';
+import { CommunityDocument } from '../config/db_schemas/community.schema';
+import Forum from '../config/db_schemas/forum.schema';
+import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
 import { DeleteResult } from 'mongodb';
+import { getProp, ServerError } from '../lib/utils.lib';
 
-interface UserResponse<R = IUserDocument> {
-  status: number;
-  res?: R;
-  err?: string;
+interface CreateUserDTO {
+  username: string;
+  displayName: string;
+  email: string;
+  plaintextPassword: string;
 }
+
+interface UpdateUserDTO
+  extends Partial<Omit<IUser, 'hashedPassword' | 'salt'>> {
+  plaintextPassword?: string;
+}
+
+type LoginDTO = { email: string } | { username: string };
 
 interface HashedPassword {
   hash: string;
@@ -37,125 +49,118 @@ export function checkPassword(
 /**
  * Creates and returns a new forum user using the userSchema
  * @param params object containing forum user attributes
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function createUser(params, done: (result: UserResponse) => void) {
-  const username = params.username;
-  const displayName = params.displayName;
-  const email = params.email;
+export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
   const hashedPassword = hashPassword(params.plaintextPassword);
-  const authToken = '0';
 
   const newUser = new User({
-    username,
-    displayName,
-    email,
-    hashedPassword,
-    authToken,
+    username: params.username,
+    displayName: params.displayName,
+    email: params.email,
+    hashedPassword: hashedPassword.hash,
+    salt: hashedPassword.salt,
   });
 
-  newUser
-    .save()
-    .then((res) => {
-      return done({ status: 201, res });
-    })
-    .catch((err) => {
-      // Forum user is already in the database with unique attributes, return duplicate conflict error
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      // Any other database error, return internal server error
-      return done({ err: 'Internal server error', status: 500 });
-    });
+  try {
+    return await newUser.save();
+  } catch (err) {
+    if (getProp(err, 'code') === 11000)
+      throw new ServerError('conflict', 409, err);
+    throw new ServerError('internal server error', 500, err);
+  }
 }
 
 /**
  * Search for a user document in the user collections of the database with a matching _id field
  * @param id the user ID for matching with a _id field in the database
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function searchUserById(id, done: (result: UserResponse) => void) {
+export async function searchUserById(id: mongoose.Types.ObjectId) {
+  let resource: UserDocument;
+
   try {
-    User.findById(id)
-      .then((res) => done({ status: 200, res }))
-      .catch((err) => {
-        return done({ status: 404, err: err });
-      });
+    resource = await User.findById(id);
   } catch (err) {
-    done({ status: 500, err: err });
+    throw new ServerError('Internal server error', 500, err);
+  }
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('user not found', 404);
   }
 }
 
 /**
  * Search for a user document in the user collections of the database with a matching authToken field
  * @param authToken the authorization token for matching with an authToken field in the database
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function searchUserByAuthToken(
+export async function searchUserByAuthToken(
   authToken: string,
-  done: (result: UserResponse) => void,
-) {
+): Promise<UserDocument> {
+  let resource: UserDocument;
+
   try {
-    User.findOne({ authToken })
-      .then((res) => done({ status: 200, res: res }))
-      .catch((err) => {
-        console.error(`1. ${err}`);
-        return done({ status: 404, err: err });
-      });
+    resource = await User.findOne({ authToken });
   } catch (err) {
-    console.error(`2. ${err}`);
-    done({ status: 500, err: err });
+    throw new ServerError('Internal server error', 500, err);
+  }
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('user not found', 404);
   }
 }
 
 /**
  * Delete an existing forum user matching a given ID
  * @param id the ID for matching to the database document being deleted
- * @param done function callback, returns status code and message if error
  */
-export function deleteUserById(
-  id,
-  done: (result: UserResponse<DeleteResult>) => void,
-) {
-  User.deleteOne({ _id: id })
-    .then((res) => {
-      if (res.deletedCount === 0) {
-        return done({ err: 'Not found', status: 404 });
-      }
-      return done({ status: 204, res });
-    })
-    .catch((err) => {
-      return done({ err: 'Internal server error', status: 500 });
-    });
+export async function deleteUserById(id: mongoose.Types.ObjectId) {
+  let result: DeleteResult;
+
+  try {
+    result = await User.deleteOne({ _id: id });
+  } catch (err) {
+    throw new ServerError('internal server error', 500, err);
+  }
+
+  if (result.deletedCount === 0)
+    throw new ServerError('not found', 404, result);
+
+  return result;
 }
 
 /**
  * Updates given fields of a database collection document for a user matching a given ID
  * @param id the ID of the document being updated
  * @param updates the document field(s) being updated
- * @param done function callback, returns status code, and updated document data or message if error
  */
-export function updateUserById(
-  id,
-  updates,
-  done: (result: UserResponse) => void,
-) {
+export async function updateUserById(
+  id: mongoose.Types.ObjectId,
+  updates: UpdateUserDTO,
+): Promise<UserDocument> {
+  const calculatedUpdates: Partial<IUser> = updates;
+
   if ('plaintextPassword' in updates) {
-    updates.hashedPassword = hashPassword(updates.plaintextPassword);
+    const hashedPassword = hashPassword(updates.plaintextPassword);
+    calculatedUpdates.hashedPassword = hashedPassword.hash;
+    calculatedUpdates.salt = hashedPassword.salt;
+    calculatedUpdates.authToken = null;
   }
+
+  let resource: UserDocument;
   try {
-    // Find the forum user database document matching the given ID, update all edited fields, return updated user data
-    User.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
-      .then((res) => {
-        return res
-          ? done({ status: 200, res })
-          : done({ err: 'Not found', status: 404 });
-      })
-      .catch((err) => {
-        return done({ err: 'Not found', status: 404 });
-      });
+    resource = await User.findOneAndUpdate(
+      { _id: id },
+      { $set: calculatedUpdates },
+      { new: true },
+    );
   } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+    throw new ServerError('unexpected server error', 500, err);
+  }
+  if (resource != null) {
+    return resource;
+  } else {
+    throw new ServerError('forum not found', 400);
   }
 }
 
@@ -163,117 +168,79 @@ export function updateUserById(
  * Authenticates a user by searching for any existing user in the database with a matching provided login and password
  * @param login the given { login-type: login-value } being matched with a login of any existing user in the database
  * @param plaintextPassword the given password being matched with the password of an existing user matched by the given login
- * @param done function callback, returns user data if authenticated, false if not or error message if server error
  */
-export function authenticateUser(login, plaintextPassword, done) {
-  if ('email' in login || 'username' in login) {
-    try {
-      User.findOne(login)
-        .then((res) => {
-          if (res.hashedPassword.match(hashPassword(plaintextPassword))) {
-            return done({ status: 200, res });
-          }
-          return done(false);
-        })
-        .catch((err) => {
-          return done(false);
-        });
-    } catch (err) {
-      return done({ status: 500, err: err });
-    }
+export async function authenticateUser(
+  login: LoginDTO,
+  plaintextPassword: string,
+): Promise<UserDocument> {
+  let res: UserDocument;
+
+  try {
+    res = await User.findOne(login);
+  } catch (e) {
+    throw new ServerError('internal server error', 500, e);
+  }
+
+  if (res == null) throw new ServerError('user not found', 404);
+
+  const hashedPassword: HashedPassword = {
+    hash: res.hashedPassword,
+    salt: res.salt,
+  };
+  if (checkPassword(plaintextPassword, hashedPassword)) {
+    return res;
   } else {
-    return done(false);
+    throw new ServerError('incorrect password', 401);
   }
 }
 
 /**
  * Gets the authorization token of a user if the user exists in the database and is logged-in
  * @param userID the user ID for matching with a _id field in the database
- * @param done function callback, returns authorization token if one, or false, or status code and message if error
  */
-export function getUserAuthToken(userID, done) {
-  searchUserById(userID, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done({ status: result.status, err: result.err });
-    } else {
-      if (result.res.authToken.length === 16) {
-        console.log(result.res.authToken);
-        // Return a user's authorization token
-        return done(result.res.authToken);
-      } else {
-        // Return false because an authorization token hasn't yet been set
-        return done(false);
-      }
-    }
-  });
+export async function getUserAuthToken(
+  userID: mongoose.Types.ObjectId,
+): Promise<string | undefined> {
+  const user = await searchUserById(userID);
+  return user.authToken;
 }
 
 /**
  * Sets the authorization token of a user if the user exists in the database and has logged in
  * @param userID the user ID for matching with a _id field in the database
- * @param done function callback, returns authorization token if one, or status code and message if error
  */
-export function setUserAuthToken(
-  userID,
-  done: (result: UserResponse<string>) => void,
-) {
-  // Resourced from: https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
-  const hexToken = [...Array(16)]
-    .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join('');
-  updateUserById(userID, { authToken: hexToken }, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done({ status: result.status, err: result.err });
-    } else {
-      // Return the authorization token in JSON format
-      return done({ status: 200, res: result.res.authToken });
-    }
-  });
+export async function setUserAuthToken(
+  userID: mongoose.Types.ObjectId,
+): Promise<string> {
+  const authToken = Crypto.randomBytes(16).toString('hex');
+
+  const user = await updateUserById(userID, { authToken });
+  return user.authToken;
 }
 
 /**
  * Verify if a user exists in the database and is currently authorized to access, store and modify database data
  * @param userID the user ID for matching with a _id field in the database
  * @param authToken the authorization token for matching with an authToken field in the database
- * @param done function callback, returns true if user is authorized, otherwise false, or status code and error message
  */
-export function isUserAuthorized(userID, authToken, done) {
-  if (authToken && typeof authToken === 'string' && authToken.length === 16) {
-    searchUserById(userID, function (result) {
-      if (result.err) {
-        // Return the error message with the error status
-        return done({ isAuth: false, status: result.status, err: result.err });
-      } else {
-        if (result.res.authToken.match(authToken)) {
-          return done({ isAuth: true });
-        } else {
-          return done({ isAuth: false });
-        }
-      }
-    });
-  } else {
-    return done({ isAuth: false });
-  }
+export async function isUserAuthorized(
+  userID: mongoose.Types.ObjectId,
+  authToken: string,
+): Promise<boolean> {
+  const user = await searchUserById(userID);
+
+  const dbAuthToken = Buffer.from(user.authToken, 'hex');
+  const providedAuthToken = Buffer.from(authToken, 'hex');
+
+  return Crypto.timingSafeEqual(dbAuthToken, providedAuthToken);
 }
 
 /**
- * Resets the authorization token of a user to unauthorized, or "0", if the user exists in the database and is logged in
+ * Resets the authorization token of a user to unauthorized, if the user exists in the database and is logged in
  * @param userID the user ID for matching with a _id field in the database
- * @param done function callback, returns status code, and message if error
  */
-export function removeUserAuthToken(
-  userID,
-  done: (result: UserResponse<undefined>) => void,
-) {
-  updateUserById(userID, { authToken: '0' }, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done({ status: result.status, err: result.err });
-    } else {
-      // Return success status
-      return done({ status: 200 });
-    }
-  });
+export async function removeUserAuthToken(
+  userID: mongoose.Types.ObjectId,
+): Promise<void> {
+  await updateUserById(userID, { authToken: null });
 }

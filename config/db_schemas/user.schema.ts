@@ -1,15 +1,13 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, HydratedDocument } from 'mongoose';
 
 export interface IUser {
   username: string;
   displayName: string;
   email: string;
   hashedPassword: string;
-  authToken: string;
+  salt: string;
+  authToken?: string;
 }
-
-export interface IUserDocument extends IUser, Document {}
-export type IUserModel = Model<IUserDocument>;
 
 const userSchema = new Schema<IUser>(
   {
@@ -40,10 +38,14 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
+    salt: {
+      type: String,
+      required: true,
+    },
     // Authorization for verifying users are logged in and can access data
     authToken: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {
@@ -51,6 +53,8 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
   },
 );
+
+export type UserDocument = HydratedDocument<IUser>;
 
 // User can be used to create new documents with the userSchema
 const UserModel = mongoose.model<IUser>('User', userSchema);
