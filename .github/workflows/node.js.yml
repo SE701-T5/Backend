@@ -1,54 +1,14 @@
 name: Backend
-on:
-  push:
-  pull_request_target:
-    branches: [a2-main]
-  workflow_dispatch:
+on: [push, pull_request]
 jobs:
-  build_pull_request:
-    name: 'Job for PR Action With Secrets Access'
-    if: github.event_name == 'pull_request_target'
-
+  Backend:
+    name: Backend
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
       matrix:
         node-version: [16.x, 17.x]
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Setup node ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        run: npm run build --if-present
-
-      - name: Test
-        run: npm test
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  build_fork:
-    name: 'Job for Non-PR Action in Fork Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.ref_name != 'a2-main'
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1
-      matrix:
-        node-version: [16.x, 17.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -73,44 +33,9 @@ jobs:
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
 
-  build_main:
-    name: 'Job for Non-PR Action in Main Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.repository == 'SE701-T5/Backend' && github.ref_name == 'a2-main'
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      max-parallel: 1
-      matrix:
-        node-version: [16.x, 17.x]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Use node ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        run: npm run build --if-present
-
-      - name: Test
-        run: npm test
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  deploy_main:
+  Deploy:
     name: 'Job for Heroku Deploy Main Repo With Secrets Access'
-    needs: build_main
+    needs: Backend
 
     runs-on: ubuntu-latest
     steps:
