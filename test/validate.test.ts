@@ -1,8 +1,7 @@
-import assert from 'assert';
 import { expect } from 'chai';
 import { isValidDocumentID } from '../lib/validate.lib';
 
-// XXX: Ideally these tests will not be needed when we are using proper types in the codebase! Going to leave for now until we get some more mature backend work merged!
+// XXX: Ideally these tests will not be needed when we are using proper types in the codebase!
 describe('Validation', () => {
   it('Validate a correctly formatted ID', () => {
     const validDocumentID = '62328e357ec3446e40e1b29b';

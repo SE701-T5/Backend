@@ -5,10 +5,6 @@ import { StatusCodes } from 'http-status-codes';
 import { expect } from 'chai';
 
 describe('Database', () => {
-  // beforeEach(async () => {
-  //   await connect();
-  // });
-
   it('Reset', () => {
     request(app).post('/api/v1/reset').expect(StatusCodes.OK);
   });

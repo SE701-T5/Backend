@@ -135,8 +135,6 @@ describe('Forum', () => {
         .set({ 'X-Authorization': authToken })
         .send(updatePayload);
 
-      // XXX: make a utility method for partial deep equals. Use this in the future but it has to be tested
-      // matchingKeyValuesEqual(updatePayload, postUpdateResponse.body.forumPost);
       expect(postUpdateResponse.body.forumPost.bodyText).equals(
         updatePayload.text,
       );
@@ -168,7 +166,6 @@ describe('Forum', () => {
       .send(updatePayload);
 
     // XXX: make a utility method for partial deep equals. Use this in the future but it has to be tested
-    // matchingKeyValuesEqual(updatePayload, postUpdateResponse.body.forumPost);
     expect(postUpdateResponse.body.forumPost.bodyText).equals(
       updatePayload.text,
     );

@@ -64,12 +64,3 @@ export const mochaHooks = {
     console.log('MongoDB server stopped!');
   },
 };
-
-export function matchingKeyValuesEqual(x: any, y: any): Boolean {
-  Object.keys(x).forEach((xk) => {
-    if (!y.hasOwnProperty(xk) || x[xk] !== y[xk]) {
-      return false;
-    }
-  });
-  return true;
-}
