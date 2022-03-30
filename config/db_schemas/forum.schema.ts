@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { HydratedDocument, Schema } from 'mongoose';
 
-interface Forum {
+export interface IForum {
   userID: string;
   communityID: string;
   title: string;
@@ -8,11 +8,11 @@ interface Forum {
   edited: boolean;
   upVotes: number;
   downVotes: number;
-  attachments?: string[];
-  comments?: string[];
+  attachments: string[];
+  comments: string[];
 }
 
-const forumSchema = new Schema<Forum>(
+const forumSchema = new Schema<IForum>(
   {
     // The User's ID who owns the forum post - must be a document ID length
     userID: {
@@ -75,6 +75,8 @@ const forumSchema = new Schema<Forum>(
   },
 );
 
+export type ForumDocument = HydratedDocument<IForum>;
+
 // Forum can be used to create new documents with the forumSchema
-const ForumModel = mongoose.model<Forum>('Forum', forumSchema);
+const ForumModel = mongoose.model<IForum>('Forum', forumSchema);
 export default ForumModel;

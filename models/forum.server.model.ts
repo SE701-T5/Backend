@@ -1,223 +1,247 @@
-import Forum from '../config/db_schemas/forum.schema';
-import Comment from '../config/db_schemas/comment.schema';
+import { DeleteResult } from 'mongodb';
+import mongoose from 'mongoose';
+import { CommunityDocument } from '../config/db_schemas/community.schema';
+import Forum, {
+  ForumDocument,
+  IForum,
+} from '../config/db_schemas/forum.schema';
+import Comment, {
+  CommentDocument,
+  IComment,
+} from '../config/db_schemas/comment.schema';
+import { getProp, ServerError } from '../lib/utils.lib';
+
+interface InsertPostDTO {
+  userID: string;
+  communityID: string;
+  title: string;
+  bodyText: string;
+  edited?: boolean;
+  upVotes?: number;
+  downVotes?: number;
+  attachments?: string[];
+  comments?: string[];
+}
+
+interface InsertCommentDTO {
+  postID: string;
+  authorID: string;
+  authorUserName: string;
+  bodyText: string;
+  edited?: boolean;
+  upVotes?: number;
+  downVotes?: number;
+  attachments?: string[];
+}
 
 /**
  * Insert a new forum post to the database
  * @param params object containing forum post attributes
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function insertPost(params, done) {
-  // Set forum post attributes
-  const userID = params.userID,
-    communityID = params.communityID,
-    title = params.title,
-    bodyText = params.bodyText,
-    edited = false,
-    upVotes = 0,
-    downVotes = 0,
-    attachments = params.attachments,
-    comments = [''];
-
+export async function insertPost(
+  params: InsertPostDTO,
+): Promise<ForumDocument> {
   // Create new forum post document
   const newPost = new Forum({
-    userID,
-    communityID,
-    title,
-    bodyText,
-    edited,
-    upVotes,
-    downVotes,
-    attachments,
-    comments,
+    userID: params.userID,
+    communityID: params.communityID,
+    title: params.title,
+    bodyText: params.bodyText,
+    edited: params.edited ?? false,
+    upVotes: params.upVotes ?? 0,
+    downVotes: params.downVotes ?? 0,
+    attachments: params.attachments ?? [],
+    comments: params.comments ?? [],
   });
 
   // Save new forum post document to database collection
-  newPost
-    .save()
-    .then((res) => {
-      return done(res);
-    })
-    .catch((err) => {
-      // Forum post is already in the database with unique attributes, return duplicate conflict error
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      // Any other database error, return internal server error
-      return done({ err: 'Internal server error', status: 500 });
-    });
+  try {
+    return await newPost.save();
+  } catch (err) {
+    // Forum post is already in the database with unique attributes, return duplicate conflict error
+    if (getProp(err, 'code') === 11000) {
+      throw new ServerError('Conflict', 409, err);
+    }
+    // Any other database error, return internal server error
+    throw new ServerError('Internal server error', 500, err);
+  }
 }
 
 /**
  * Search for a forum post in the database
  * @param id forum post ID
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function searchPostById(id, done) {
+export async function searchPostById(
+  id: mongoose.Types.ObjectId,
+): Promise<ForumDocument> {
+  let resource: ForumDocument;
+
   try {
-    Forum.findById(id)
-      .then((res) => done(res))
-      .catch((err) => {
-        return done({ status: 404, err: err });
-      });
+    resource = await Forum.findById(id);
   } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+    throw new ServerError('Internal server error', 500, err);
+  }
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('forum post not found', 404);
   }
 }
 
 /**
  * Delete an existing forum post matching a given ID
  * @param id the ID for matching to the database document being deleted
- * @param done function callback, returns status code and message if error
  */
-export function deletePostById(id, done) {
-  Forum.deleteOne({ _id: id })
-    .then((res) => {
-      if (res.deletedCount === 0) {
-        return done({ err: 'Not found', status: 404 });
-      }
-      return done(res);
-    })
-    .catch((err) => {
-      return done({ err: 'Internal server error', status: 500 });
-    });
+export async function deletePostById(
+  id: mongoose.Types.ObjectId,
+): Promise<DeleteResult> {
+  let result: DeleteResult;
+
+  try {
+    result = await Forum.deleteOne({ _id: id });
+  } catch {
+    throw new ServerError('internal server error', 500);
+  }
+
+  if (result.deletedCount === 0) {
+    throw new ServerError('not found', 404, result);
+  }
+
+  return result;
 }
 
 /**
  * Updates given fields of a database collection document matching a given ID
  * @param id the ID of the document being updated
  * @param updates the document field(s) being updated
- * @param done function callback, returns status code and message if error
+ * @param checkForEdits if set to true, will automatically update the edited field in certain cases
+ * @param deltaVotes if set to true, upVote and downVote counts will be added to the existing count instead of replacing.
  */
-export function updatePostById(id, updates, done) {
-  // Search for a document matching the given ID to increment upVotes and downVotes
-  searchPostById(id, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done(result);
-    } else {
-      updates['upVotes'] = updates.upVotes
-        ? updates.upVotes + result.upVotes
-        : result.upVotes;
-      updates['downVotes'] = updates.downVotes
-        ? updates.downVotes + result.downVotes
-        : result.downVotes;
-      updates['comments'] = updates.comments
-        ? result.comments.concat(updates.comments)
-        : result.comments;
+export async function updatePostById(
+  id: mongoose.Types.ObjectId,
+  updates: Partial<IForum>,
+  checkForEdits: boolean,
+  deltaVotes = false,
+) {
+  if (checkForEdits && updates.edited === undefined) {
+    const editTriggerProperties = ['title', 'bodyText', 'attachments'];
+    const updatedProperties = Object.keys(updates);
 
-      // If the update does not just involve up votes, down votes, or comments, and actual edits
-      if (Object.keys(updates).length > 3) {
-        updates['edited'] = true; // set the edited field to true
-      }
+    const intersection = editTriggerProperties.filter((i) =>
+      updatedProperties.includes(i),
+    );
 
-      // Find the document and update the changed fields
-      Forum.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
-        .then((res) => {
-          return done(res);
-        })
-        .catch((err) => {
-          return done({ err: 'Internal server error', status: 500 });
-        });
-    }
-  });
+    if (intersection.length > 0) updates.edited = true;
+  }
+
+  if (deltaVotes) {
+    const post = await searchPostById(id);
+    updates.upVotes = post.upVotes + updates.upVotes;
+    updates.downVotes = post.downVotes + updates.downVotes;
+  }
+
+  let resource: CommunityDocument;
+  try {
+    resource = await Forum.findOneAndUpdate(
+      { _id: id },
+      { $set: updates },
+      { new: true },
+    );
+  } catch (err) {
+    throw new ServerError('unexpected server error', 500, err);
+  }
+  if (resource != null) {
+    return resource;
+  } else {
+    throw new ServerError('forum not found', 400);
+  }
 }
 
 /**
  * Creates and returns a new forum comment using the comment schema
  * @param params object containing forum post comment fields
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function addComment(params, done) {
-  const postID = params.postID,
-    authorID = params.authorID,
-    authorUserName = params.authorUserName,
-    bodyText = params.bodyText,
-    edited = false,
-    upVotes = 0,
-    downVotes = 0,
-    attachments = params.attachments;
+export async function addComment(
+  params: InsertCommentDTO,
+): Promise<CommentDocument> {
+  const newComment = new Comment(params);
 
-  const newComment = new Comment({
-    postID,
-    authorID,
-    authorUserName,
-    bodyText,
-    edited,
-    upVotes,
-    downVotes,
-    attachments,
-  });
+  let comment: CommentDocument;
+  try {
+    comment = await newComment.save();
+  } catch (err: unknown) {
+    if (getProp(err, 'code') === 11000) {
+      throw new ServerError('Conflict', 409, err);
+    }
+    throw new ServerError('Internal server error', 500, err);
+  }
 
-  newComment
-    .save()
-    .then((res) => {
-      updatePostById(postID, { comments: [res.id] }, function (result) {
-        if (result.err) {
-          // Return the error message with the error status
-          return done(result);
-        } else {
-          done(res);
-        }
-      });
-    })
-    .catch((err) => {
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      return done({ err: 'Internal server error', status: 500 });
-    });
+  const post = await searchPostById(
+    new mongoose.Types.ObjectId(comment.postID),
+  );
+
+  await updatePostById(
+    new mongoose.Types.ObjectId(comment.postID),
+    { comments: post.comments.concat(comment.id as string) },
+    true,
+  );
+
+  return comment;
 }
-
 
 /**
  * Search for a forum post in the database
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
- export function getPosts(done) {
+export async function getPosts(): Promise<ForumDocument[]> {
   try {
-    Forum.find()
-      .then((res) => done(res));
+    return await Forum.find();
   } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+    throw new ServerError('Internal server error', 500, err);
   }
 }
 
-export function updateCommentsById(id, updates, done) {
-  // Search for a document matching the given ID to increment upVotes and downVotes
-  searchCommentById(id, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done(result);
-    } else {
+export async function updateCommentById(
+  id: mongoose.Types.ObjectId,
+  updates: Partial<IComment>,
+  checkForEdits: boolean,
+  deltaVotes = false,
+) {
+  if (
+    checkForEdits &&
+    updates.edited != undefined &&
+    updates.bodyText != undefined
+  ) {
+    updates.edited = true;
+  }
 
-      updates['upVotes'] = updates.upVotes
-      updates['downVotes'] = updates.downVotes
-      updates['bodyText'] = updates.bodyText
+  if (deltaVotes) {
+    const comment = await searchCommentById(id);
+    updates.upVotes = comment.upVotes + updates.upVotes;
+    updates.downVotes = comment.downVotes + updates.downVotes;
+  }
 
-      if (updates['bodyText']) {
-        updates['edited'] = true; // set the edited field to true
-      }
-
-      // Find the document and update the changed fields
-      Comment.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
-        .then((res) => {
-          return done(res);
-        })
-        .catch((err) => {
-          return done({ err: 'Internal server error', status: 500 });
-        });
-    }
-  });
+  try {
+    return await Comment.findOneAndUpdate(
+      { _id: id },
+      { $set: updates },
+      { new: true },
+    );
+  } catch (err) {
+    return new ServerError('internal server error', 500, err);
+  }
 }
 
-export function searchCommentById(id, done) {
+export async function searchCommentById(id): Promise<CommentDocument> {
+  let resource: CommentDocument;
+
   try {
-    Comment.findById(id)
-      .then((res) => done(res))
-      .catch((err) => {
-        return done({ status: 404, err: err });
-      });
+    resource = await Comment.findById(id);
   } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+    throw new ServerError('Internal server error', 500, err);
+  }
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('forum post not found', 404);
   }
 }

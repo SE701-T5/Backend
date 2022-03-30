@@ -232,9 +232,9 @@ export function commentGiveById(req: Request, res: Response) {
  */
 export function commentUpdateById(req: Request, res: Response) {
   const commentID = req.params.id ? req.params.id : false,
-  userID = req.body.userID ? req.body.userID : false,
-  authToken = req.get(config.get('authToken')),
-  reqBody = req.body;
+    userID = req.body.userID ? req.body.userID : false,
+    authToken = req.get(config.get('authToken')),
+    reqBody = req.body;
   let commentUpdateParams;
   // Set fields for updating to an object with either passed values or false to declare them as invalid
   commentUpdateParams = {
@@ -243,21 +243,22 @@ export function commentUpdateById(req: Request, res: Response) {
     downVotes: reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
   };
 
-  if (
-    isValidDocumentID(userID) &&
-    isAnyFieldValid(commentUpdateParams)
-  ) {
+  if (isValidDocumentID(userID) && isAnyFieldValid(commentUpdateParams)) {
     User.isUserAuthorized(userID, authToken, function (result) {
       if (result.isAuth) {
-        Forum.updateCommentsById(commentID, commentUpdateParams, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return the comment post document object with 201 status
-            res.status(201).json({ commentPost: result });
-          }
-        });
+        Forum.updateCommentById(
+          commentID,
+          commentUpdateParams,
+          function (result) {
+            if (result.err) {
+              // Return the error message with the error status
+              res.status(result.status).send(result.err);
+            } else {
+              // Return the comment post document object with 201 status
+              res.status(201).json({ commentPost: result });
+            }
+          },
+        );
       } else {
         if (result.err) {
           // Return the error message with the error status

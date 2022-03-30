@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { HydratedDocument, Schema } from 'mongoose';
 
-interface Comment {
+export interface IComment {
   postID: string;
   authorID: string;
   authorUserName: string;
@@ -8,10 +8,10 @@ interface Comment {
   edited: boolean;
   upVotes: number;
   downVotes: number;
-  attachments?: string[];
+  attachments: string[];
 }
 
-const commentSchema = new Schema<Comment>(
+const commentSchema = new Schema<IComment>(
   {
     // The Forum post ID the comment is made to - must be a document ID length
     postID: {
@@ -46,22 +46,26 @@ const commentSchema = new Schema<Comment>(
     // Used to determine whether a comment has been edited
     edited: {
       type: Boolean,
+      default: false,
       required: true,
     },
     // Indicates the number of up votes the forum post comment has
     upVotes: {
       type: Number,
+      default: 0,
       required: true,
     },
     // Indicates the number of down votes the forum post comment has
     downVotes: {
       type: Number,
+      default: 0,
       required: true,
     },
     // Contains list of file paths to attachments (optional)
     attachments: [
       {
         type: String,
+        default: [],
       },
     ],
   },
@@ -71,6 +75,8 @@ const commentSchema = new Schema<Comment>(
   },
 );
 
+export type CommentDocument = HydratedDocument<IComment>;
+
 // User can be used to create new documents with the userSchema
-const CommentModel = mongoose.model<Comment>('Comment', commentSchema);
+const CommentModel = mongoose.model<IComment>('Comment', commentSchema);
 export default CommentModel;
