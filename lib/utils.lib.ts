@@ -1,7 +1,7 @@
 export class ServerError {
   public constructor(
     public desc: string,
-    public code: number,
+    public status: number,
     public context?: unknown,
   ) {}
 }
@@ -13,4 +13,8 @@ export function getProp(o: unknown, prop: string): unknown {
     // ignore
   }
   return undefined;
+}
+
+export interface TypedRequestBody<T> extends Express.Request {
+  body: T;
 }

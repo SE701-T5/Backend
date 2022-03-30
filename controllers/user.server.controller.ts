@@ -1,12 +1,21 @@
 import emailValidator from 'email-validator';
 import { Request, Response } from 'express';
+import { ServerError, TypedRequestBody } from '../lib/utils.lib';
+import { CreateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
   isValidDocumentID,
-  isAnyFieldValid,
-  isAllFieldsValid,
+  isFieldsValid,
+  IValidation,
+  getValidValues,
 } from '../lib/validate.lib';
+
+interface UserResponseDTO {
+  username: string;
+  displayName: string;
+  email: string;
+}
 
 /**
  * Returns a random displayName (e.g. User0001)
@@ -22,39 +31,40 @@ function generateDisplayName() {
  * @param req HTTP request object containing the data used for creating a new forum user document in the database
  * @param res HTTP request response object status code and user data in JSON format, or error message
  */
-export function userCreate(req: Request, res: Response) {
-  const reqBody = req.body,
-    forumUserParams = {
-      username:
-        reqBody.username && reqBody.username.length > 2
-          ? reqBody.username
-          : false,
-      displayName:
-        reqBody.displayName && reqBody.displayName.length > 2
-          ? reqBody.displayName
-          : generateDisplayName(),
-      email:
-        reqBody.email && emailValidator.validate(reqBody.email)
-          ? reqBody.email
-          : false,
-      plaintextPassword:
-        reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
-          ? reqBody.plaintextPassword
-          : false,
-    };
+export async function userCreate(
+  req: TypedRequestBody<CreateUserDTO>,
+  res: Response<UserResponseDTO>,
+) {
+  const forumUserParams: IValidation<CreateUserDTO> = {
+    username: {
+      valid: req.body.username.length > 2,
+      value: req.body.username,
+    },
+    displayName: {
+      valid: req.body.displayName.length > 2,
+      value: req.body.displayName,
+    },
+    email: {
+      valid: emailValidator.validate(req.body.email),
+      value: req.body.email,
+    },
+    plaintextPassword: {
+      valid: req.body.plaintextPassword.length > 0,
+      value: req.body.plaintextPassword,
+    },
+  };
 
-  if (isAllFieldsValid(forumUserParams)) {
-    User.createUser(forumUserParams, function (result) {
-      if (result.err) {
-        // Return the error message with the error status
-        res.status(result.status).send(result.err);
-      } else {
-        // User was created successfully, return 201 status
-        res.status(201).json({ userData: result });
-      }
+  if (isFieldsValid(forumUserParams)) {
+    const params = getValidValues(forumUserParams);
+
+    const user = await User.createUser(params);
+    res.status(201).json({
+      displayName: user.displayName,
+      email: user.email,
+      username: user.username,
     });
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 

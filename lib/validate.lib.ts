@@ -3,7 +3,7 @@
  * @param id the ID being validated
  * @returns {boolean} true if the given ID is a valid document ID, otherwise false
  */
-export function isValidDocumentID(id) {
+export function isValidDocumentID(id: string) {
   const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
   return (
     id &&
@@ -14,13 +14,37 @@ export function isValidDocumentID(id) {
 }
 
 /**
- * Parses a string into an integer if it is a valid number, otherwise returns a given minimum value if not
+ * Parses a string into an integer if it is a valid number, otherwise returns a given value
  * @param str the string being parsed into an integer
- * @param min the value being returned if the string fails to pass as an integer
+ * @param val the value being returned if the string fails to pass as an integer
  * @returns {*|number} the string integer value as a number if valid, otherwise the given minimum value
  */
-export function parseInteger(str, min) {
-  return isNaN(parseInt(str, 10)) ? min : parseInt(str, 10);
+export function parseInteger(str: string, val: number) {
+  const number = parseInt(str, 10);
+  return isNaN(number) ? val : number;
+}
+
+export type IValidation<T = Record<string, unknown>> = {
+  [field in keyof T]: IValidationRecord<T[field]>;
+};
+
+interface IValidationRecord<T> {
+  valid: boolean | ((value: T) => boolean);
+  value: T;
+  required?: boolean;
+}
+
+function isRecordValid<T>(record: IValidationRecord<T>): boolean {
+  let valid: boolean;
+  const required = record.required ?? true;
+
+  if (typeof record.valid === 'boolean') {
+    valid = record.valid;
+  } else if (typeof record.valid === 'function') {
+    valid = record.valid(record.value);
+  }
+
+  return valid || !required;
 }
 
 /**
@@ -28,25 +52,23 @@ export function parseInteger(str, min) {
  * @param obj the object being validated
  * @returns {boolean} true if all fields in an object have valid and true values, otherwise false
  */
-export function isAllFieldsValid(obj) {
+export function isFieldsValid<T>(obj: IValidation<T>) {
   for (const field in obj) {
-    if (!obj[field]) {
-      return false;
-    }
+    if (!isRecordValid(obj[field])) return false;
   }
   return true;
 }
 
-/**
- * Conditional function to validate that any one field in an object has a valid and true value, removes invalid fields
- * @param obj the object being validated
- * @returns {boolean} true if any one field in an object has a valid and true value, otherwise false
- */
-export function isAnyFieldValid(obj) {
+export function getValidValues<T>(obj: IValidation<T>): T {
+  const result: unknown = {};
+
   for (const field in obj) {
-    if (!obj[field]) {
-      delete obj[field];
+    const record = obj[field];
+
+    if (isRecordValid(record)) {
+      result[field] = record.value;
     }
   }
-  return Object.keys(obj).length !== 0;
+
+  return result as T;
 }

@@ -6,7 +6,7 @@ import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
 import { DeleteResult } from 'mongodb';
 import { getProp, ServerError } from '../lib/utils.lib';
 
-interface CreateUserDTO {
+export interface CreateUserDTO {
   username: string;
   displayName: string;
   email: string;
