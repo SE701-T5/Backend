@@ -1,7 +1,7 @@
 export class ServerError {
   public constructor(
-    public err: string,
-    public status: number,
+    public desc: string,
+    public code: number,
     public context?: unknown,
   ) {}
 }
