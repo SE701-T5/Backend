@@ -16,7 +16,7 @@ import { customPromisify } from './global-fixtures';
 /**
  * Test successful user authentication using a matching email login and password
  */
-describe('Authenticate user with matching email and password', function () {
+describe('Authenticate', function () {
   beforeEach(async () => {
     await new User({
       username: 'TestDummy',
@@ -27,7 +27,7 @@ describe('Authenticate user with matching email and password', function () {
     }).save();
   });
 
-  it('should fail on incorrect password', async () => {
+  it('Incorrect password', async () => {
     const result = await customPromisify(authenticateUser)(
       { email: 'test@dummy.com' },
       'incorrectPassword',
@@ -35,7 +35,7 @@ describe('Authenticate user with matching email and password', function () {
     expect(result).to.be.false;
   });
 
-  it('should fail on incorrect username', function (done) {
+  it('Incorrect username', function (done) {
     authenticateUser(
       { username: 'IncorrectUsername' },
       'authentication-test',
@@ -46,7 +46,7 @@ describe('Authenticate user with matching email and password', function () {
     );
   });
 
-  it('should fail on incorrect email', function (done) {
+  it('Incorrect email', function (done) {
     authenticateUser(
       { email: 'incorrectemail@example.com' },
       'authentication-test',
@@ -57,7 +57,7 @@ describe('Authenticate user with matching email and password', function () {
     );
   });
 
-  it('should fail on incorrect login details', function (done) {
+  it('Incorrect login details', function (done) {
     authenticateUser(
       { displayName: 'MostValuedTest' },
       'authentication-test',
@@ -68,7 +68,7 @@ describe('Authenticate user with matching email and password', function () {
     );
   });
 
-  it('should succeed on correct username and password', function (done) {
+  it('Correct username and password', function (done) {
     authenticateUser(
       { username: 'TestDummy' },
       'authentication-test',
@@ -82,7 +82,7 @@ describe('Authenticate user with matching email and password', function () {
     );
   });
 
-  it('should succeed on correct email and password', function (done) {
+  it('Correct email and password', function (done) {
     authenticateUser(
       { email: 'test@dummy.com' },
       'authentication-test',
@@ -97,31 +97,33 @@ describe('Authenticate user with matching email and password', function () {
   });
 });
 
-describe('Login to app', function () {
+describe('Login', () => {
+  const password = 'passwordtodd';
+
   beforeEach(async () => {
     await new User({
       username: 'Todd123',
       displayName: 'Todd',
       email: 'todd413@hotmail.com',
-      hashedPassword: hashPassword('passwordtodd'),
+      hashedPassword: hashPassword(password),
       authToken: '6a95b47e-c37d-492e-8278-faca6824ada6',
     }).save();
   });
 
-  it('should provide an auth token if details are valid', async function () {
+  it('Authtoken provided with valid details', async () => {
     const response = await request(app).post('/api/v1/users/login').send({
       email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
+      plaintextPassword: password,
     });
     expect(response.status).to.equal(StatusCodes.OK);
     expect(response.body).to.have.property('authToken');
   });
 
-  it('should not provide an auth token if details are invalid', async function () {
+  it.skip('Authtoken not provided invalid details', async function () {
     const response = await request(app).post('/api/v1/users/login').send({
       username: 'InvalidUsername',
       email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
+      plaintextPassword: password,
     });
     expect(response.status).to.equal(StatusCodes.FORBIDDEN);
     expect(response.body).to.not.have.property('authToken');
