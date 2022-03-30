@@ -13,9 +13,6 @@ import request from 'supertest';
 import app from '../server';
 import { customPromisify } from './global-fixtures';
 
-/**
- * Test successful user authentication using a matching email login and password
- */
 describe('Authenticate', function () {
   beforeEach(async () => {
     await new User({
@@ -35,65 +32,51 @@ describe('Authenticate', function () {
     expect(result).to.be.false;
   });
 
-  it('Incorrect username', function (done) {
-    authenticateUser(
+  it('Incorrect username', async () => {
+    const result = await customPromisify(authenticateUser)(
       { username: 'IncorrectUsername' },
       'authentication-test',
-      (result) => {
-        expect(result).to.be.false;
-        done();
-      },
     );
+    expect(result).to.be.false;
   });
 
-  it('Incorrect email', function (done) {
-    authenticateUser(
+  it('Incorrect email', async () => {
+    const result = await customPromisify(authenticateUser)(
       { email: 'incorrectemail@example.com' },
       'authentication-test',
-      (result) => {
-        expect(result).to.be.false;
-        done();
-      },
     );
+    expect(result).to.be.false;
   });
 
-  it('Incorrect login details', function (done) {
-    authenticateUser(
+  it('Incorrect login details', async () => {
+    const result = await customPromisify(authenticateUser)(
       { displayName: 'MostValuedTest' },
       'authentication-test',
-      (result) => {
-        expect(result).to.be.false;
-        done();
-      },
     );
+    expect(result).to.be.false;
   });
 
-  it('Correct username and password', function (done) {
-    authenticateUser(
+  it('Correct username and password', async () => {
+    const result: any = await customPromisify(authenticateUser)(
       { username: 'TestDummy' },
       'authentication-test',
-      (result) => {
-        expect(result).to.have.property('res');
-        expect(result.res.email).to.equal('test@dummy.com');
-        expect(result).to.have.property('status');
-        expect(result.status).to.equal(StatusCodes.OK);
-        done();
-      },
     );
+
+    expect(result).to.have.property('res');
+    expect(result.res.email).to.equal('test@dummy.com');
+    expect(result).to.have.property('status');
+    expect(result.status).to.equal(StatusCodes.OK);
   });
 
-  it('Correct email and password', function (done) {
-    authenticateUser(
+  it('Correct email and password', async () => {
+    const result: any = await customPromisify(authenticateUser)(
       { email: 'test@dummy.com' },
       'authentication-test',
-      (result) => {
-        expect(result).to.have.property('res');
-        expect(result.res.email).to.equal('test@dummy.com');
-        expect(result).to.have.property('status');
-        expect(result.status).to.equal(StatusCodes.OK);
-        done();
-      },
     );
+    expect(result).to.have.property('res');
+    expect(result.res.email).to.equal('test@dummy.com');
+    expect(result).to.have.property('status');
+    expect(result.status).to.equal(StatusCodes.OK);
   });
 });
 
@@ -119,13 +102,14 @@ describe('Login', () => {
     expect(response.body).to.have.property('authToken');
   });
 
-  it.skip('Authtoken not provided invalid details', async function () {
+  // XXX: Original test expected 403 Forbidden but this is functionality is found nowhere in userLogin
+  it('Authtoken not provided invalid details', async () => {
     const response = await request(app).post('/api/v1/users/login').send({
       username: 'InvalidUsername',
       email: 'todd413@hotmail.com',
       plaintextPassword: password,
     });
-    expect(response.status).to.equal(StatusCodes.FORBIDDEN);
+    expect(response.status).to.equal(StatusCodes.NOT_FOUND);
     expect(response.body).to.not.have.property('authToken');
   });
 });
