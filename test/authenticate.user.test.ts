@@ -13,7 +13,7 @@ import request from 'supertest';
 import app from '../server';
 import { customPromisify } from './global-fixtures';
 
-describe('Authenticate', function () {
+describe('Authenticate', () => {
   beforeEach(async () => {
     await new User({
       username: 'TestDummy',
@@ -112,20 +112,8 @@ describe('Login', () => {
     expect(response.status).to.equal(StatusCodes.NOT_FOUND);
     expect(response.body).to.not.have.property('authToken');
   });
-});
 
-/**
- * Test successful verification of user authentication using a valid user ID and authentication token
- */
-describe('Verify user authentication successfully with valid ID and authentication token', function () {
-  it('should return: true', async function () {
-    const userReponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-    expect(userReponse.status).to.equal(StatusCodes.CREATED);
+  it('Verify isUserAuthorized', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
@@ -143,21 +131,8 @@ describe('Verify user authentication successfully with valid ID and authenticati
     expect(authResponse).to.have.property('isAuth');
     expect(authResponse.isAuth).to.be.true;
   });
-});
 
-/**
- * Test unsuccessful verification of user authentication using a valid user ID and invalid authentication token
- */
-describe('Verify user authentication unsuccessfully with valid ID and invalid authentication token', function () {
-  it('should return: true', async function () {
-    const userResponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-    expect(userResponse.status).to.equal(StatusCodes.CREATED);
-    // expect(userResponse.body.userData).to.have.property('_id');
+  it('Verify isUserAuthorized false with invalid authToken', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
@@ -177,21 +152,8 @@ describe('Verify user authentication unsuccessfully with valid ID and invalid au
     expect(authResponse).to.have.property('isAuth');
     expect(authResponse.isAuth).to.be.false;
   });
-});
 
-/**
- * Test unsuccessful verification of user authentication using an invalid user ID and valid authentication token
- */
-describe('Verify user authentication unsuccessfully with invalid ID and valid authentication token', function () {
-  it('should return: true', async function () {
-    const userResponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-
-    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+  it('Verify isUserAuthorized with invalid ID and valid authentication token', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
@@ -210,21 +172,8 @@ describe('Verify user authentication unsuccessfully with invalid ID and valid au
     expect(authResponse).to.have.property('isAuth');
     expect(authResponse.isAuth).to.be.false;
   });
-});
 
-/**
- * Test successful getting of a user authentication token with valid and logged-in user ID
- */
-describe('Get user authentication token successfully with valid and logged-in user ID', function () {
-  it('should return: authToken', async function () {
-    const userResponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-
-    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+  it('getUserAuthToken with valid logged-in userId', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
@@ -239,43 +188,25 @@ describe('Get user authentication token successfully with valid and logged-in us
     );
     expect(userAuthTokenResponse).lengthOf(16);
   });
-});
 
-/**
- * Test unsuccessful getting of a user authentication token with invalid user ID
- */
-describe('Get user authentication token unsuccessfully with invalid user ID', function () {
-  it('should return: 404', async function () {
+  it('getUserAuthToken with invalid userId', async () => {
     const userId = 'invalidUserId';
     const userAuthTokenResponse: any = await customPromisify(getUserAuthToken)(
       userId,
     );
     expect(userAuthTokenResponse.status).to.equal(StatusCodes.NOT_FOUND);
   });
-});
 
-/**
- * Test successful setting of a user authentication token with valid and logged-in user ID
- */
-describe('Set user authentication token successfully with valid and logged-in user ID', function () {
-  it('should return: authToken', async function () {
-    const userResponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-
-    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+  it('setUserAuthToken with valid and logged-in userId', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
       plaintextPassword: 'passwordtodd',
     });
     expect(loginResponse.status).to.equal(StatusCodes.OK);
-
     expect(loginResponse.body).to.have.property('userID');
     expect(loginResponse.body).to.have.property('authToken');
+
     const userId = loginResponse.body.userID;
     const authToken = loginResponse.body.authToken;
     const setUserAuthTokenResponse: any = await customPromisify(
@@ -285,33 +216,18 @@ describe('Set user authentication token successfully with valid and logged-in us
     expect(newAuthToken).lengthOf(16);
     expect(authToken).not.to.equal(newAuthToken);
   });
-});
 
-/**
- * Test unsuccessful setting of a user authentication token with invalid user ID
- */
-describe('set user authentication token unsuccessfully with invalid user ID', function () {
-  it('should return: 404', async function () {
-    const userResponse = await request(app).post('/api/v1/users').send({
-      username: 'Todd123',
-      displayName: 'todd',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
-    });
-
-    expect(userResponse.status).to.equal(StatusCodes.CREATED);
+  it('setUserAuthToken with invalid userId', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
       plaintextPassword: 'passwordtodd',
     });
     expect(loginResponse.status).to.equal(StatusCodes.OK);
-
     const invalidUserId = 'invalidUserId';
     const setUserAuthTokenResponse: any = await customPromisify(
       setUserAuthToken,
     )(invalidUserId);
-
     expect(setUserAuthTokenResponse.status).equals(StatusCodes.NOT_FOUND);
   });
 });
