@@ -4,9 +4,9 @@
   "description": "RESTful API for a forum site.",
   "main": "server.ts",
   "scripts": {
-    "test": "mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --colors --exit",
-    "test:dev": "mocha --require ts-node/register --require ./test/global-fixtures.ts --colours --watch --watch-files test, test/**/*.test.ts",
-    "coverage": "nyc npm run test",
+    "test": "TESTING=false mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --colors --exit",
+    "test:dev": "TESTING=true mocha --require ts-node/register --require ./test/global-fixtures.ts --colours --watch --watch-files test, test/**/*.test.ts",
+    "coverage": "TESTING=true nyc npm run test",
     "start": "ts-node server.ts",
     "dev": "nodemon server.ts",
     "prepare": "husky install"

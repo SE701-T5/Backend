@@ -1,3 +1,4 @@
+import { resolve } from 'promise';
 import config from './config/config.server.config';
 import { connect } from './config/db.server.config';
 import createApp from './config/express.server.config';
@@ -6,9 +7,11 @@ import createApp from './config/express.server.config';
 const app = createApp();
 
 const PORT = config.get('port');
+const TESTING = config.get('testing');
 
+const connectFn = TESTING ? resolve : connect;
 // Connect to MongoDB database
-connect().then(
+connectFn().then(
   () => {
     if (require.main === module) {
       app.listen(PORT, function () {
