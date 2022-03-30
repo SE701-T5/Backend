@@ -1,66 +1,41 @@
-import Community from '../config/db_schemas/community.schema';
+import mongoose from 'mongoose';
+import { CommunityDocument } from '../config/db_schemas/community.schema';
+import Community, { ICommunity } from '../config/db_schemas/community.schema';
+import { getProp, ServerError } from '../lib/utils.lib';
 
-export function insertCommunity(params, done) {
-  // Set Community attributes
-  const name = params.name,
-    description = params.description,
-    members = params.members,
-    img = params.img;
-
+export async function insertCommunity(params: ICommunity) {
   // Create new Community document
-  const newCommunity = new Community({
-    name,
-    description,
-    members,
-    img,
-  });
+  const newCommunity = new Community(params);
 
   // Save new Community document to database collection
-  newCommunity
-    .save()
-    .then((res) => {
-      return done(res);
-    })
-    .catch((err) => {
-      // Community is already in the database with unique attributes, return duplicate conflict error
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      // Any other database error, return internal server error
-      return done({ err: 'Internal server error', status: 500 });
-    });
+  try {
+    return await newCommunity.save();
+  } catch (err: unknown) {
+    if (getProp(err, 'code') === 11000) {
+      throw new ServerError('Conflict', 409);
+    }
+    // Any other database error, return internal server error
+    throw new ServerError('Internal server error', 500);
+  }
 }
 
-export function updateCommunityById(CommunityID, params, done) {
-  // Set Community attributes
-  const name = params.name,
-    description = params.description,
-    members = params.members,
-    img = params.img;
-
-  // Create new Community document
-  const newCommunity = new Community({
-    name,
-    description,
-    members,
-    img,
-  });
-
+export async function updateCommunityById(
+  CommunityID: mongoose.Types.ObjectId,
+  params: Partial<ICommunity>,
+): Promise<CommunityDocument> {
+  let resource: CommunityDocument;
   try {
-    Community.findOneAndUpdate(
+    resource = await Community.findOneAndUpdate(
       { _id: CommunityID },
       { $set: params },
       { new: true },
-    )
-      .then((res) => {
-        return res
-          ? done({ status: 200, res })
-          : done({ err: 'Not found', status: 404 });
-      })
-      .catch((err) => {
-        return done({ err: 'Not found', status: 404 });
-      });
+    );
   } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+    throw new ServerError('unexpected server error', 500, err);
+  }
+  if (resource != null) {
+    return resource;
+  } else {
+    throw new ServerError('community not found', 400);
   }
 }

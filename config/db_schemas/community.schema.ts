@@ -1,13 +1,13 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, HydratedDocument } from 'mongoose';
 
-interface Community {
+export interface ICommunity {
   name: string;
   description: string;
   members: number;
   img: string;
 }
 
-const communitySchema = new Schema<Community>(
+const communitySchema = new Schema<ICommunity>(
   {
     name: {
       type: String,
@@ -19,19 +19,21 @@ const communitySchema = new Schema<Community>(
       type: String,
       required: true,
     },
-    members:{
-        type: Number,
-        required: true
+    members: {
+      type: Number,
+      required: true,
     },
     img: {
       type: String,
       required: true,
-    }
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const CommunityModel = mongoose.model<Community>('Community', communitySchema);
+export type CommunityDocument = HydratedDocument<ICommunity>;
+
+const CommunityModel = mongoose.model<ICommunity>('Community', communitySchema);
 export default CommunityModel;
