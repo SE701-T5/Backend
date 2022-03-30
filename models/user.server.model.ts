@@ -29,6 +29,7 @@ export function createUser(params, done: (result: UserResponse) => void) {
   const email = params.email;
   const hashedPassword = hashPassword(params.plaintextPassword);
   const authToken = '0';
+  const profilePicture = params.profilePicture;
 
   const newUser = new User({
     username,
@@ -36,6 +37,7 @@ export function createUser(params, done: (result: UserResponse) => void) {
     email,
     hashedPassword,
     authToken,
+    profilePicture,
   });
 
   newUser

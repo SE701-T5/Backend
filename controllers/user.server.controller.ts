@@ -41,6 +41,7 @@ export function userCreate(req: Request, res: Response) {
         reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
           ? reqBody.plaintextPassword
           : false,
+      profilePicture: req.file ? req.file.originalname : false,
     };
 
   if (isAllFieldsValid(forumUserParams)) {
@@ -212,6 +213,7 @@ export function userUpdateById(req: Request, res: Response) {
       reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
         ? reqBody.plaintextPassword
         : false,
+    profilePicture: req.file ? req.file.originalname : false,
   };
 
   if (isValidDocumentID(reqParams.id) && isAnyFieldValid(userUpdateParams)) {
@@ -290,27 +292,35 @@ export function userUpdateCurrent(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken'));
   const reqBody = req.body;
 
-  const userUpdateParams = {};
-  if (reqBody.username && reqBody.username.length > 2) {
-    userUpdateParams['username'] = reqBody.username;
-  }
-  if (reqBody.displayName && reqBody.displayName.length > 2) {
-    userUpdateParams['displayName'] = reqBody.displayName;
-  }
-  if (reqBody.email && emailValidator.validate(reqBody.email)) {
-    userUpdateParams['email'] = reqBody.email;
-  }
-  if (reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0) {
-    userUpdateParams['plaintextPassword'] = reqBody.plaintextPassword;
-  }
+  const userUpdateParams = {
+    username:
+      reqBody.username && reqBody.username.length > 2
+        ? reqBody.username
+        : false,
+    displayName:
+      reqBody.displayName && reqBody.displayName.length > 2
+        ? reqBody.displayName
+        : false,
+    email:
+      reqBody.email && emailValidator.validate(reqBody.email)
+        ? reqBody.email
+        : false,
+    plaintextPassword:
+      reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
+        ? reqBody.plaintextPassword
+        : false,
+    profilePicture: req.file ? req.file.originalname : false,
+  };
 
-  User.searchUserByAuthToken(authToken, (result) => {
-    User.updateUserById(result.res.id, userUpdateParams, (result) => {
-      if (result.err) {
-        res.status(result.status).send(result.err);
-      } else {
-        res.status(201).json({ updatedForumUser: result });
-      }
+  if (isAnyFieldValid(userUpdateParams)) {
+    User.searchUserByAuthToken(authToken, (result) => {
+      User.updateUserById(result.res.id, userUpdateParams, (result) => {
+        if (result.err) {
+          res.status(result.status).send(result.err);
+        } else {
+          res.status(201).json({ updatedForumUser: result });
+        }
+      });
     });
-  });
+  }
 }
