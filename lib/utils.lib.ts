@@ -19,3 +19,8 @@ export function getProp(o: unknown, prop: string): unknown {
 }
 
 export type TypedRequestBody<T> = Request<ParamsDictionary, any, T>;
+
+export interface TimestampedModel {
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import Comment, { CommentDocument } from '../config/db_schemas/comment.schema';
 import { CommunityDocument } from '../config/db_schemas/community.schema';
 import Community, { ICommunity } from '../config/db_schemas/community.schema';
 import { getProp, ServerError } from '../lib/utils.lib';

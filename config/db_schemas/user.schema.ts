@@ -1,12 +1,14 @@
-import mongoose, { Schema, Document, Model, HydratedDocument } from 'mongoose';
+import mongoose, { Schema, HydratedDocument } from 'mongoose';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface IUser {
+export interface IUser extends TimestampedModel {
   username: string;
   displayName: string;
   email: string;
   hashedPassword: string;
   salt: string;
   authToken?: string;
+  subscribedCommunities: mongoose.Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>(
@@ -47,6 +49,14 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: false,
     },
+
+    subscribedCommunities: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Community',
+      },
+    ],
   },
   {
     // Assigns createdAt and updatedAt fields

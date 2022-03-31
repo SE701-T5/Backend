@@ -1,12 +1,12 @@
 import mongoose, { Schema, HydratedDocument } from 'mongoose';
-import UserSchema from './user.schema';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface ICommunity {
+export interface ICommunity extends TimestampedModel {
   owner: mongoose.Types.ObjectId;
   name: string;
   description: string;
-  members: number;
   img?: string;
+  posts: mongoose.Types.ObjectId[];
 }
 
 const communitySchema = new Schema<ICommunity>(
@@ -14,7 +14,7 @@ const communitySchema = new Schema<ICommunity>(
     owner: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: UserSchema.modelName,
+      ref: 'User',
     },
     name: {
       type: String,
@@ -27,15 +27,18 @@ const communitySchema = new Schema<ICommunity>(
       required: true,
       default: '',
     },
-    members: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
     img: {
       type: String,
       required: false,
     },
+    posts: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        default: [],
+        ref: 'Forum',
+      },
+    ],
   },
   {
     timestamps: true,

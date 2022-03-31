@@ -1,9 +1,8 @@
 import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface IComment {
-  postID: string;
-  authorID: string;
-  authorUserName: string;
+export interface IComment extends TimestampedModel {
+  owner: mongoose.Types.ObjectId;
   bodyText: string;
   edited: boolean;
   upVotes: number;
@@ -13,29 +12,11 @@ export interface IComment {
 
 const commentSchema = new Schema<IComment>(
   {
-    // The Forum post ID the comment is made to - must be a document ID length
-    postID: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
-    },
     // The User's ID who authored the comment to the forum post - must be a document ID length
-    authorID: {
-      type: String,
+    owner: {
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
-    },
-    // User's publicly displayed username
-    authorUserName: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 3,
+      ref: 'User',
     },
     // Contains the body of text for the forum post comment
     bodyText: {
@@ -66,6 +47,7 @@ const commentSchema = new Schema<IComment>(
       {
         type: String,
         default: [],
+        required: true,
       },
     ],
   },

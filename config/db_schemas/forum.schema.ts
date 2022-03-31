@@ -1,9 +1,7 @@
 import mongoose, { HydratedDocument, Schema } from 'mongoose';
-import CommentModel from './comment.schema';
-import CommunityModel from './community.schema';
-import UserModel from './user.schema';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface IForum {
+export interface IForum extends TimestampedModel {
   owner: mongoose.Types.ObjectId;
   community: mongoose.Types.ObjectId;
   title: string;
@@ -21,13 +19,13 @@ const forumSchema = new Schema<IForum>(
     owner: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: UserModel.modelName,
+      ref: 'User',
     },
     // The ID for the community the blog is associates with
     community: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: CommunityModel.modelName,
+      ref: 'Community',
     },
     // Title of the forum post
     title: {
@@ -72,7 +70,7 @@ const forumSchema = new Schema<IForum>(
     comments: [
       {
         type: Schema.Types.ObjectId,
-        ref: CommentModel.modelName,
+        ref: 'Comment',
         required: true,
         default: [],
       },
