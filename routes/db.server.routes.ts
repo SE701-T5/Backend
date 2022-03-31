@@ -7,7 +7,6 @@ import { asyncHandler } from '../lib/middleware.lib';
  * @param app Express.js application object
  */
 export default function (app: Express) {
-  app.route('/api/v1/reset').post(asyncHandler(database.resetDB));
-
-  app.route('/api/v1/resample').post(database.resampleDB);
+  app.route('/api/v1/db/reset').post(asyncHandler(database.resetDB));
+  app.route('/api/v1/db/resample').post(asyncHandler(database.resampleDB));
 }

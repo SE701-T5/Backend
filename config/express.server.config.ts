@@ -34,7 +34,10 @@ export default function () {
 
   // HTTP GET request to homepage with a message response stating the server is running
   app.get('/health', function (req, res) {
-    res.status(200).json({ msg: 'The server is up and running!' });
+    res.status(200).json({
+      msg: 'The server is up and running!',
+      tim: new Date().getTime(),
+    });
   });
 
   // Configure HTTP routes

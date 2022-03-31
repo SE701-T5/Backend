@@ -50,6 +50,7 @@ const userSchema = new Schema<IUser>(
       unique: true,
       index: true,
       required: false,
+      sparse: true,
     },
 
     subscribedCommunities: [
