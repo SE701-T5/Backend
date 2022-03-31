@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 
-export class ServerError {
+export class ServerError extends Error {
   public constructor(
-    public desc: string,
+    message: string,
     public status: number,
     public context?: unknown,
-  ) {}
+  ) {
+    super(message);
+  }
 }
 
 export function getProp(o: unknown, prop: string): unknown {

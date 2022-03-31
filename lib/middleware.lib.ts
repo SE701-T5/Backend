@@ -14,20 +14,23 @@ export async function isRequestTokenAuthorized(
   res: Response,
   next: NextFunction,
 ) {
-  console.log('started auth');
-  const authToken = req.header(config.get('authToken'));
-
   try {
-    await User.searchUserByAuthToken(authToken);
-  } catch (err) {
-    throw new ServerError('Unauthorised', 401, err);
-  }
+    const authToken = req.header(config.get('authToken'));
 
-  next();
+    try {
+      await User.searchUserByAuthToken(authToken);
+    } catch (err) {
+      throw new ServerError('Unauthorised', 401, err);
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function asyncHandler(
-  fn: (req: Request, res: Response, next?: NextFunction) => unknown,
+  fn: (req: Request, res: Response, next?: NextFunction) => Promise<unknown>,
 ) {
   return (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);
@@ -48,7 +51,7 @@ export function errorHandler(
 
   res.status(serverError.status).send({
     code: serverError.status,
-    error: serverError.desc,
+    error: serverError.message,
     context:
       config.get('environment') === 'development'
         ? JSON.stringify(serverError.context)
