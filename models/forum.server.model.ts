@@ -134,8 +134,12 @@ export async function updatePostById(
 
   if (deltaVotes) {
     const post = await searchPostById(id);
-    updates.upVotes = post.upVotes + updates.upVotes;
-    updates.downVotes = post.downVotes + updates.downVotes;
+    if ('upVotes' in updates) {
+      updates.upVotes = post.upVotes + updates.upVotes;
+    }
+    if ('downVotes' in updates) {
+      updates.downVotes = post.downVotes + updates.downVotes;
+    }
   }
 
   let resource: PostDocument;
@@ -213,7 +217,7 @@ export async function updateCommentById(
 ): Promise<CommentDocument> {
   if (
     checkForEdits &&
-    updates.edited != undefined &&
+    updates.edited == undefined &&
     updates.bodyText != undefined
   ) {
     updates.edited = true;
@@ -221,8 +225,10 @@ export async function updateCommentById(
 
   if (deltaVotes) {
     const comment = await searchCommentById(id);
-    updates.upVotes = comment.upVotes + updates.upVotes;
-    updates.downVotes = comment.downVotes + updates.downVotes;
+    if ('upVotes' in updates)
+      updates.upVotes = comment.upVotes + updates.upVotes;
+    if ('downVotes' in updates)
+      updates.downVotes = comment.downVotes + updates.downVotes;
   }
 
   try {

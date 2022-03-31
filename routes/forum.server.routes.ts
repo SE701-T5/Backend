@@ -11,16 +11,16 @@ export default function (app: Express) {
 
   app
     .route('/api/v1/posts/:id')
-    .get(forum.postViewById)
+    .get(asyncHandler(forum.postViewById))
     .patch(isRequestTokenAuthorized, asyncHandler(forum.postUpdateById))
     .delete(isRequestTokenAuthorized, asyncHandler(forum.postDeleteById));
 
   app
     .route('/api/v1/posts/:id/comments')
     .get(asyncHandler(forum.commentViewById))
-    .post(asyncHandler(forum.commentGiveById));
+    .post(isRequestTokenAuthorized, asyncHandler(forum.commentGiveById));
 
   app
-    .route('/api/v1/posts/comments/:id')
-    .patch(asyncHandler(forum.commentUpdateById));
+    .route('/api/v1/comments/:id')
+    .patch(isRequestTokenAuthorized, asyncHandler(forum.commentUpdateById));
 }

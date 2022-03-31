@@ -34,8 +34,6 @@ export async function getPosts(req: Request, res: Response<PostResponse[]>) {
   const id = convertToObjectId(req.params.id);
   const posts = await Community.getPosts(id);
 
-  console.log(posts);
-
   const response = posts.map(
     (post) =>
       ({

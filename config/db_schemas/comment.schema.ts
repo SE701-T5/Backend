@@ -35,12 +35,14 @@ const commentSchema = new Schema<IComment>(
       type: Number,
       default: 0,
       required: true,
+      min: 0,
     },
     // Indicates the number of down votes the forum post comment has
     downVotes: {
       type: Number,
       default: 0,
       required: true,
+      min: 0,
     },
     // Contains list of file paths to attachments (optional)
     attachments: [

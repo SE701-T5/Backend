@@ -51,12 +51,14 @@ const postSchema = new Schema<IPost>(
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
     // Indicates the number of down votes the forum post has
     downVotes: {
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
     // Contains list of file paths to attachments (optional)
     attachments: [

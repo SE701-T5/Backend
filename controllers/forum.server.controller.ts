@@ -31,7 +31,6 @@ interface UpdatePostDTO {
 }
 
 interface CreateCommentDTO {
-  postID: string;
   bodyText: string;
   attachments: string[];
 }
@@ -177,7 +176,7 @@ export async function postUpdateById(
     downVotes: validators.voteDelta(),
   })
     .min(1)
-    .xor('upVotes', 'downVotes');
+    .oxor('upVotes', 'downVotes');
 
   const data = validate(schema, req.body);
 
@@ -245,13 +244,12 @@ export async function commentGiveById(
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<CreateCommentDTO>({
-    postID: validators.objectId().required(),
     bodyText: Joi.string().required(),
     attachments: Joi.array().items(Joi.string().uri()).max(3),
   });
 
   const data = validate(schema, req.body);
-  const postId = convertToObjectId(data.postID);
+  const postId = convertToObjectId(req.params.id);
 
   const user = await searchUserByAuthToken(authToken);
   const comment = await Forum.addComment(postId, {
@@ -291,7 +289,7 @@ export async function commentUpdateById(
     attachments: Joi.array().items(Joi.string().uri()).max(3),
   })
     .min(1)
-    .xor('upVotes', 'downVotes');
+    .oxor('upVotes', 'downVotes');
 
   const data = validate(schema, req.body);
 
