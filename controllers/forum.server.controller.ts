@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
+import { IForum } from '../config/db_schemas/forum.schema';
+import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import * as Forum from '../models/forum.server.model';
+import { searchUserByAuthToken } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
@@ -7,7 +10,17 @@ import {
   parseInteger,
   isAnyFieldValid,
   isAllFieldsValid,
+  IValidation,
+  isFieldsValid,
+  getValidValues,
 } from '../lib/validate.lib';
+
+interface CreatePostDTO {
+  title: string;
+  communityID: string;
+  bodyText: string;
+  attachments: string[];
+}
 
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
@@ -31,47 +44,55 @@ export function postViews(req: Request, res: Response) {
  * @param req HTTP request object containing forum post field data, user ID, and authorization token for verification
  * @param res HTTP request response status code, and message if error, or JSON with post data if successful
  */
-export function postCreate(req: Request, res: Response) {
-  const authToken = req.get(config.get('authToken')),
-    reqBody = req.body;
+export async function postCreate(
+  req: TypedRequestBody<CreatePostDTO>,
+  res: Response<IForum>,
+) {
+  const authToken = req.get(config.get('authToken'));
 
   // Set forum post fields to an object for passing to the model
-  const forumPostParams = {
-    userID: isValidDocumentID(reqBody.userID) ? reqBody.userID : false,
-    title:
-      reqBody.title.length && reqBody.title.length > 0 ? reqBody.title : false,
-    communityID:
-      reqBody.communityID && reqBody.communityID.length > 2
-        ? reqBody.communityID
-        : false,
-    bodyText: reqBody.text || '',
-    attachments: reqBody.images || [''],
+  const forumPostParams: IValidation<CreatePostDTO> = {
+    title: {
+      value: req.body.title,
+      valid: req.body.title.length > 0,
+    },
+    communityID: {
+      value: req.body.communityID,
+      valid: isValidDocumentID,
+    },
+    bodyText: {
+      value: req.body.bodyText,
+      valid: req.body.bodyText != undefined,
+    },
+    attachments: {
+      value: req.body.attachments,
+      valid: req.body.attachments != undefined,
+    },
   };
 
-  if (isAllFieldsValid(forumPostParams)) {
-    User.isUserAuthorized(forumPostParams.userID, authToken, function (result) {
-      if (result.isAuth) {
-        // Insert new forum post to database
-        Forum.insertPost(forumPostParams, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return the forum post document object with 201 status
-            res.status(201).json({ forumPostData: result });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
+  if (isFieldsValid(forumPostParams)) {
+    const params = getValidValues(forumPostParams);
+
+    const user = await searchUserByAuthToken(authToken);
+
+    const post = await Forum.insertPost({
+      userID: user._id.toString(),
+      ...params,
+    });
+
+    res.status(201).send({
+      userID: post.userID,
+      communityID: post.communityID,
+      title: post.title,
+      bodyText: post.bodyText,
+      edited: post.edited,
+      upVotes: post.upVotes,
+      attachments: post.attachments,
+      downVotes: post.downVotes,
+      comments: post.comments,
     });
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 
