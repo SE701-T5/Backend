@@ -1,4 +1,3 @@
-import emailValidator from 'email-validator';
 import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
@@ -6,12 +5,7 @@ import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
-import {
-  isValidDocumentID,
-  validateForm,
-  IValidation,
-  getValidValues,
-} from '../lib/validate.lib';
+import { validators, validate } from '../lib/validate.lib';
 
 interface UserResponseDTO {
   username: string;
@@ -35,20 +29,16 @@ export async function userCreate(
   req: TypedRequestBody<CreateUserDTO>,
   res: Response<UserResponseDTO>,
 ) {
-  const data = req.body;
   const rules = Joi.object<CreateUserDTO>({
-    username: Joi.string().alphanum().min(2).required(),
+    username: validators.username().required(),
     displayName: Joi.string().alphanum().min(2).required(),
     email: Joi.string().email().required(),
-    plaintextPassword: Joi.string().min(6).required(),
+    plaintextPassword: validators.password().required(),
   });
 
-  const formData = rules.validate(data);
-  if (formData.error) {
-    throw new ServerError(formData.error.message, 400, formData);
-  }
+  const formData = validate(rules, req.body);
 
-  const user = await User.createUser(formData.value);
+  const user = await User.createUser(formData);
   res.status(201).json({
     displayName: user.displayName,
     email: user.email,
@@ -66,46 +56,25 @@ export async function userLogin(
   req: TypedRequestBody<LoginDTO>,
   res: Response<UserResponseDTO>,
 ) {
-  const validateParams: IValidation<LoginDTO> = {
-    plaintextPassword: {
-      value: req.body.plaintextPassword,
-      valid: req.body.plaintextPassword.length > 0,
-    },
-    username: {
-      value: req.body.username,
-      required: true,
-      valid: req.body.username.length > 2 || req.body.email != undefined,
-    },
-    email: {
-      value: req.body.email,
-      required: true,
-      valid:
-        emailValidator.validate(req.body.email) ||
-        req.body.username != undefined,
-    },
+  const rules = Joi.object<LoginDTO>({
+    username: validators.username(),
+    email: Joi.string().email(),
+    plaintextPassword: validators.password().required(),
+  }).xor('username', 'email');
+
+  const data = validate(rules, req.body);
+  const login: User.LoginInfoDTO = {
+    email: data.email,
+    username: data.username,
   };
 
-  if (validateForm(validateParams)) {
-    const params = getValidValues(validateParams);
-
-    const login: User.LoginInfoDTO = params.email
-      ? { email: params.email }
-      : { username: params.username };
-
-    const user = await User.authenticateUser(
-      login,
-      params.plaintextPassword,
-      true,
-    );
-    res.status(200).send({
-      username: user.username,
-      displayName: user.displayName,
-      email: user.email,
-      authToken: user.authToken,
-    });
-  } else {
-    throw new ServerError('bad request', 400);
-  }
+  const user = await User.authenticateUser(login, data.plaintextPassword, true);
+  res.status(200).send({
+    username: user.username,
+    displayName: user.displayName,
+    email: user.email,
+    authToken: user.authToken,
+  });
 }
 
 /**
@@ -131,18 +100,14 @@ export async function userViewById(
   req: Request,
   res: Response<UserResponseDTO>,
 ) {
-  const id = req.params.id;
+  const id = new mongoose.Types.ObjectId(req.params.id);
+  const user = await User.searchUserById(id);
 
-  if (isValidDocumentID(id)) {
-    const user = await User.searchUserById(new mongoose.Types.ObjectId(id));
-    res.status(200).send({
-      username: user.username,
-      displayName: user.displayName,
-      email: user.email,
-    });
-  } else {
-    throw new ServerError('bad request', 400, { id });
-  }
+  res.status(200).send({
+    username: user.username,
+    displayName: user.displayName,
+    email: user.email,
+  });
 }
 
 /**
@@ -156,46 +121,25 @@ export async function userUpdateById(
 ) {
   const authToken = req.get(config.get('authToken'));
 
-  // Set fields for updating to an object with either passed values or false to declare them as invalid
-  const userUpdateParams: IValidation<UpdateUserDTO> = {
-    username: {
-      valid: req.body.username.length > 2,
-      required: false,
-      value: req.body.username,
-    },
-    displayName: {
-      valid: req.body.displayName.length > 2,
-      required: false,
-      value: req.body.displayName,
-    },
-    email: {
-      valid: emailValidator.validate(req.body.email),
-      required: false,
-      value: req.body.email,
-    },
-    plaintextPassword: {
-      valid: req.body.plaintextPassword.length > 0,
-      required: false,
-      value: req.body.plaintextPassword,
-    },
-  };
+  const schema = Joi.object<UpdateUserDTO>({
+    username: validators.username(),
+    displayName: Joi.string().alphanum().min(2),
+    email: Joi.string().email(),
+    plaintextPassword: validators.password(),
+  });
 
-  if (validateForm(userUpdateParams) && isValidDocumentID(req.params.id)) {
-    const params = getValidValues(userUpdateParams);
-    const id = new mongoose.Types.ObjectId(req.params.id);
+  const data = validate(schema, req.body);
 
-    if (await User.isUserAuthorized(id, authToken)) {
-      const user = await User.updateUserById(id, params);
-      res.status(200).send({
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName,
-      });
-    } else {
-      throw new ServerError('forbidden', 403);
-    }
+  const id = new mongoose.Types.ObjectId(req.params.id);
+  if (await User.isUserAuthorized(id, authToken)) {
+    const user = await User.updateUserById(id, data);
+    res.status(200).send({
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+    });
   } else {
-    throw new ServerError('bad request', 400);
+    throw new ServerError('forbidden', 403);
   }
 }
 
@@ -206,17 +150,12 @@ export async function userUpdateById(
  */
 export async function userDeleteById(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken'));
+  const id = new mongoose.Types.ObjectId(req.params.id);
 
-  if (isValidDocumentID(req.params.id)) {
-    const id = new mongoose.Types.ObjectId(req.params.id);
-
-    if (await User.isUserAuthorized(id, authToken)) {
-      await User.deleteUserById(id);
-      res.status(204).send();
-    } else {
-      throw new ServerError('forbidden', 403);
-    }
+  if (await User.isUserAuthorized(id, authToken)) {
+    await User.deleteUserById(id);
+    res.status(204).send();
   } else {
-    throw new ServerError('bad request', 400);
+    throw new ServerError('forbidden', 403);
   }
 }
