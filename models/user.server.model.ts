@@ -16,7 +16,10 @@ export interface UpdateUserDTO
   plaintextPassword?: string;
 }
 
-export type LoginInfoDTO = { email: string } | { username: string };
+export interface LoginInfoDTO {
+  username?: string;
+  email?: string;
+}
 
 interface HashedPassword {
   hash: string;
@@ -176,12 +179,14 @@ export async function authenticateUser(
   let res: UserDocument;
 
   try {
-    res = await User.findOne(login);
+    res = await User.findOne({
+      $or: [{ username: login.username }, { email: login.email }],
+    }).exec();
   } catch (e) {
     throw new ServerError('internal server error', 500, e);
   }
 
-  if (res == null) throw new ServerError('user not found', 404);
+  if (res == null) throw new ServerError('user not found', 404, login);
 
   const hashedPassword: HashedPassword = {
     hash: res.hashedPassword,
