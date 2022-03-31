@@ -26,23 +26,3 @@ jobs:
 
       - name: Test
         run: npm test
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  Deploy:
-    name: 'Job for Heroku Deploy Main Repo With Secrets Access'
-    needs: Backend
-
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: 'web: npm start'
