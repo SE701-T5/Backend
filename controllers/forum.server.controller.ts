@@ -5,15 +5,17 @@ import * as Forum from '../models/forum.server.model';
 import { searchUserByAuthToken } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
+import mongoose from 'mongoose';
 import {
   isValidDocumentID,
   parseInteger,
-  isAnyFieldValid,
-  isAllFieldsValid,
+  // isAnyFieldValid,
+  // isAllFieldsValid,
   IValidation,
   isFieldsValid,
   getValidValues,
 } from '../lib/validate.lib';
+import { IComment } from '../config/db_schemas/comment.schema';
 
 interface CreatePostDTO {
   title: string;
@@ -22,21 +24,58 @@ interface CreatePostDTO {
   attachments: string[];
 }
 
+interface UpdatePostDTO {
+  title: string;
+  communityID: string;
+  bodyText: string;
+  upVotes: number;
+  downVotes: number;
+  attachments: string[];
+}
+
+interface CreateCommentDTO {
+  postID: string;
+  authorID: string;
+  authorUserName: string;
+  bodyText: string;
+  attachments: string[];
+}
+
+interface UpdateCommentDTO {
+  postID: string;
+  authorID: string;
+  authorUserName: string;
+  upVotes: number;
+  downVotes: number;
+  attachments: string[];
+}
+
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export function postViews(req: Request, res: Response) {
-  Forum.getPosts(function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      res.status(result.status).send(result.err);
-    } else {
-      // Return the forum post document object with 200 status
-      res.json({ forumPost: result });
+export async function postViews(req: Request, res: Response<Array<IForum>>) {
+  try {
+    const posts = await Forum.getPosts();
+    const response = Array<IForum>();
+    for (const post of posts){
+      response.push({
+        userID: post.userID,
+        communityID: post.communityID,
+        title: post.title,
+        bodyText: post.bodyText,
+        edited: post.edited,
+        upVotes: post.upVotes,
+        attachments: post.attachments,
+        downVotes: post.downVotes,
+        comments: post.comments,
+      })
     }
-  });
+    res.status(200).send(response);
+  }catch (err){
+    throw new ServerError('bad request', 400);
+  };
 }
 
 /**
@@ -101,21 +140,24 @@ export async function postCreate(
  * @param req HTTP request object containing forum post ID for identifying the post being viewed
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
-export function postViewById(req: Request, res: Response) {
-  const postID = req.params.id ? req.params.id : false;
-
-  if (isValidDocumentID(postID)) {
-    Forum.searchPostById(req.params.id, function (result) {
-      if (result.err) {
-        // Return the error message with the error status
-        res.status(result.status).send(result.err);
-      } else {
-        // Return the forum post document object with 200 status
-        res.json({ forumPost: result });
-      }
+export async function postViewById(req: Request, res: Response<IForum>) {
+  const postID = req.params.id;
+  
+  if (isValidDocumentID(postID)){
+    const post = await Forum.searchPostById(new mongoose.Types.ObjectId(postID));
+    res.status(200).send({
+      userID: post.userID,
+      communityID: post.communityID,
+      title: post.title,
+      bodyText: post.bodyText,
+      edited: post.edited,
+      upVotes: post.upVotes,
+      attachments: post.attachments,
+      downVotes: post.downVotes,
+      comments: post.comments,
     });
-  } else {
-    res.status(400).send('Bad request');
+  }else{
+    throw new ServerError('bad request', 400, { postID });
   }
 }
 
@@ -124,53 +166,57 @@ export function postViewById(req: Request, res: Response) {
  * @param req HTTP request object containing forum post fields being updated, user ID and auth token for verification
  * @param res HTTP request response status code and updated forum post data in JSON format or error message
  */
-export function postUpdateById(req: Request, res: Response) {
-  const postID = req.params.id ? req.params.id : false,
-    userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get('authToken')),
-    reqBody = req.body;
-  let forumUpdateParams;
+export async function postUpdateById(req: TypedRequestBody<UpdatePostDTO>, res: Response<IForum>) {
+  const authToken = req.get(config.get('authToken'));
+  const postID = req.params.id;
+  const forumUpdateParams: IValidation<UpdatePostDTO> = {
+    title: {
+      value: req.body.title,
+      valid: req.body.title.length > 0,
+    },
+    communityID: {
+      value: req.body.communityID,
+      valid: isValidDocumentID,
+    },
+    bodyText: {
+      value: req.body.bodyText,
+      valid: req.body.bodyText != undefined,
+    },
+    attachments: {
+      value: req.body.attachments,
+      valid: req.body.attachments != undefined,
+    },
+    upVotes: {
+      value: req.body.upVotes,
+      valid: req.body.upVotes != undefined,
+    },
+    downVotes: {
+      value: req.body.downVotes,
+      valid: req.body.downVotes != undefined,
+    }
+  }
 
-  // Set fields for updating to an object with either passed values or false to declare them as invalid
-  forumUpdateParams = {
-    communityID:
-      reqBody.communityID && reqBody.communityID.length > 2
-        ? reqBody.communityID
-        : false,
-    title: reqBody.title && reqBody.title.length > 0 ? reqBody.title : false,
-    bodyText: reqBody.text || false,
-    upVotes: reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
-    downVotes: reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
-    attachments: reqBody.images || false,
-  };
-
-  if (
-    isValidDocumentID(postID) &&
-    isValidDocumentID(userID) &&
-    isAnyFieldValid(forumUpdateParams)
-  ) {
-    User.isUserAuthorized(userID, authToken, function (result) {
-      if (result.isAuth) {
-        Forum.updatePostById(postID, forumUpdateParams, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return the forum post document object with 201 status
-            res.status(201).json({ forumPost: result });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
+  if (isFieldsValid(forumUpdateParams) && isValidDocumentID(postID)){
+    const params = getValidValues(forumUpdateParams);
+    const id = new mongoose.Types.ObjectId(postID);
+    const user = await searchUserByAuthToken(authToken);
+    const post = await Forum.updatePostById(id, {
+      userID: user._id.toString(),
+      ...params,
+    }, true, true);
+    res.status(200).send({
+      userID: post.userID,
+      communityID: post.communityID,
+      title: post.title,
+      bodyText: post.bodyText,
+      edited: post.edited,
+      upVotes: post.upVotes,
+      attachments: post.attachments,
+      downVotes: post.downVotes,
+      comments: post.comments,
     });
-  } else {
-    res.status(400).send('Bad request');
+  }else{
+    throw new ServerError('bad request', 400, { postID });
   }
 }
 
@@ -179,21 +225,13 @@ export function postUpdateById(req: Request, res: Response) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export function commentViewById(req: Request, res: Response) {
-  const postID = req.params.id ? req.params.id : false;
-
+export async function commentViewById(req: Request, res: Response<Array<IComment>>) {
+  const postID = req.params.id;
   if (isValidDocumentID(postID)) {
-    Forum.searchPostById(req.params.id, function (result) {
-      if (result.err) {
-        // Return the error message with the error status
-        res.status(result.status).send(result.err);
-      } else {
-        // Return the forum post document object with 200 status
-        res.json({ forumPostComments: result.comments });
-      }
-    });
-  } else {
-    res.status(400).send('Bad request');
+    const comments = await Forum.getAllCommentsByPostId(new mongoose.Types.ObjectId(postID));
+    res.status(200).send(comments);
+  }else{
+    throw new ServerError('bad request', 400);
   }
 }
 
@@ -202,47 +240,53 @@ export function commentViewById(req: Request, res: Response) {
  * @param req HTTP request object containing forum post comment field data, and post ID, and authorization token
  * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
-export function commentGiveById(req: Request, res: Response) {
-  const reqParams = req.params,
-    reqBody = req.body,
-    authToken = req.get(config.get('authToken')),
-    commentParams = {
-      postID: isValidDocumentID(reqParams.id) ? reqParams.id : false,
-      authorID: isValidDocumentID(reqBody.authorID) ? reqBody.authorID : false,
-      authorUserName:
-        reqBody.username && reqBody.username.length > 2
-          ? reqBody.username
-          : false,
-      bodyText:
-        reqBody.bodyText && reqBody.bodyText.length > 0
-          ? reqBody.bodyText
-          : false,
-      attachments: reqBody.images ? reqBody.images : [''],
-    };
+export async function commentGiveById(req: TypedRequestBody<CreateCommentDTO>, res: Response<IComment>) {
+  const authToken = req.get(config.get('authToken'));
 
-  if (isAllFieldsValid(commentParams)) {
-    User.isUserAuthorized(commentParams.authorID, authToken, function (result) {
-      if (result.isAuth) {
-        Forum.addComment(commentParams, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Comment was created successfully, return 201 status
-            res.status(201).json({ comment: result });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
+  const commentParams: IValidation<CreateCommentDTO> = {
+    postID: {
+      value: req.params.id,
+      valid: isValidDocumentID,
+    },
+    authorID: {
+      value: req.body.authorID,
+      valid: isValidDocumentID,
+    },
+    authorUserName: {
+      value: req.body.authorUserName,
+      valid: req.body.authorUserName != undefined,
+    },
+    bodyText: {
+      value: req.body.bodyText,
+      valid: req.body.bodyText != undefined,
+    },
+    attachments: {
+      value: req.body.attachments,
+      valid: req.body.attachments != undefined,
+    },
+  };
+
+  if (isFieldsValid(commentParams)) {
+    const params = getValidValues(commentParams);
+
+    const user = await searchUserByAuthToken(authToken);
+
+    const comment = await Forum.addComment({
+      ...params,
+    });
+
+    res.status(201).send({
+      postID: comment.postID,
+      authorID: comment.authorID,
+      authorUserName: comment.authorUserName,
+      bodyText: comment.bodyText,
+      edited: comment.edited,
+      upVotes: comment.upVotes,
+      downVotes: comment.downVotes,
+      attachments: comment.attachments,
     });
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 
@@ -251,46 +295,48 @@ export function commentGiveById(req: Request, res: Response) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export function commentUpdateById(req: Request, res: Response) {
-  const commentID = req.params.id ? req.params.id : false,
-    userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get('authToken')),
-    reqBody = req.body;
-  let commentUpdateParams;
-  // Set fields for updating to an object with either passed values or false to declare them as invalid
-  commentUpdateParams = {
-    bodyText: reqBody.text || false,
-    upVotes: reqBody.upVotes ? parseInteger(reqBody.upVotes, 0) : false,
-    downVotes: reqBody.downVotes ? parseInteger(reqBody.downVotes, 0) : false,
-  };
+export async function commentUpdateById(req: Request, res: Response<IComment>) {
+  const authToken = req.get(config.get('authToken'));
+  const commentID = req.params.id;
 
-  if (isValidDocumentID(userID) && isAnyFieldValid(commentUpdateParams)) {
-    User.isUserAuthorized(userID, authToken, function (result) {
-      if (result.isAuth) {
-        Forum.updateCommentById(
-          commentID,
-          commentUpdateParams,
-          function (result) {
-            if (result.err) {
-              // Return the error message with the error status
-              res.status(result.status).send(result.err);
-            } else {
-              // Return the comment post document object with 201 status
-              res.status(201).json({ commentPost: result });
-            }
-          },
-        );
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
-    });
+  const commentUpdateParams: IValidation<UpdateCommentDTO> = {
+    postID: {
+      value: req.body.postID,
+      valid: isValidDocumentID,
+    },
+    authorID: {
+      value: req.body.authorID,
+      valid: isValidDocumentID,
+    },
+    authorUserName: {
+      value: req.body.authorUserName,
+      valid: req.body.authorUserName != undefined,
+    },
+    upVotes: {
+      value: req.body.upVotes,
+      valid: req.body.upVotes != undefined,
+    },
+    downVotes: {
+      value: req.body.downVotes,
+      valid: req.body.downVotes != undefined,
+    },
+    attachments: {
+      value: req.body.attachments,
+      valid: req.body.attachments != undefined,
+    }
+  }
+
+  if (isValidDocumentID(commentID) && isFieldsValid(commentUpdateParams)) {
+
+    const params = getValidValues(commentUpdateParams);
+
+    const user = await searchUserByAuthToken(authToken);
+
+    const comment = await Forum.updateCommentById(new mongoose.Types.ObjectId(commentID),
+      params, true, true);
+    res.status(200).send(comment);
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 
@@ -299,33 +345,19 @@ export function commentUpdateById(req: Request, res: Response) {
  * @param req HTTP request object containing forum post ID, user ID, and authorization token for verification
  * @param res HTTP request response status code with message whether with error or success
  */
-export function postDeleteById(req: Request, res: Response) {
-  const postID = req.params.id ? req.params.id : false,
-    userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get('authToken'));
+export async function postDeleteById(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
 
-  if (isValidDocumentID(postID) && isValidDocumentID(userID)) {
-    User.isUserAuthorized(userID, authToken, function (result) {
-      if (result.isAuth) {
-        Forum.deletePostById(postID, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return a message body { success: true } with 200 status
-            res.status(200).json({ success: true });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
-    });
+  if (isValidDocumentID(req.params.id)) {
+    const id = new mongoose.Types.ObjectId(req.params.id);
+
+    if (await User.searchUserByAuthToken(authToken)) {
+      await Forum.deletePostById(id);
+      res.status(204).send();
+    } else {
+      throw new ServerError('forbidden', 403);
+    }
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }

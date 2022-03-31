@@ -9,7 +9,7 @@ export interface IForum {
   upVotes: number;
   downVotes: number;
   attachments: string[];
-  comments: string[];
+  comments: mongoose.Types.ObjectId[];
 }
 
 const forumSchema = new Schema<IForum>(
@@ -65,7 +65,7 @@ const forumSchema = new Schema<IForum>(
     // Contains the document IDs of post comments (optional)
     comments: [
       {
-        type: String,
+        type: mongoose.Types.ObjectId,
       },
     ],
   },
