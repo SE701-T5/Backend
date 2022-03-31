@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
+import Joi, { array, string } from 'joi';
 import { IForum } from '../config/db_schemas/forum.schema';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
+import { searchCommentById } from '../models/forum.server.model';
 import * as Forum from '../models/forum.server.model';
 import { searchUserByAuthToken } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
@@ -11,34 +13,29 @@ import { IComment } from '../config/db_schemas/comment.schema';
 
 interface CreatePostDTO {
   title: string;
-  communityID: string;
-  bodyText: string;
-  attachments: string[];
+  community: string;
+  bodyText?: string;
+  attachments?: string[];
 }
 
 interface UpdatePostDTO {
-  title: string;
-  communityID: string;
-  bodyText: string;
-  upVotes: number;
-  downVotes: number;
-  attachments: string[];
+  title?: string;
+  bodyText?: string;
+  upVotes?: number;
+  downVotes?: number;
+  attachments?: string[];
 }
 
 interface CreateCommentDTO {
   postID: string;
-  authorID: string;
-  authorUserName: string;
   bodyText: string;
   attachments: string[];
 }
 
 interface UpdateCommentDTO {
-  postID: string;
-  authorID: string;
-  authorUserName: string;
   upVotes: number;
   downVotes: number;
+  bodyText: string;
   attachments: string[];
 }
 
@@ -48,26 +45,21 @@ interface UpdateCommentDTO {
  * @param res HTTP request response object
  */
 export async function postViews(req: Request, res: Response<Array<IForum>>) {
-  try {
-    const posts = await Forum.getPosts();
-    const response = Array<IForum>();
-    for (const post of posts) {
-      response.push({
-        userID: post.userID,
-        communityID: post.communityID,
-        title: post.title,
-        bodyText: post.bodyText,
-        edited: post.edited,
-        upVotes: post.upVotes,
-        attachments: post.attachments,
-        downVotes: post.downVotes,
-        comments: post.comments,
-      });
-    }
-    res.status(200).send(response);
-  } catch (err) {
-    throw new ServerError('bad request', 400);
-  }
+  const posts = await Forum.getPosts();
+
+  const response = posts.map((post) => ({
+    owner: post.owner,
+    community: post.community,
+    title: post.title,
+    bodyText: post.bodyText,
+    edited: post.edited,
+    upVotes: post.upVotes,
+    attachments: post.attachments,
+    downVotes: post.downVotes,
+    comments: post.comments,
+  }));
+
+  res.status(200).send(response);
 }
 
 /**
@@ -81,50 +73,34 @@ export async function postCreate(
 ) {
   const authToken = req.get(config.get('authToken'));
 
-  // Set forum post fields to an object for passing to the model
-  const forumPostParams: IValidation<CreatePostDTO> = {
-    title: {
-      value: req.body.title,
-      valid: req.body.title.length > 0,
-    },
-    communityID: {
-      value: req.body.communityID,
-      valid: isValidDocumentID,
-    },
-    bodyText: {
-      value: req.body.bodyText,
-      valid: req.body.bodyText != undefined,
-    },
-    attachments: {
-      value: req.body.attachments,
-      valid: req.body.attachments != undefined,
-    },
-  };
+  const schema = Joi.object<CreatePostDTO>({
+    title: string().min(3).required(),
+    community: validators.objectId().required(),
+    bodyText: string().allow(['']),
+    attachments: array().items(string().uri()).max(3),
+  });
 
-  if (validateForm(forumPostParams)) {
-    const params = getValidValues(forumPostParams);
+  const data = validate(schema, req.body);
 
-    const user = await searchUserByAuthToken(authToken);
+  const user = await searchUserByAuthToken(authToken);
 
-    const post = await Forum.insertPost({
-      userID: user._id.toString(),
-      ...params,
-    });
+  const post = await Forum.insertPost({
+    ...data,
+    owner: user._id,
+    community: new mongoose.Types.ObjectId(data.community),
+  });
 
-    res.status(201).send({
-      userID: post.userID,
-      communityID: post.communityID,
-      title: post.title,
-      bodyText: post.bodyText,
-      edited: post.edited,
-      upVotes: post.upVotes,
-      attachments: post.attachments,
-      downVotes: post.downVotes,
-      comments: post.comments,
-    });
-  } else {
-    throw new ServerError('bad request', 400);
-  }
+  res.status(201).send({
+    owner: post.owner,
+    community: post.community,
+    title: post.title,
+    bodyText: post.bodyText,
+    edited: post.edited,
+    upVotes: post.upVotes,
+    attachments: post.attachments,
+    downVotes: post.downVotes,
+    comments: post.comments,
+  });
 }
 
 /**
@@ -133,26 +109,20 @@ export async function postCreate(
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
 export async function postViewById(req: Request, res: Response<IForum>) {
-  const postID = req.params.id;
+  const postID = new mongoose.Types.ObjectId(req.params.id);
 
-  if (isValidDocumentID(postID)) {
-    const post = await Forum.searchPostById(
-      new mongoose.Types.ObjectId(postID),
-    );
-    res.status(200).send({
-      userID: post.userID,
-      communityID: post.communityID,
-      title: post.title,
-      bodyText: post.bodyText,
-      edited: post.edited,
-      upVotes: post.upVotes,
-      attachments: post.attachments,
-      downVotes: post.downVotes,
-      comments: post.comments,
-    });
-  } else {
-    throw new ServerError('bad request', 400, { postID });
-  }
+  const post = await Forum.searchPostById(postID);
+  res.status(200).send({
+    owner: post.owner,
+    community: post.community,
+    title: post.title,
+    bodyText: post.bodyText,
+    edited: post.edited,
+    upVotes: post.upVotes,
+    attachments: post.attachments,
+    downVotes: post.downVotes,
+    comments: post.comments,
+  });
 }
 
 /**
@@ -165,61 +135,39 @@ export async function postUpdateById(
   res: Response<IForum>,
 ) {
   const authToken = req.get(config.get('authToken'));
-  const postID = req.params.id;
-  const forumUpdateParams: IValidation<UpdatePostDTO> = {
-    title: {
-      value: req.body.title,
-      valid: req.body.title.length > 0,
-    },
-    communityID: {
-      value: req.body.communityID,
-      valid: isValidDocumentID,
-    },
-    bodyText: {
-      value: req.body.bodyText,
-      valid: req.body.bodyText != undefined,
-    },
-    attachments: {
-      value: req.body.attachments,
-      valid: req.body.attachments != undefined,
-    },
-    upVotes: {
-      value: req.body.upVotes,
-      valid: req.body.upVotes != undefined,
-    },
-    downVotes: {
-      value: req.body.downVotes,
-      valid: req.body.downVotes != undefined,
-    },
-  };
 
-  if (isFieldsValid(forumUpdateParams) && isValidDocumentID(postID)) {
-    const params = getValidValues(forumUpdateParams);
-    const id = new mongoose.Types.ObjectId(postID);
-    const user = await searchUserByAuthToken(authToken);
-    const post = await Forum.updatePostById(
-      id,
-      {
-        userID: user._id.toString(),
-        ...params,
-      },
-      true,
-      true,
-    );
-    res.status(200).send({
-      userID: post.userID,
-      communityID: post.communityID,
-      title: post.title,
-      bodyText: post.bodyText,
-      edited: post.edited,
-      upVotes: post.upVotes,
-      attachments: post.attachments,
-      downVotes: post.downVotes,
-      comments: post.comments,
-    });
-  } else {
-    throw new ServerError('bad request', 400, { postID });
+  const schema = Joi.object<UpdatePostDTO>({
+    title: string().min(3),
+    attachments: array().items(string().uri()).max(3),
+    bodyText: string().allow(['']),
+    upVotes: validators.voteDelta(),
+    downVotes: validators.voteDelta(),
+  })
+    .min(1)
+    .xor('upVotes', 'downVotes');
+
+  const data = validate(schema, req.body);
+
+  const id = new mongoose.Types.ObjectId(req.params.id);
+  const post = await Forum.searchPostById(id);
+
+  if (!(await User.isUserAuthorized(post.owner, authToken))) {
+    throw new ServerError('forbidden', 403);
   }
+
+  const newPost = await Forum.updatePostById(id, data, true, true);
+
+  res.status(200).send({
+    owner: newPost.owner,
+    community: newPost.community,
+    title: newPost.title,
+    bodyText: newPost.bodyText,
+    edited: newPost.edited,
+    upVotes: newPost.upVotes,
+    attachments: newPost.attachments,
+    downVotes: newPost.downVotes,
+    comments: newPost.comments,
+  });
 }
 
 /**
@@ -231,15 +179,9 @@ export async function commentViewById(
   req: Request,
   res: Response<Array<IComment>>,
 ) {
-  const postID = req.params.id;
-  if (isValidDocumentID(postID)) {
-    const comments = await Forum.getAllCommentsByPostId(
-      new mongoose.Types.ObjectId(postID),
-    );
-    res.status(200).send(comments);
-  } else {
-    throw new ServerError('bad request', 400);
-  }
+  const postID = new mongoose.Types.ObjectId(req.params.id);
+  const comments = await Forum.getAllCommentsByPostId(postID);
+  res.status(200).send(comments);
 }
 
 /**
@@ -253,51 +195,31 @@ export async function commentGiveById(
 ) {
   const authToken = req.get(config.get('authToken'));
 
-  const commentParams: IValidation<CreateCommentDTO> = {
-    postID: {
-      value: req.params.id,
-      valid: isValidDocumentID,
-    },
-    authorID: {
-      value: req.body.authorID,
-      valid: isValidDocumentID,
-    },
-    authorUserName: {
-      value: req.body.authorUserName,
-      valid: req.body.authorUserName != undefined,
-    },
-    bodyText: {
-      value: req.body.bodyText,
-      valid: req.body.bodyText != undefined,
-    },
-    attachments: {
-      value: req.body.attachments,
-      valid: req.body.attachments != undefined,
-    },
-  };
+  const schema = Joi.object<CreateCommentDTO>({
+    postID: validators.objectId().required(),
+    bodyText: Joi.string().required(),
+    attachments: Joi.array().items(Joi.string().uri()).max(3),
+  });
 
-  if (isFieldsValid(commentParams)) {
-    const params = getValidValues(commentParams);
+  const data = validate(schema, req.body);
 
-    const user = await searchUserByAuthToken(authToken);
+  const user = await searchUserByAuthToken(authToken);
+  const comment = await Forum.addComment({
+    ...data,
+    authorID: user._id.toString(),
+    authorUserName: user.username,
+  });
 
-    const comment = await Forum.addComment({
-      ...params,
-    });
-
-    res.status(201).send({
-      postID: comment.postID,
-      authorID: comment.authorID,
-      authorUserName: comment.authorUserName,
-      bodyText: comment.bodyText,
-      edited: comment.edited,
-      upVotes: comment.upVotes,
-      downVotes: comment.downVotes,
-      attachments: comment.attachments,
-    });
-  } else {
-    throw new ServerError('bad request', 400);
-  }
+  res.status(201).send({
+    postID: comment.postID,
+    authorID: comment.authorID,
+    authorUserName: comment.authorUserName,
+    bodyText: comment.bodyText,
+    edited: comment.edited,
+    upVotes: comment.upVotes,
+    downVotes: comment.downVotes,
+    attachments: comment.attachments,
+  });
 }
 
 /**
@@ -307,50 +229,32 @@ export async function commentGiveById(
  */
 export async function commentUpdateById(req: Request, res: Response<IComment>) {
   const authToken = req.get(config.get('authToken'));
-  const commentID = req.params.id;
 
-  const commentUpdateParams: IValidation<UpdateCommentDTO> = {
-    postID: {
-      value: req.body.postID,
-      valid: isValidDocumentID,
-    },
-    authorID: {
-      value: req.body.authorID,
-      valid: isValidDocumentID,
-    },
-    authorUserName: {
-      value: req.body.authorUserName,
-      valid: req.body.authorUserName != undefined,
-    },
-    upVotes: {
-      value: req.body.upVotes,
-      valid: req.body.upVotes != undefined,
-    },
-    downVotes: {
-      value: req.body.downVotes,
-      valid: req.body.downVotes != undefined,
-    },
-    attachments: {
-      value: req.body.attachments,
-      valid: req.body.attachments != undefined,
-    },
-  };
+  const schema = Joi.object<UpdateCommentDTO>({
+    bodyText: Joi.string(),
+    upVotes: validators.voteDelta(),
+    downVotes: validators.voteDelta(),
+    attachments: Joi.array().items(Joi.string().uri()).max(3),
+  })
+    .min(1)
+    .xor('upVotes', 'downVotes');
 
-  if (isValidDocumentID(commentID) && isFieldsValid(commentUpdateParams)) {
-    const params = getValidValues(commentUpdateParams);
+  const data = validate(schema, req.body);
 
-    const user = await searchUserByAuthToken(authToken);
+  const commentID = new mongoose.Types.ObjectId(req.params.id);
+  const comment = await searchCommentById(commentID);
 
-    const comment = await Forum.updateCommentById(
-      new mongoose.Types.ObjectId(commentID),
-      params,
-      true,
-      true,
-    );
-    res.status(200).send(comment);
-  } else {
-    throw new ServerError('bad request', 400);
+  if (
+    !(await User.isUserAuthorized(
+      new mongoose.Types.ObjectId(comment.authorID),
+      authToken,
+    ))
+  ) {
+    throw new ServerError('forbidden', 403);
   }
+
+  const newComment = await Forum.updateCommentById(commentID, data, true, true);
+  res.status(200).send(newComment);
 }
 
 /**
@@ -360,17 +264,14 @@ export async function commentUpdateById(req: Request, res: Response<IComment>) {
  */
 export async function postDeleteById(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken'));
+  const id = new mongoose.Types.ObjectId(req.params.id);
 
-  if (isValidDocumentID(req.params.id)) {
-    const id = new mongoose.Types.ObjectId(req.params.id);
+  const forum = await Forum.searchPostById(id);
 
-    if (await User.searchUserByAuthToken(authToken)) {
-      await Forum.deletePostById(id);
-      res.status(204).send();
-    } else {
-      throw new ServerError('forbidden', 403);
-    }
+  if (await User.isUserAuthorized(forum.owner, authToken)) {
+    await Forum.deletePostById(id);
+    res.status(204).send();
   } else {
-    throw new ServerError('bad request', 400);
+    throw new ServerError('forbidden', 403);
   }
 }

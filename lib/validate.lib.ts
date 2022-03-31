@@ -3,10 +3,14 @@ import { ServerError } from './utils.lib';
 
 const username = () => Joi.string().min(3).alphanum();
 const password = () => Joi.string().min(6);
+const objectId = () => Joi.string().hex().length(24);
+const voteDelta = () => Joi.number().valid([-1, 1]);
 
 export const validators = {
   username,
   password,
+  objectId,
+  voteDelta,
 };
 
 export function validate<T>(

@@ -1,6 +1,6 @@
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
-import { CommunityDocument } from '../config/db_schemas/community.schema';
+
 import Forum, {
   ForumDocument,
   IForum,
@@ -12,10 +12,10 @@ import Comment, {
 import { getProp, ServerError } from '../lib/utils.lib';
 
 interface InsertPostDTO {
-  userID: string;
-  communityID: string;
+  owner: mongoose.Types.ObjectId;
+  community: mongoose.Types.ObjectId;
   title: string;
-  bodyText: string;
+  bodyText?: string;
   edited?: boolean;
   upVotes?: number;
   downVotes?: number;
@@ -43,8 +43,8 @@ export async function insertPost(
 ): Promise<ForumDocument> {
   // Create new forum post document
   const newPost = new Forum({
-    userID: params.userID,
-    communityID: params.communityID,
+    owner: params.owner,
+    community: params.community,
     title: params.title,
     bodyText: params.bodyText,
     edited: params.edited ?? false,
@@ -182,7 +182,7 @@ export async function addComment(
 
   await updatePostById(
     new mongoose.Types.ObjectId(comment.postID),
-    { comments: post.comments.concat(comment.id) },
+    { comments: post.comments.concat(comment._id) },
     true,
   );
 
@@ -238,7 +238,9 @@ export async function updateCommentById(
   }
 }
 
-export async function searchCommentById(id: mongoose.Types.ObjectId,): Promise<CommentDocument> {
+export async function searchCommentById(
+  id: mongoose.Types.ObjectId,
+): Promise<CommentDocument> {
   let resource: CommentDocument;
 
   try {
@@ -253,29 +255,16 @@ export async function searchCommentById(id: mongoose.Types.ObjectId,): Promise<C
   }
 }
 
-export async function getAllCommentsByPostId(id: mongoose.Types.ObjectId,): Promise<Array<IComment>>{
-  try {
-    const post = await Forum.findOne({_id : id}).populate('comments').exec();
-    if (post != null) {
-      const comments : IComment[] = [];
-      for (const comment of post.comments){
-        const commentDocument = {
-          postID: comment['postID'],
-          authorID: comment['authorID'],
-          authorUserName: comment['authorUserName'],
-          bodyText: comment['bodyText'],
-          edited: comment['edited'],
-          upVotes: comment['upVotes'],
-          downVotes: comment['downVotes'],
-          attachments: comment['attachments'],
-        }
-        comments.push(commentDocument);
-      }
-      return comments;
-    }else{
-      throw new ServerError('forum post not found', 404);
-    }
-  }catch (err){
-    throw new ServerError('Internal server error', 500, err);
+export async function getAllCommentsByPostId(
+  id: mongoose.Types.ObjectId,
+): Promise<IComment[]> {
+  const post = await Forum.findById(id)
+    .populate<{ comments: IComment[] }>('comments')
+    .exec();
+
+  if (post != null) {
+    return post.comments;
+  } else {
+    throw new ServerError('forum post not found', 404);
   }
 }

@@ -1,8 +1,11 @@
 import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import CommentModel from './comment.schema';
+import CommunityModel from './community.schema';
+import UserModel from './user.schema';
 
 export interface IForum {
-  userID: string;
-  communityID: string;
+  owner: mongoose.Types.ObjectId;
+  community: mongoose.Types.ObjectId;
   title: string;
   bodyText: string;
   edited: boolean;
@@ -15,19 +18,16 @@ export interface IForum {
 const forumSchema = new Schema<IForum>(
   {
     // The User's ID who owns the forum post - must be a document ID length
-    userID: {
-      type: String,
+    owner: {
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
+      ref: UserModel.modelName,
     },
     // The ID for the community the blog is associates with
-    communityID: {
-      type: String,
+    community: {
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true,
-      minlength: 3,
+      ref: CommunityModel.modelName,
     },
     // Title of the forum post
     title: {
@@ -40,32 +40,41 @@ const forumSchema = new Schema<IForum>(
     bodyText: {
       type: String,
       required: true,
+      default: '',
     },
     // Used to determine whether a post has been edited
     edited: {
       type: Boolean,
       required: true,
+      default: false,
     },
     // Indicates the number of up votes the forum post has
     upVotes: {
       type: Number,
       required: true,
+      default: 0,
     },
     // Indicates the number of down votes the forum post has
     downVotes: {
       type: Number,
       required: true,
+      default: 0,
     },
     // Contains list of file paths to attachments (optional)
     attachments: [
       {
         type: String,
+        default: [],
+        required: true,
       },
     ],
     // Contains the document IDs of post comments (optional)
     comments: [
       {
-        type: mongoose.Types.ObjectId,
+        type: Schema.Types.ObjectId,
+        ref: CommentModel.modelName,
+        required: true,
+        default: [],
       },
     ],
   },
