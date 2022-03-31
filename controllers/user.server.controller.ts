@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
-import { ServerError, TypedRequestBody } from '../lib/utils.lib';
+import {
+  convertToObjectId,
+  ServerError,
+  TypedRequestBody,
+} from '../lib/utils.lib';
 import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
@@ -91,7 +95,7 @@ export async function userLogout(req: Request, res: Response) {
   const user = await User.searchUserByAuthToken(authToken);
   await User.removeUserAuthToken(user._id);
 
-  res.status(201).send();
+  res.status(204).send();
 }
 
 /**
@@ -103,7 +107,7 @@ export async function userViewById(
   req: Request,
   res: Response<UserResponseDTO>,
 ) {
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
   const user = await User.searchUserById(id);
 
   res.status(200).send({
@@ -134,7 +138,7 @@ export async function userUpdateById(
 
   const data = validate(schema, req.body);
 
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
   if (await User.isUserAuthorized(id, authToken)) {
     const user = await User.updateUserById(id, data);
     res.status(200).send({
@@ -155,7 +159,7 @@ export async function userUpdateById(
  */
 export async function userDeleteById(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken'));
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
 
   if (await User.isUserAuthorized(id, authToken)) {
     await User.deleteUserById(id);

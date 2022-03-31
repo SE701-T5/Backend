@@ -17,10 +17,12 @@ export async function isRequestTokenAuthorized(
   try {
     const authToken = req.header(config.get('authToken'));
 
+    if (authToken == undefined) throw new ServerError('Unauthorised', 401);
+
     try {
       await User.searchUserByAuthToken(authToken);
     } catch (err) {
-      throw new ServerError('Unauthorised', 401, err);
+      throw new ServerError('Unauthorised', 401);
     }
 
     next();
@@ -43,7 +45,10 @@ export function errorHandler(
   next: NextFunction,
 ) {
   if (!(err instanceof ServerError)) {
+    console.error('unhandled error', err);
     err = new ServerError('internal server error', 500, err);
+  } else if (err.status === 500) {
+    console.error('server error', err);
   }
 
   // update typings

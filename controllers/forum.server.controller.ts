@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import Joi, { array, string } from 'joi';
 import { IPost } from '../config/db_schemas/post.schema';
 import { UserDocument } from '../config/db_schemas/user.schema';
-import { ServerError, TypedRequestBody } from '../lib/utils.lib';
+import {
+  convertToObjectId,
+  ServerError,
+  TypedRequestBody,
+} from '../lib/utils.lib';
 import { searchCommentById } from '../models/forum.server.model';
 import * as Forum from '../models/forum.server.model';
 import { searchUserByAuthToken } from '../models/user.server.model';
@@ -104,7 +108,7 @@ export async function postCreate(
   const post = await Forum.insertPost({
     ...data,
     owner: user._id,
-    community: new mongoose.Types.ObjectId(data.community),
+    community: convertToObjectId(data.community),
   });
 
   res.status(201).send({
@@ -128,7 +132,7 @@ export async function postCreate(
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
 export async function postViewById(req: Request, res: Response<IPost>) {
-  const postID = new mongoose.Types.ObjectId(req.params.id);
+  const postID = convertToObjectId(req.params.id);
 
   const post = await Forum.searchPostById(postID);
   res.status(200).send({
@@ -169,7 +173,7 @@ export async function postUpdateById(
 
   const data = validate(schema, req.body);
 
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
   const post = await Forum.searchPostById(id);
 
   if (!(await User.isUserAuthorized(post.owner, authToken))) {
@@ -202,7 +206,7 @@ export async function commentViewById(
   req: Request,
   res: Response<CommentResponse[]>,
 ) {
-  const postID = new mongoose.Types.ObjectId(req.params.id);
+  const postID = convertToObjectId(req.params.id);
   const comments = await Forum.getAllCommentsByPostId(postID);
   res.status(200).send(
     comments.map((comment) => ({
@@ -237,7 +241,7 @@ export async function commentGiveById(
   });
 
   const data = validate(schema, req.body);
-  const postId = new mongoose.Types.ObjectId(data.postID);
+  const postId = convertToObjectId(data.postID);
 
   const user = await searchUserByAuthToken(authToken);
   const comment = await Forum.addComment(postId, {
@@ -280,15 +284,10 @@ export async function commentUpdateById(
 
   const data = validate(schema, req.body);
 
-  const commentID = new mongoose.Types.ObjectId(req.params.id);
+  const commentID = convertToObjectId(req.params.id);
   const comment = await searchCommentById(commentID);
 
-  if (
-    !(await User.isUserAuthorized(
-      new mongoose.Types.ObjectId(comment.owner),
-      authToken,
-    ))
-  ) {
+  if (!(await User.isUserAuthorized(comment.owner, authToken))) {
     throw new ServerError('forbidden', 403);
   }
 
@@ -316,7 +315,7 @@ export async function commentUpdateById(
  */
 export async function postDeleteById(req: Request, res: Response) {
   const authToken = req.get(config.get('authToken'));
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
 
   const forum = await Forum.searchPostById(id);
 

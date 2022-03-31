@@ -2,7 +2,11 @@ import { Response } from 'express';
 import Joi, { array, string } from 'joi';
 import mongoose from 'mongoose';
 import { ICommunity } from '../config/db_schemas/community.schema';
-import { ServerError, TypedRequestBody } from '../lib/utils.lib';
+import {
+  convertToObjectId,
+  ServerError,
+  TypedRequestBody,
+} from '../lib/utils.lib';
 import * as Community from '../models/community.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
@@ -38,7 +42,7 @@ export async function communityUpdateById(
 
   const data = validate(schema, req.body);
 
-  const id = new mongoose.Types.ObjectId(req.params.id);
+  const id = convertToObjectId(req.params.id);
   const community = await Community.searchCommunityById(id);
 
   if (!(await User.isUserAuthorized(community.owner, authToken))) {
