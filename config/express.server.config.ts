@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import { errorHandler } from '../lib/middleware.lib';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
@@ -38,6 +39,9 @@ export default function () {
   forumServerRoutes(app);
   userServerRoutes(app);
   communityServerRoutes(app);
+
+  // Configure Error Handler
+  app.use(errorHandler);
 
   return app;
 }

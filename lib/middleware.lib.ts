@@ -1,6 +1,6 @@
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { ServerError } from './utils.lib';
 
 /**
@@ -24,4 +24,34 @@ export async function isRequestTokenAuthorized(
   }
 
   next();
+}
+
+export function asyncHandler(
+  fn: (req: Request, res: Response, next?: NextFunction) => unknown,
+) {
+  return (req: Request, res: Response, next: NextFunction) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
+}
+
+export function errorHandler(
+  err: unknown,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!(err instanceof ServerError)) {
+    err = new ServerError('internal server error', 500, err);
+  }
+
+  // update typings
+  const serverError = err as ServerError;
+
+  res.status(serverError.status).send({
+    code: serverError.status,
+    error: serverError.desc,
+    context:
+      config.get('environment') === 'development'
+        ? JSON.stringify(serverError.context)
+        : undefined,
+  });
 }
