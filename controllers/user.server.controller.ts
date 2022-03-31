@@ -1,7 +1,8 @@
 import emailValidator from 'email-validator';
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
-import { CreateUserDTO } from '../models/user.server.model';
+import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
@@ -15,15 +16,13 @@ interface UserResponseDTO {
   username: string;
   displayName: string;
   email: string;
+  authToken?: string;
 }
 
-/**
- * Returns a random displayName (e.g. User0001)
- */
-function generateDisplayName() {
-  const maxValue = 9999;
-  const randomNumber = Math.floor(Math.random() * maxValue);
-  return 'User' + randomNumber.toString();
+interface LoginDTO {
+  plaintextPassword: string;
+  email?: string;
+  username?: string;
 }
 
 /**
@@ -62,6 +61,7 @@ export async function userCreate(
       displayName: user.displayName,
       email: user.email,
       username: user.username,
+      authToken: user.authToken,
     });
   } else {
     throw new ServerError('bad request', 400);
@@ -73,67 +73,49 @@ export async function userCreate(
  * @param req HTTP request object containing the user login (email or username) and password for authentication
  * @param res HTTP request response object status code and user ID and authorization token, or error message
  */
-export function userLogin(req: Request, res: Response) {
-  const reqBody = req.body,
-    plaintextPassword =
-      reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
-        ? reqBody.plaintextPassword
-        : false;
-
-  const forumUserLoginBody = {
-    username:
-      reqBody.username && reqBody.username.length > 2
-        ? reqBody.username
-        : false,
-    email:
-      reqBody.email && emailValidator.validate(reqBody.email)
-        ? reqBody.email
-        : false,
+export async function userLogin(
+  req: TypedRequestBody<LoginDTO>,
+  res: Response<UserResponseDTO>,
+) {
+  const validateParams: IValidation<LoginDTO> = {
+    plaintextPassword: {
+      value: req.body.plaintextPassword,
+      valid: req.body.plaintextPassword.length > 0,
+    },
+    username: {
+      value: req.body.username,
+      required: true,
+      valid: req.body.username.length > 2 || req.body.email != undefined,
+    },
+    email: {
+      value: req.body.email,
+      required: true,
+      valid:
+        emailValidator.validate(req.body.email) ||
+        req.body.username != undefined,
+    },
   };
 
-  if (isAnyFieldValid(forumUserLoginBody) && plaintextPassword) {
-    User.authenticateUser(
-      forumUserLoginBody,
-      plaintextPassword,
-      function (result) {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          if (result.res) {
-            const userID = result.res._id;
-            User.getUserAuthToken(userID, function (result) {
-              if (result.err) {
-                // Return the error message with the error status
-                res.status(result.status).send(result.err);
-              } else if (result) {
-                // Return the authorization token if already set for the user
-                res.send({ status: 200, userID: userID, authToken: result });
-              } else {
-                // Set a new authorization token if one not already set for the user
-                User.setUserAuthToken(userID, function (result) {
-                  if (result.err) {
-                    // Return the error message with the error status
-                    res.status(result.status).send(result.err);
-                  } else {
-                    // Return the newly set authorization token for the user
-                    res.send({
-                      status: 200,
-                      userID: userID,
-                      authToken: result.res,
-                    });
-                  }
-                });
-              }
-            });
-          } else {
-            res.status(404).send('Not found');
-          }
-        }
-      },
+  if (isFieldsValid(validateParams)) {
+    const params = getValidValues(validateParams);
+
+    const login: User.LoginInfoDTO = params.email
+      ? { email: params.email }
+      : { username: params.username };
+
+    const user = await User.authenticateUser(
+      login,
+      params.plaintextPassword,
+      true,
     );
+    res.status(200).send({
+      username: user.username,
+      displayName: user.displayName,
+      email: user.email,
+      authToken: user.authToken,
+    });
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 
@@ -142,33 +124,13 @@ export function userLogin(req: Request, res: Response) {
  * @param req HTTP request object containing forum user ID, and authorization token for verification
  * @param res HTTP request response status code and message
  */
-export function userLogout(req: Request, res: Response) {
-  const userID = req.body.userID ? req.body.userID : false,
-    authToken = req.get(config.get('authToken'));
+export async function userLogout(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
 
-  if (isValidDocumentID(userID)) {
-    User.isUserAuthorized(userID, authToken, function (result) {
-      if (result.isAuth) {
-        User.removeUserAuthToken(userID, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            res.status(result.status).send('Success');
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
-    });
-  } else {
-    res.status(400).send('Bad request');
-  }
+  const user = await User.searchUserByAuthToken(authToken);
+  await User.removeUserAuthToken(user._id);
+
+  res.status(201).send();
 }
 
 /**
@@ -176,21 +138,21 @@ export function userLogout(req: Request, res: Response) {
  * @param req HTTP request object containing user ID and authorization token for verification
  * @param res HTTP request response status code and user data in JSON format or error message
  */
-export function userViewById(req: Request, res: Response) {
+export async function userViewById(
+  req: Request,
+  res: Response<UserResponseDTO>,
+) {
   const id = req.params.id;
 
   if (isValidDocumentID(id)) {
-    User.searchUserById(id, function (result) {
-      if (result.err) {
-        // Return the error message with the error status
-        res.status(result.status).send(result.err);
-      } else {
-        // Return the user document object with 200 status
-        res.json({ user: result });
-      }
+    const user = await User.searchUserById(new mongoose.Types.ObjectId(id));
+    res.status(200).send({
+      username: user.username,
+      displayName: user.displayName,
+      email: user.email,
     });
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400, { id });
   }
 }
 
@@ -199,54 +161,52 @@ export function userViewById(req: Request, res: Response) {
  * @param req HTTP request object containing the user fields being updated, user ID and auth token for verification
  * @param res HTTP request response object status code and updated user data in JSON format or error message
  */
-export function userUpdateById(req: Request, res: Response) {
-  const reqParams = req.params,
-    authToken = req.get(config.get('authToken')),
-    reqBody = req.body;
+export async function userUpdateById(
+  req: TypedRequestBody<UpdateUserDTO>,
+  res: Response<UserResponseDTO>,
+) {
+  const authToken = req.get(config.get('authToken'));
 
   // Set fields for updating to an object with either passed values or false to declare them as invalid
-  const userUpdateParams = {
-    username:
-      reqBody.username && reqBody.username.length > 2
-        ? reqBody.username
-        : false,
-    displayName:
-      reqBody.displayName && reqBody.displayName.length > 2
-        ? reqBody.displayName
-        : false,
-    email:
-      reqBody.email && emailValidator.validate(reqBody.email)
-        ? reqBody.email
-        : false,
-    plaintextPassword:
-      reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
-        ? reqBody.plaintextPassword
-        : false,
+  const userUpdateParams: IValidation<UpdateUserDTO> = {
+    username: {
+      valid: req.body.username.length > 2,
+      required: false,
+      value: req.body.username,
+    },
+    displayName: {
+      valid: req.body.displayName.length > 2,
+      required: false,
+      value: req.body.displayName,
+    },
+    email: {
+      valid: emailValidator.validate(req.body.email),
+      required: false,
+      value: req.body.email,
+    },
+    plaintextPassword: {
+      valid: req.body.plaintextPassword.length > 0,
+      required: false,
+      value: req.body.plaintextPassword,
+    },
   };
 
-  if (isValidDocumentID(reqParams.id) && isAnyFieldValid(userUpdateParams)) {
-    User.isUserAuthorized(reqParams.id, authToken, function (result) {
-      if (result.isAuth) {
-        User.updateUserById(reqParams.id, userUpdateParams, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return the forum post document object with 201 status
-            res.status(201).json({ updatedForumUser: result });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
-    });
+  if (isFieldsValid(userUpdateParams) && isValidDocumentID(req.params.id)) {
+    const params = getValidValues(userUpdateParams);
+    const id = new mongoose.Types.ObjectId(req.params.id);
+
+    if (await User.isUserAuthorized(id, authToken)) {
+      const user = await User.updateUserById(id, params);
+      res.status(200).send({
+        username: user.username,
+        email: user.email,
+        displayName: user.displayName,
+      });
+    } else {
+      throw new ServerError('forbidden', 403);
+    }
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }
 
@@ -255,32 +215,19 @@ export function userUpdateById(req: Request, res: Response) {
  * @param req HTTP request object containing the user ID and authorization token for verification
  * @param res HTTP request response status code with message for whether in error or success
  */
-export function userDeleteById(req: Request, res: Response) {
-  const reqParams = req.params,
-    authToken = req.get(config.get('authToken'));
+export async function userDeleteById(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
 
-  if (isValidDocumentID(reqParams.id)) {
-    User.isUserAuthorized(reqParams.id, authToken, function (result) {
-      if (result.isAuth) {
-        User.deleteUserById(reqParams.id, function (result) {
-          if (result.err) {
-            // Return the error message with the error status
-            res.status(result.status).send(result.err);
-          } else {
-            // Return a message body { success: true } with 200 status
-            res.status(200).json({ success: true });
-          }
-        });
-      } else {
-        if (result.err) {
-          // Return the error message with the error status
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(401).send('Unauthorized');
-        }
-      }
-    });
+  if (isValidDocumentID(req.params.id)) {
+    const id = new mongoose.Types.ObjectId(req.params.id);
+
+    if (await User.isUserAuthorized(id, authToken)) {
+      await User.deleteUserById(id);
+      res.status(204).send();
+    } else {
+      throw new ServerError('forbidden', 403);
+    }
   } else {
-    res.status(400).send('Bad request');
+    throw new ServerError('bad request', 400);
   }
 }

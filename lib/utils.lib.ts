@@ -1,3 +1,6 @@
+import { Request, Response } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+
 export class ServerError {
   public constructor(
     public desc: string,
@@ -15,6 +18,4 @@ export function getProp(o: unknown, prop: string): unknown {
   return undefined;
 }
 
-export interface TypedRequestBody<T> extends Express.Request {
-  body: T;
-}
+export type TypedRequestBody<T> = Request<ParamsDictionary, any, T>;

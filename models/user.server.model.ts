@@ -1,9 +1,7 @@
 import * as Crypto from 'crypto';
-import mongoose from 'mongoose';
-import { CommunityDocument } from '../config/db_schemas/community.schema';
-import Forum from '../config/db_schemas/forum.schema';
-import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
 import { DeleteResult } from 'mongodb';
+import mongoose from 'mongoose';
+import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
 export interface CreateUserDTO {
@@ -13,12 +11,12 @@ export interface CreateUserDTO {
   plaintextPassword: string;
 }
 
-interface UpdateUserDTO
+export interface UpdateUserDTO
   extends Partial<Omit<IUser, 'hashedPassword' | 'salt'>> {
   plaintextPassword?: string;
 }
 
-type LoginDTO = { email: string } | { username: string };
+export type LoginInfoDTO = { email: string } | { username: string };
 
 interface HashedPassword {
   hash: string;
@@ -168,10 +166,12 @@ export async function updateUserById(
  * Authenticates a user by searching for any existing user in the database with a matching provided login and password
  * @param login the given { login-type: login-value } being matched with a login of any existing user in the database
  * @param plaintextPassword the given password being matched with the password of an existing user matched by the given login
+ * @param forceNewAuthToken if set to true, will always generate a new auth-token. Otherwise, will only create if none exist
  */
 export async function authenticateUser(
-  login: LoginDTO,
+  login: LoginInfoDTO,
   plaintextPassword: string,
+  forceNewAuthToken?: boolean,
 ): Promise<UserDocument> {
   let res: UserDocument;
 
@@ -188,6 +188,11 @@ export async function authenticateUser(
     salt: res.salt,
   };
   if (checkPassword(plaintextPassword, hashedPassword)) {
+    // User has successfully authenticated
+    if (res.authToken == null || forceNewAuthToken) {
+      return await setUserAuthToken(res._id);
+    }
+
     return res;
   } else {
     throw new ServerError('incorrect password', 401);
@@ -211,11 +216,10 @@ export async function getUserAuthToken(
  */
 export async function setUserAuthToken(
   userID: mongoose.Types.ObjectId,
-): Promise<string> {
+): Promise<UserDocument> {
   const authToken = Crypto.randomBytes(16).toString('hex');
 
-  const user = await updateUserById(userID, { authToken });
-  return user.authToken;
+  return await updateUserById(userID, { authToken });
 }
 
 /**
