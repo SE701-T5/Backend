@@ -1,5 +1,6 @@
 import emailValidator from 'email-validator';
 import { Request, Response } from 'express';
+import Joi from 'joi';
 import mongoose from 'mongoose';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
@@ -34,38 +35,26 @@ export async function userCreate(
   req: TypedRequestBody<CreateUserDTO>,
   res: Response<UserResponseDTO>,
 ) {
-  const forumUserParams: IValidation<CreateUserDTO> = {
-    username: {
-      valid: req.body.username.length > 2,
-      value: req.body.username,
-    },
-    displayName: {
-      valid: req.body.displayName.length > 2,
-      value: req.body.displayName,
-    },
-    email: {
-      valid: emailValidator.validate(req.body.email),
-      value: req.body.email,
-    },
-    plaintextPassword: {
-      valid: req.body.plaintextPassword.length > 0,
-      value: req.body.plaintextPassword,
-    },
-  };
+  const data = req.body;
+  const rules = Joi.object<CreateUserDTO>({
+    username: Joi.string().alphanum().min(2).required(),
+    displayName: Joi.string().alphanum().min(2).required(),
+    email: Joi.string().email().required(),
+    plaintextPassword: Joi.string().min(6).required(),
+  });
 
-  if (validateForm(forumUserParams)) {
-    const params = getValidValues(forumUserParams);
-
-    const user = await User.createUser(params);
-    res.status(201).json({
-      displayName: user.displayName,
-      email: user.email,
-      username: user.username,
-      authToken: user.authToken,
-    });
-  } else {
-    throw new ServerError('bad request', 400);
+  const formData = rules.validate(data);
+  if (formData.error) {
+    throw new ServerError(formData.error.message, 400, formData);
   }
+
+  const user = await User.createUser(formData.value);
+  res.status(201).json({
+    displayName: user.displayName,
+    email: user.email,
+    username: user.username,
+    authToken: user.authToken,
+  });
 }
 
 /**
