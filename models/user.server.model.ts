@@ -238,6 +238,9 @@ export async function isUserAuthorized(
 ): Promise<boolean> {
   const user = await searchUserById(userID);
 
+  if (user.authToken == null)
+    throw new ServerError('forbidden', 403, 'no auth token found on user');
+
   const dbAuthToken = Buffer.from(user.authToken, 'hex');
   const providedAuthToken = Buffer.from(authToken, 'hex');
 
