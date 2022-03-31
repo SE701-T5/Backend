@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Joi, { array, string } from 'joi';
-import { IForum } from '../config/db_schemas/forum.schema';
+import { IPost } from '../config/db_schemas/post.schema';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import { searchCommentById } from '../models/forum.server.model';
 import * as Forum from '../models/forum.server.model';
@@ -44,7 +44,7 @@ interface UpdateCommentDTO {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export async function postViews(req: Request, res: Response<Array<IForum>>) {
+export async function postViews(req: Request, res: Response<Array<IPost>>) {
   const posts = await Forum.getPosts();
 
   const response = posts.map((post) => ({
@@ -69,7 +69,7 @@ export async function postViews(req: Request, res: Response<Array<IForum>>) {
  */
 export async function postCreate(
   req: TypedRequestBody<CreatePostDTO>,
-  res: Response<IForum>,
+  res: Response<IPost>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -108,7 +108,7 @@ export async function postCreate(
  * @param req HTTP request object containing forum post ID for identifying the post being viewed
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
-export async function postViewById(req: Request, res: Response<IForum>) {
+export async function postViewById(req: Request, res: Response<IPost>) {
   const postID = new mongoose.Types.ObjectId(req.params.id);
 
   const post = await Forum.searchPostById(postID);
@@ -132,7 +132,7 @@ export async function postViewById(req: Request, res: Response<IForum>) {
  */
 export async function postUpdateById(
   req: TypedRequestBody<UpdatePostDTO>,
-  res: Response<IForum>,
+  res: Response<IPost>,
 ) {
   const authToken = req.get(config.get('authToken'));
 

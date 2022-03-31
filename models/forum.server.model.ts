@@ -1,10 +1,7 @@
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
 
-import Forum, {
-  ForumDocument,
-  IForum,
-} from '../config/db_schemas/forum.schema';
+import Forum, { PostDocument, IPost } from '../config/db_schemas/post.schema';
 import Comment, {
   CommentDocument,
   IComment,
@@ -38,9 +35,7 @@ interface InsertCommentDTO {
  * Insert a new forum post to the database
  * @param params object containing forum post attributes
  */
-export async function insertPost(
-  params: InsertPostDTO,
-): Promise<ForumDocument> {
+export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
   // Create new forum post document
   const newPost = new Forum({
     owner: params.owner,
@@ -73,8 +68,8 @@ export async function insertPost(
  */
 export async function searchPostById(
   id: mongoose.Types.ObjectId,
-): Promise<ForumDocument> {
-  let resource: ForumDocument;
+): Promise<PostDocument> {
+  let resource: PostDocument;
 
   try {
     resource = await Forum.findById(id);
@@ -119,7 +114,7 @@ export async function deletePostById(
  */
 export async function updatePostById(
   id: mongoose.Types.ObjectId,
-  updates: Partial<IForum>,
+  updates: Partial<IPost>,
   checkForEdits: boolean,
   deltaVotes = false,
 ) {
@@ -140,7 +135,7 @@ export async function updatePostById(
     updates.downVotes = post.downVotes + updates.downVotes;
   }
 
-  let resource: ForumDocument;
+  let resource: PostDocument;
   try {
     resource = await Forum.findOneAndUpdate(
       { _id: id },
@@ -192,7 +187,7 @@ export async function addComment(
 /**
  * Search for a forum post in the database
  */
-export async function getPosts(): Promise<ForumDocument[]> {
+export async function getPosts(): Promise<PostDocument[]> {
   try {
     return await Forum.find();
   } catch (err) {

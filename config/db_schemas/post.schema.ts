@@ -1,7 +1,7 @@
 import mongoose, { HydratedDocument, Schema } from 'mongoose';
 import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface IForum extends TimestampedModel {
+export interface IPost extends TimestampedModel {
   owner: mongoose.Types.ObjectId;
   community: mongoose.Types.ObjectId;
   title: string;
@@ -13,7 +13,7 @@ export interface IForum extends TimestampedModel {
   comments: mongoose.Types.ObjectId[];
 }
 
-const forumSchema = new Schema<IForum>(
+const postSchema = new Schema<IPost>(
   {
     // The User's ID who owns the forum post - must be a document ID length
     owner: {
@@ -82,8 +82,8 @@ const forumSchema = new Schema<IForum>(
   },
 );
 
-export type ForumDocument = HydratedDocument<IForum>;
+export type PostDocument = HydratedDocument<IPost>;
 
-// Forum can be used to create new documents with the forumSchema
-const ForumModel = mongoose.model<IForum>('Forum', forumSchema);
-export default ForumModel;
+// Forum can be used to create new documents with the postSchema
+const PostModel = mongoose.model<IPost>('Forum', postSchema);
+export default PostModel;
