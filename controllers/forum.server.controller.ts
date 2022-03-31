@@ -11,7 +11,7 @@ import {
   isAnyFieldValid,
   isAllFieldsValid,
   IValidation,
-  isFieldsValid,
+  validateForm,
   getValidValues,
 } from '../lib/validate.lib';
 
@@ -70,7 +70,7 @@ export async function postCreate(
     },
   };
 
-  if (isFieldsValid(forumPostParams)) {
+  if (validateForm(forumPostParams)) {
     const params = getValidValues(forumPostParams);
 
     const user = await searchUserByAuthToken(authToken);

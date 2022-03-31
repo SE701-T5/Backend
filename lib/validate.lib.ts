@@ -3,6 +3,8 @@
  * @param id the ID being validated
  * @returns {boolean} true if the given ID is a valid document ID, otherwise false
  */
+import { ServerError } from './utils.lib';
+
 export function isValidDocumentID(id: string) {
   const regExpDocumentID = new RegExp('^[a-fA-F0-9]{24}$');
   return (
@@ -34,7 +36,10 @@ interface IValidationRecord<T> {
   required?: boolean;
 }
 
-function isRecordValid<T>(record: IValidationRecord<T>): boolean {
+function isRecordValid<T>(record: IValidationRecord<T>): {
+  valid: boolean;
+  required: boolean;
+} {
   let valid: boolean;
   const required = record.required ?? true;
 
@@ -42,9 +47,14 @@ function isRecordValid<T>(record: IValidationRecord<T>): boolean {
     valid = record.valid;
   } else if (typeof record.valid === 'function') {
     valid = record.valid(record.value);
+  } else {
+    valid = true;
   }
 
-  return valid || !required;
+  return {
+    valid: valid || !required,
+    required,
+  };
 }
 
 /**
@@ -52,9 +62,9 @@ function isRecordValid<T>(record: IValidationRecord<T>): boolean {
  * @param obj the object being validated
  * @returns {boolean} true if all fields in an object have valid and true values, otherwise false
  */
-export function isFieldsValid<T>(obj: IValidation<T>) {
+export function validateForm<T>(obj: IValidation<T>) {
   for (const field in obj) {
-    if (!isRecordValid(obj[field])) return false;
+    if (!isRecordValid(obj[field]).valid) return false;
   }
   return true;
 }
@@ -63,10 +73,12 @@ export function getValidValues<T>(obj: IValidation<T>): T {
   const result: unknown = {};
 
   for (const field in obj) {
-    const record = obj[field];
+    const record = isRecordValid(obj[field]);
 
-    if (isRecordValid(record)) {
-      result[field] = record.value;
+    if (record.valid) {
+      result[field] = obj[field].value;
+    } else if (record.required) {
+      throw new ServerError('bad request', 400);
     }
   }
 

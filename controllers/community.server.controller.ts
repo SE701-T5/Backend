@@ -7,7 +7,7 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
   getValidValues,
-  isFieldsValid,
+  validateForm,
   isValidDocumentID,
   IValidation,
 } from '../lib/validate.lib';
@@ -49,7 +49,7 @@ export async function communityUpdateById(
     },
   };
 
-  if (!isFieldsValid(communityParams) && isValidDocumentID(req.params.id)) {
+  if (!validateForm(communityParams) && isValidDocumentID(req.params.id)) {
     throw new ServerError('Bad request', 400);
   }
 
@@ -96,7 +96,7 @@ export async function communityCreate(
     },
   };
 
-  if (!isFieldsValid(communityParams)) {
+  if (!validateForm(communityParams)) {
     throw new ServerError('bad request', 400);
   }
 

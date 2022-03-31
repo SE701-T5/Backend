@@ -7,7 +7,7 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import {
   isValidDocumentID,
-  isFieldsValid,
+  validateForm,
   IValidation,
   getValidValues,
 } from '../lib/validate.lib';
@@ -53,7 +53,7 @@ export async function userCreate(
     },
   };
 
-  if (isFieldsValid(forumUserParams)) {
+  if (validateForm(forumUserParams)) {
     const params = getValidValues(forumUserParams);
 
     const user = await User.createUser(params);
@@ -96,7 +96,7 @@ export async function userLogin(
     },
   };
 
-  if (isFieldsValid(validateParams)) {
+  if (validateForm(validateParams)) {
     const params = getValidValues(validateParams);
 
     const login: User.LoginInfoDTO = params.email
@@ -191,7 +191,7 @@ export async function userUpdateById(
     },
   };
 
-  if (isFieldsValid(userUpdateParams) && isValidDocumentID(req.params.id)) {
+  if (validateForm(userUpdateParams) && isValidDocumentID(req.params.id)) {
     const params = getValidValues(userUpdateParams);
     const id = new mongoose.Types.ObjectId(req.params.id);
 
