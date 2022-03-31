@@ -1,6 +1,7 @@
 import { Express } from 'express';
 // import * as user from '../controllers/user.server.controller';
 import * as community from '../controllers/community.server.controller';
+import * as forum from '../controllers/forum.server.controller';
 import { asyncHandler, isRequestTokenAuthorized } from '../lib/middleware.lib';
 
 /**
@@ -15,6 +16,10 @@ export default function (app: Express) {
       isRequestTokenAuthorized,
       asyncHandler(community.communityUpdateById),
     );
+
+  app
+    .route('/api/v1/communities/:id/posts')
+    .post(isRequestTokenAuthorized, asyncHandler(forum.postCreate));
 
   app
     .route('/api/v1/communities')

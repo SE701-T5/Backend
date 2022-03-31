@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Joi, { array, string } from 'joi';
+import Joi from 'joi';
 import { IPost } from '../config/db_schemas/post.schema';
 import { UserDocument } from '../config/db_schemas/user.schema';
 import {
@@ -95,20 +95,20 @@ export async function postCreate(
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<CreatePostDTO>({
-    title: string().min(3).required(),
-    community: validators.objectId().required(),
-    bodyText: string().allow(['']),
-    attachments: array().items(string().uri()).max(3),
+    title: Joi.string().min(3).required(),
+    bodyText: Joi.string().allow(''),
+    attachments: Joi.array().items(Joi.string().uri()).max(3),
   });
 
   const data = validate(schema, req.body);
+  const community = convertToObjectId(req.params.id);
 
   const user = await searchUserByAuthToken(authToken);
 
   const post = await Forum.insertPost({
     ...data,
     owner: user._id,
-    community: convertToObjectId(data.community),
+    community,
   });
 
   res.status(201).send({
@@ -162,9 +162,9 @@ export async function postUpdateById(
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<UpdatePostDTO>({
-    title: string().min(3),
-    attachments: array().items(string().uri()).max(3),
-    bodyText: string().allow(['']),
+    title: Joi.string().min(3),
+    attachments: Joi.array().items(Joi.string().uri()).max(3),
+    bodyText: Joi.string().allow(''),
     upVotes: validators.voteDelta(),
     downVotes: validators.voteDelta(),
   })

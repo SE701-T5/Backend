@@ -7,10 +7,7 @@ import { asyncHandler, isRequestTokenAuthorized } from '../lib/middleware.lib';
  * @param app Express.js application object
  */
 export default function (app: Express) {
-  app
-    .route('/api/v1/posts')
-    .get(asyncHandler(forum.postViews))
-    .post(isRequestTokenAuthorized, asyncHandler(forum.postCreate));
+  app.route('/api/v1/posts').get(asyncHandler(forum.postViews));
 
   app
     .route('/api/v1/posts/:id')

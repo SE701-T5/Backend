@@ -6,7 +6,6 @@ export interface ICommunity extends TimestampedModel {
   name: string;
   description: string;
   img?: string;
-  posts: mongoose.Types.ObjectId[];
 }
 
 const communitySchema = new Schema<ICommunity>(
@@ -31,14 +30,6 @@ const communitySchema = new Schema<ICommunity>(
       type: String,
       required: false,
     },
-    posts: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        default: [],
-        ref: 'Forum',
-      },
-    ],
   },
   {
     timestamps: true,

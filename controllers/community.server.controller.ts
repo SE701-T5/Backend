@@ -59,7 +59,6 @@ export async function communityUpdateById(
     owner: newCommunity.owner,
     memberCount: await Community.getCommunityMemberCount(id),
     description: newCommunity.description,
-    posts: newCommunity.posts,
     createdAt: newCommunity.createdAt,
     updatedAt: newCommunity.updatedAt,
   });
@@ -81,7 +80,6 @@ export async function getCommunities(
       owner: i.owner,
       memberCount: await Community.getCommunityMemberCount(i._id),
       description: i.description,
-      posts: i.posts,
       createdAt: i.createdAt,
       updatedAt: i.updatedAt,
     });
@@ -117,7 +115,6 @@ export async function communityCreate(
     owner: community.owner,
     memberCount: await Community.getCommunityMemberCount(community._id),
     description: community.description,
-    posts: community.posts,
     createdAt: community.createdAt,
     updatedAt: community.updatedAt,
   });
