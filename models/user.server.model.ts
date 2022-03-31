@@ -67,7 +67,7 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
   } catch (err) {
     if (getProp(err, 'code') === 11000)
       throw new ServerError('conflict', 409, err);
-    throw new ServerError('internal server error', 500, err);
+    throw err;
   }
 }
 
@@ -76,13 +76,7 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
  * @param id the user ID for matching with a _id field in the database
  */
 export async function searchUserById(id: mongoose.Types.ObjectId) {
-  let resource: UserDocument;
-
-  try {
-    resource = await User.findById(id);
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  const resource = await User.findById(id);
 
   if (resource != null) return resource;
   else {
@@ -97,13 +91,7 @@ export async function searchUserById(id: mongoose.Types.ObjectId) {
 export async function searchUserByAuthToken(
   authToken: string,
 ): Promise<UserDocument> {
-  let resource: UserDocument;
-
-  try {
-    resource = await User.findOne({ authToken });
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  const resource = await User.findOne({ authToken });
 
   if (resource != null) return resource;
   else {
@@ -115,14 +103,10 @@ export async function searchUserByAuthToken(
  * Delete an existing forum user matching a given ID
  * @param id the ID for matching to the database document being deleted
  */
-export async function deleteUserById(id: mongoose.Types.ObjectId) {
-  let result: DeleteResult;
-
-  try {
-    result = await User.deleteOne({ _id: id });
-  } catch (err) {
-    throw new ServerError('internal server error', 500, err);
-  }
+export async function deleteUserById(
+  id: mongoose.Types.ObjectId,
+): Promise<DeleteResult> {
+  const result = await User.deleteOne({ _id: id });
 
   if (result.deletedCount === 0)
     throw new ServerError('not found', 404, result);
@@ -148,16 +132,12 @@ export async function updateUserById(
     calculatedUpdates.authToken = null;
   }
 
-  let resource: UserDocument;
-  try {
-    resource = await User.findOneAndUpdate(
-      { _id: id },
-      { $set: calculatedUpdates },
-      { new: true },
-    );
-  } catch (err) {
-    throw new ServerError('unexpected server error', 500, err);
-  }
+  const resource = await User.findOneAndUpdate(
+    { _id: id },
+    { $set: calculatedUpdates },
+    { new: true },
+  );
+
   if (resource != null) {
     return resource;
   } else {
@@ -176,15 +156,9 @@ export async function authenticateUser(
   plaintextPassword: string,
   forceNewAuthToken?: boolean,
 ): Promise<UserDocument> {
-  let res: UserDocument;
-
-  try {
-    res = await User.findOne({
-      $or: [{ username: login.username }, { email: login.email }],
-    }).exec();
-  } catch (e) {
-    throw new ServerError('internal server error', 500, e);
-  }
+  const res = await User.findOne({
+    $or: [{ username: login.username }, { email: login.email }],
+  }).exec();
 
   if (res == null) throw new ServerError('user not found', 404, login);
 

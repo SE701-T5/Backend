@@ -1,14 +1,12 @@
 import { Overwrite } from 'convict';
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
-import Post from '../config/db_schemas/post.schema';
-
-import Forum, { PostDocument, IPost } from '../config/db_schemas/post.schema';
+import Post, { PostDocument, IPost } from '../config/db_schemas/post.schema';
 import Comment, {
   CommentDocument,
   IComment,
 } from '../config/db_schemas/comment.schema';
-import { IUser, UserDocument } from '../config/db_schemas/user.schema';
+import { UserDocument } from '../config/db_schemas/user.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
 interface InsertPostDTO {
@@ -40,7 +38,7 @@ type PopulatedComment = Overwrite<CommentDocument, { owner: UserDocument }>;
  */
 export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
   // Create new forum post document
-  const newPost = new Forum({
+  const newPost = new Post({
     owner: params.owner,
     community: params.community,
     title: params.title,
@@ -60,8 +58,8 @@ export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
     if (getProp(err, 'code') === 11000) {
       throw new ServerError('Conflict', 409, err);
     }
-    // Any other database error, return internal server error
-    throw new ServerError('Internal server error', 500, err);
+    // Any other error
+    throw err;
   }
 }
 
@@ -72,13 +70,7 @@ export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
 export async function searchPostById(
   id: mongoose.Types.ObjectId,
 ): Promise<PostDocument> {
-  let resource: PostDocument;
-
-  try {
-    resource = await Forum.findById(id);
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  const resource = await Post.findById(id);
 
   if (resource != null) return resource;
   else {
@@ -93,13 +85,7 @@ export async function searchPostById(
 export async function deletePostById(
   id: mongoose.Types.ObjectId,
 ): Promise<DeleteResult> {
-  let result: DeleteResult;
-
-  try {
-    result = await Forum.deleteOne({ _id: id });
-  } catch {
-    throw new ServerError('internal server error', 500);
-  }
+  const result = await Post.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
     throw new ServerError('not found', 404, result);
@@ -120,7 +106,7 @@ export async function updatePostById(
   updates: Partial<IPost>,
   checkForEdits: boolean,
   deltaVotes = false,
-) {
+): Promise<PostDocument> {
   if (checkForEdits && updates.edited === undefined) {
     const editTriggerProperties = ['title', 'bodyText', 'attachments'];
     const updatedProperties = Object.keys(updates);
@@ -142,16 +128,12 @@ export async function updatePostById(
     }
   }
 
-  let resource: PostDocument;
-  try {
-    resource = await Forum.findOneAndUpdate(
-      { _id: id },
-      { $set: updates },
-      { new: true },
-    );
-  } catch (err) {
-    throw new ServerError('unexpected server error', 500, err);
-  }
+  const resource = await Post.findOneAndUpdate(
+    { _id: id },
+    { $set: updates },
+    { new: true },
+  );
+
   if (resource != null) {
     return resource;
   } else {
@@ -177,7 +159,7 @@ export async function addComment(
     if (getProp(err, 'code') === 11000) {
       throw new ServerError('Conflict', 409, err);
     }
-    throw new ServerError('Internal server error', 500, err);
+    throw err;
   }
 
   await Post.findByIdAndUpdate(postId, {
@@ -195,11 +177,7 @@ export async function addComment(
  * Search for a forum post in the database
  */
 export async function getPosts(): Promise<PostDocument[]> {
-  try {
-    return await Forum.find();
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  return await Post.find();
 }
 
 /**
@@ -231,38 +209,28 @@ export async function updateCommentById(
       updates.downVotes = comment.downVotes + updates.downVotes;
   }
 
-  try {
-    return await Comment.findOneAndUpdate(
-      { _id: id },
-      { $set: updates },
-      { new: true },
-    );
-  } catch (err) {
-    throw new ServerError('internal server error', 500, err);
-  }
+  return await Comment.findOneAndUpdate(
+    { _id: id },
+    { $set: updates },
+    { new: true },
+  );
 }
 
 export async function searchCommentById(
   id: mongoose.Types.ObjectId,
 ): Promise<CommentDocument> {
-  let resource: CommentDocument;
-
-  try {
-    resource = await Comment.findById(id);
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  const resource = await Comment.findById(id);
 
   if (resource != null) return resource;
   else {
-    throw new ServerError('forum post not found', 404);
+    throw new ServerError('comment not found', 404);
   }
 }
 
 export async function getAllCommentsByPostId(
   id: mongoose.Types.ObjectId,
 ): Promise<PopulatedComment[]> {
-  const post = await Forum.findById(id)
+  const post = await Post.findById(id)
     .populate<{ comments: PopulatedComment[] }>({
       path: 'comments',
       populate: { path: 'owner' },

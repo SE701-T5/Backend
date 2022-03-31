@@ -24,8 +24,8 @@ export async function insertCommunity(params: CreateCommunityDTO) {
     if (getProp(err, 'code') === 11000) {
       throw new ServerError('Conflict', 409);
     }
-    // Any other database error, return internal server error
-    throw new ServerError('Internal server error', 500);
+    // Any other database error
+    throw err;
   }
 }
 
@@ -33,16 +33,12 @@ export async function updateCommunityById(
   CommunityID: mongoose.Types.ObjectId,
   params: Partial<ICommunity>,
 ): Promise<CommunityDocument> {
-  let resource: CommunityDocument;
-  try {
-    resource = await Community.findOneAndUpdate(
-      { _id: CommunityID },
-      { $set: params },
-      { new: true },
-    );
-  } catch (err) {
-    throw new ServerError('unexpected server error', 500, err);
-  }
+  const resource = await Community.findOneAndUpdate(
+    { _id: CommunityID },
+    { $set: params },
+    { new: true },
+  );
+
   if (resource != null) {
     return resource;
   } else {
@@ -53,13 +49,7 @@ export async function updateCommunityById(
 export async function searchCommunityById(
   id: mongoose.Types.ObjectId,
 ): Promise<CommunityDocument> {
-  let resource: CommunityDocument;
-
-  try {
-    resource = await Community.findById(id).exec();
-  } catch (err) {
-    throw new ServerError('Internal server error', 500, err);
-  }
+  const resource = await Community.findById(id).exec();
 
   if (resource != null) return resource;
   else {
