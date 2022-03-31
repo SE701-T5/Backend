@@ -20,9 +20,13 @@ interface CreateCommunityDTO {
   img: string;
 }
 
+interface CommunityResponse extends ICommunity {
+  memberCount: number;
+}
+
 export async function communityUpdateById(
   req: TypedRequestBody<UpdateCommunityDTO>,
-  res: Response<ICommunity>,
+  res: Response<CommunityResponse>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -47,14 +51,17 @@ export async function communityUpdateById(
     img: newCommunity.img,
     name: newCommunity.name,
     owner: newCommunity.owner,
-    members: newCommunity.members,
+    memberCount: await Community.getCommunityMemberCount(id),
     description: newCommunity.description,
+    posts: newCommunity.posts,
+    createdAt: newCommunity.createdAt,
+    updatedAt: newCommunity.updatedAt,
   });
 }
 
 export async function communityCreate(
   req: TypedRequestBody<CreateCommunityDTO>,
-  res: Response<ICommunity>,
+  res: Response<CommunityResponse>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -76,7 +83,10 @@ export async function communityCreate(
     img: community.img,
     name: community.name,
     owner: community.owner,
-    members: community.members,
+    memberCount: await Community.getCommunityMemberCount(community._id),
     description: community.description,
+    posts: community.posts,
+    createdAt: community.createdAt,
+    updatedAt: community.updatedAt,
   });
 }

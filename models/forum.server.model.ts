@@ -1,11 +1,14 @@
+import { Overwrite } from 'convict';
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
+import Post from '../config/db_schemas/post.schema';
 
 import Forum, { PostDocument, IPost } from '../config/db_schemas/post.schema';
 import Comment, {
   CommentDocument,
   IComment,
 } from '../config/db_schemas/comment.schema';
+import { IUser, UserDocument } from '../config/db_schemas/user.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
 interface InsertPostDTO {
@@ -21,15 +24,15 @@ interface InsertPostDTO {
 }
 
 interface InsertCommentDTO {
-  postID: string;
-  authorID: string;
-  authorUserName: string;
+  owner: mongoose.Types.ObjectId;
   bodyText: string;
   edited?: boolean;
   upVotes?: number;
   downVotes?: number;
   attachments?: string[];
 }
+
+type PopulatedComment = Overwrite<IComment, { owner: UserDocument }>;
 
 /**
  * Insert a new forum post to the database
@@ -154,9 +157,11 @@ export async function updatePostById(
 
 /**
  * Creates and returns a new forum comment using the comment schema
+ * @param postId post that the comment is on
  * @param params object containing forum post comment fields
  */
 export async function addComment(
+  postId: mongoose.Types.ObjectId,
   params: InsertCommentDTO,
 ): Promise<CommentDocument> {
   const newComment = new Comment(params);
@@ -171,15 +176,13 @@ export async function addComment(
     throw new ServerError('Internal server error', 500, err);
   }
 
-  const post = await searchPostById(
-    new mongoose.Types.ObjectId(comment.postID),
-  );
-
-  await updatePostById(
-    new mongoose.Types.ObjectId(comment.postID),
-    { comments: post.comments.concat(comment._id) },
-    true,
-  );
+  await Post.findByIdAndUpdate(postId, {
+    $push: {
+      comments: {
+        $each: [comment._id],
+      },
+    },
+  });
 
   return comment;
 }
@@ -252,9 +255,12 @@ export async function searchCommentById(
 
 export async function getAllCommentsByPostId(
   id: mongoose.Types.ObjectId,
-): Promise<IComment[]> {
+): Promise<PopulatedComment[]> {
   const post = await Forum.findById(id)
-    .populate<{ comments: IComment[] }>('comments')
+    .populate<{ comments: PopulatedComment[] }>({
+      path: 'comments',
+      populate: { path: 'owner' },
+    })
     .exec();
 
   if (post != null) {

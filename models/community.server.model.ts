@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { CommunityDocument } from '../config/db_schemas/community.schema';
 import Community, { ICommunity } from '../config/db_schemas/community.schema';
+import User from '../config/db_schemas/user.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
 interface CreateCommunityDTO {
@@ -62,4 +63,12 @@ export async function searchCommunityById(
   else {
     throw new ServerError('community not found', 404);
   }
+}
+
+export async function getCommunityMemberCount(
+  id: mongoose.Types.ObjectId,
+): Promise<number> {
+  return await User.count({
+    subscribedCommunities: id,
+  });
 }

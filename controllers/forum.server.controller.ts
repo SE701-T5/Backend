@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Joi, { array, string } from 'joi';
 import { IPost } from '../config/db_schemas/post.schema';
+import { UserDocument } from '../config/db_schemas/user.schema';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import { searchCommentById } from '../models/forum.server.model';
 import * as Forum from '../models/forum.server.model';
@@ -9,7 +10,6 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import mongoose from 'mongoose';
 import { validate, validators } from '../lib/validate.lib';
-import { IComment } from '../config/db_schemas/comment.schema';
 
 interface CreatePostDTO {
   title: string;
@@ -39,25 +39,42 @@ interface UpdateCommentDTO {
   attachments: string[];
 }
 
+interface CommentResponse {
+  owner: {
+    id: mongoose.Types.ObjectId;
+    username: string;
+  };
+  bodyText: string;
+  edited: boolean;
+  upVotes: number;
+  downVotes: number;
+  attachments: string[];
+}
+
 /**
  * Responds to HTTP request with formatted post documents matching a given forum search
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export async function postViews(req: Request, res: Response<Array<IPost>>) {
+export async function postViews(req: Request, res: Response<IPost[]>) {
   const posts = await Forum.getPosts();
 
-  const response = posts.map((post) => ({
-    owner: post.owner,
-    community: post.community,
-    title: post.title,
-    bodyText: post.bodyText,
-    edited: post.edited,
-    upVotes: post.upVotes,
-    attachments: post.attachments,
-    downVotes: post.downVotes,
-    comments: post.comments,
-  }));
+  const response = posts.map(
+    (post) =>
+      ({
+        owner: post.owner,
+        community: post.community,
+        title: post.title,
+        bodyText: post.bodyText,
+        edited: post.edited,
+        upVotes: post.upVotes,
+        attachments: post.attachments,
+        downVotes: post.downVotes,
+        comments: post.comments,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      } as IPost),
+  );
 
   res.status(200).send(response);
 }
@@ -100,6 +117,8 @@ export async function postCreate(
     attachments: post.attachments,
     downVotes: post.downVotes,
     comments: post.comments,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
   });
 }
 
@@ -122,6 +141,8 @@ export async function postViewById(req: Request, res: Response<IPost>) {
     attachments: post.attachments,
     downVotes: post.downVotes,
     comments: post.comments,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
   });
 }
 
@@ -167,6 +188,8 @@ export async function postUpdateById(
     attachments: newPost.attachments,
     downVotes: newPost.downVotes,
     comments: newPost.comments,
+    createdAt: newPost.createdAt,
+    updatedAt: newPost.updatedAt,
   });
 }
 
@@ -177,11 +200,23 @@ export async function postUpdateById(
  */
 export async function commentViewById(
   req: Request,
-  res: Response<Array<IComment>>,
+  res: Response<CommentResponse[]>,
 ) {
   const postID = new mongoose.Types.ObjectId(req.params.id);
   const comments = await Forum.getAllCommentsByPostId(postID);
-  res.status(200).send(comments);
+  res.status(200).send(
+    comments.map((comment) => ({
+      owner: {
+        id: comment.owner._id,
+        username: comment.owner.username,
+      },
+      attachments: comment.attachments,
+      downVotes: comment.downVotes,
+      upVotes: comment.upVotes,
+      bodyText: comment.bodyText,
+      edited: comment.edited,
+    })),
+  );
 }
 
 /**
@@ -191,7 +226,7 @@ export async function commentViewById(
  */
 export async function commentGiveById(
   req: TypedRequestBody<CreateCommentDTO>,
-  res: Response<IComment>,
+  res: Response<CommentResponse>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -202,18 +237,19 @@ export async function commentGiveById(
   });
 
   const data = validate(schema, req.body);
+  const postId = new mongoose.Types.ObjectId(data.postID);
 
   const user = await searchUserByAuthToken(authToken);
-  const comment = await Forum.addComment({
+  const comment = await Forum.addComment(postId, {
     ...data,
-    authorID: user._id.toString(),
-    authorUserName: user.username,
+    owner: user._id,
   });
 
   res.status(201).send({
-    postID: comment.postID,
-    authorID: comment.authorID,
-    authorUserName: comment.authorUserName,
+    owner: {
+      id: user._id,
+      username: user.username,
+    },
     bodyText: comment.bodyText,
     edited: comment.edited,
     upVotes: comment.upVotes,
@@ -227,7 +263,10 @@ export async function commentGiveById(
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export async function commentUpdateById(req: Request, res: Response<IComment>) {
+export async function commentUpdateById(
+  req: Request,
+  res: Response<CommentResponse>,
+) {
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<UpdateCommentDTO>({
@@ -246,7 +285,7 @@ export async function commentUpdateById(req: Request, res: Response<IComment>) {
 
   if (
     !(await User.isUserAuthorized(
-      new mongoose.Types.ObjectId(comment.authorID),
+      new mongoose.Types.ObjectId(comment.owner),
       authToken,
     ))
   ) {
@@ -254,7 +293,20 @@ export async function commentUpdateById(req: Request, res: Response<IComment>) {
   }
 
   const newComment = await Forum.updateCommentById(commentID, data, true, true);
-  res.status(200).send(newComment);
+  const populatedComment = await newComment.populate<{ owner: UserDocument }>(
+    'owner',
+  );
+  res.status(200).send({
+    owner: {
+      id: populatedComment.owner._id,
+      username: populatedComment.owner.username,
+    },
+    edited: newComment.edited,
+    upVotes: newComment.upVotes,
+    downVotes: newComment.downVotes,
+    attachments: newComment.attachments,
+    bodyText: newComment.bodyText,
+  });
 }
 
 /**
