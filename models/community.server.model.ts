@@ -1,9 +1,17 @@
 import mongoose from 'mongoose';
+import Comment, { CommentDocument } from '../config/db_schemas/comment.schema';
 import { CommunityDocument } from '../config/db_schemas/community.schema';
 import Community, { ICommunity } from '../config/db_schemas/community.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
-export async function insertCommunity(params: ICommunity) {
+interface CreateCommunityDTO {
+  owner: mongoose.Types.ObjectId;
+  name: string;
+  description: string;
+  img?: string;
+}
+
+export async function insertCommunity(params: CreateCommunityDTO) {
   // Create new Community document
   const newCommunity = new Community(params);
 
@@ -37,5 +45,22 @@ export async function updateCommunityById(
     return resource;
   } else {
     throw new ServerError('community not found', 400);
+  }
+}
+
+export async function searchCommunityById(
+  id: mongoose.Types.ObjectId,
+): Promise<CommunityDocument> {
+  let resource: CommunityDocument;
+
+  try {
+    resource = await Community.findById(id);
+  } catch (err) {
+    throw new ServerError('Internal server error', 500, err);
+  }
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('community not found', 404);
   }
 }

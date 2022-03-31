@@ -1,14 +1,21 @@
 import mongoose, { Schema, HydratedDocument } from 'mongoose';
+import UserSchema from './user.schema';
 
 export interface ICommunity {
+  owner: mongoose.Types.ObjectId;
   name: string;
   description: string;
   members: number;
-  img: string;
+  img?: string;
 }
 
 const communitySchema = new Schema<ICommunity>(
   {
+    owner: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: UserSchema.modelName,
+    },
     name: {
       type: String,
       required: true,
@@ -18,14 +25,16 @@ const communitySchema = new Schema<ICommunity>(
     description: {
       type: String,
       required: true,
+      default: '',
     },
     members: {
       type: Number,
       required: true,
+      default: 0,
     },
     img: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {
