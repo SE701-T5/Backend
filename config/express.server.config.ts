@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { errorHandler } from '../lib/middleware.lib';
+import { ServerError } from '../lib/utils.lib';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
@@ -39,6 +40,11 @@ export default function () {
   forumServerRoutes(app);
   userServerRoutes(app);
   communityServerRoutes(app);
+
+  // 404 Route
+  app.all('*', () => {
+    throw new ServerError('endpoint does not exist', 404);
+  });
 
   // Configure Error Handler
   app.use(errorHandler);
