@@ -140,7 +140,7 @@ export async function updatePostById(
     updates.downVotes = post.downVotes + updates.downVotes;
   }
 
-  let resource: CommunityDocument;
+  let resource: ForumDocument;
   try {
     resource = await Forum.findOneAndUpdate(
       { _id: id },
@@ -182,7 +182,7 @@ export async function addComment(
 
   await updatePostById(
     new mongoose.Types.ObjectId(comment.postID),
-    { comments: post.comments.concat(comment.id as string) },
+    { comments: post.comments.concat(comment.id) },
     true,
   );
 
@@ -212,7 +212,7 @@ export async function updateCommentById(
   updates: Partial<IComment>,
   checkForEdits: boolean,
   deltaVotes = false,
-) {
+): Promise<CommentDocument> {
   if (
     checkForEdits &&
     updates.edited != undefined &&
@@ -234,11 +234,11 @@ export async function updateCommentById(
       { new: true },
     );
   } catch (err) {
-    return new ServerError('internal server error', 500, err);
+    throw new ServerError('internal server error', 500, err);
   }
 }
 
-export async function searchCommentById(id): Promise<CommentDocument> {
+export async function searchCommentById(id: mongoose.Types.ObjectId,): Promise<CommentDocument> {
   let resource: CommentDocument;
 
   try {
@@ -250,5 +250,32 @@ export async function searchCommentById(id): Promise<CommentDocument> {
   if (resource != null) return resource;
   else {
     throw new ServerError('forum post not found', 404);
+  }
+}
+
+export async function getAllCommentsByPostId(id: mongoose.Types.ObjectId,): Promise<Array<IComment>>{
+  try {
+    const post = await Forum.findOne({_id : id}).populate('comments').exec();
+    if (post != null) {
+      const comments : IComment[] = [];
+      for (const comment of post.comments){
+        const commentDocument = {
+          postID: comment['postID'],
+          authorID: comment['authorID'],
+          authorUserName: comment['authorUserName'],
+          bodyText: comment['bodyText'],
+          edited: comment['edited'],
+          upVotes: comment['upVotes'],
+          downVotes: comment['downVotes'],
+          attachments: comment['attachments'],
+        }
+        comments.push(commentDocument);
+      }
+      return comments;
+    }else{
+      throw new ServerError('forum post not found', 404);
+    }
+  }catch (err){
+    throw new ServerError('Internal server error', 500, err);
   }
 }
