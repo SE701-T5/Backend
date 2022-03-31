@@ -18,5 +18,6 @@ export default function (app: Express) {
 
   app
     .route('/api/v1/communities')
+    .get(asyncHandler(community.getCommunities))
     .post(isRequestTokenAuthorized, asyncHandler(community.communityCreate));
 }

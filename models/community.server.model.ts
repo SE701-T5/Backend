@@ -54,7 +54,7 @@ export async function searchCommunityById(
   let resource: CommunityDocument;
 
   try {
-    resource = await Community.findById(id);
+    resource = await Community.findById(id).exec();
   } catch (err) {
     throw new ServerError('Internal server error', 500, err);
   }
@@ -63,6 +63,10 @@ export async function searchCommunityById(
   else {
     throw new ServerError('community not found', 404);
   }
+}
+
+export async function getAll(): Promise<CommunityDocument[]> {
+  return await Community.find({});
 }
 
 export async function getCommunityMemberCount(
