@@ -126,7 +126,7 @@ export async function userUpdateById(
     displayName: Joi.string().alphanum().min(2),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
-  });
+  }).min(1);
 
   const data = validate(schema, req.body);
 

@@ -6,15 +6,7 @@ import { searchUserByAuthToken } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import mongoose from 'mongoose';
-import {
-  isValidDocumentID,
-  parseInteger,
-  // isAnyFieldValid,
-  // isAllFieldsValid,
-  IValidation,
-  validateForm,
-  getValidValues,
-} from '../lib/validate.lib';
+import { validate, validators } from '../lib/validate.lib';
 import { IComment } from '../config/db_schemas/comment.schema';
 
 interface CreatePostDTO {
@@ -59,7 +51,7 @@ export async function postViews(req: Request, res: Response<Array<IForum>>) {
   try {
     const posts = await Forum.getPosts();
     const response = Array<IForum>();
-    for (const post of posts){
+    for (const post of posts) {
       response.push({
         userID: post.userID,
         communityID: post.communityID,
@@ -70,12 +62,12 @@ export async function postViews(req: Request, res: Response<Array<IForum>>) {
         attachments: post.attachments,
         downVotes: post.downVotes,
         comments: post.comments,
-      })
+      });
     }
     res.status(200).send(response);
-  }catch (err){
+  } catch (err) {
     throw new ServerError('bad request', 400);
-  };
+  }
 }
 
 /**
@@ -142,9 +134,11 @@ export async function postCreate(
  */
 export async function postViewById(req: Request, res: Response<IForum>) {
   const postID = req.params.id;
-  
-  if (isValidDocumentID(postID)){
-    const post = await Forum.searchPostById(new mongoose.Types.ObjectId(postID));
+
+  if (isValidDocumentID(postID)) {
+    const post = await Forum.searchPostById(
+      new mongoose.Types.ObjectId(postID),
+    );
     res.status(200).send({
       userID: post.userID,
       communityID: post.communityID,
@@ -156,7 +150,7 @@ export async function postViewById(req: Request, res: Response<IForum>) {
       downVotes: post.downVotes,
       comments: post.comments,
     });
-  }else{
+  } else {
     throw new ServerError('bad request', 400, { postID });
   }
 }
@@ -166,7 +160,10 @@ export async function postViewById(req: Request, res: Response<IForum>) {
  * @param req HTTP request object containing forum post fields being updated, user ID and auth token for verification
  * @param res HTTP request response status code and updated forum post data in JSON format or error message
  */
-export async function postUpdateById(req: TypedRequestBody<UpdatePostDTO>, res: Response<IForum>) {
+export async function postUpdateById(
+  req: TypedRequestBody<UpdatePostDTO>,
+  res: Response<IForum>,
+) {
   const authToken = req.get(config.get('authToken'));
   const postID = req.params.id;
   const forumUpdateParams: IValidation<UpdatePostDTO> = {
@@ -193,17 +190,22 @@ export async function postUpdateById(req: TypedRequestBody<UpdatePostDTO>, res: 
     downVotes: {
       value: req.body.downVotes,
       valid: req.body.downVotes != undefined,
-    }
-  }
+    },
+  };
 
-  if (isFieldsValid(forumUpdateParams) && isValidDocumentID(postID)){
+  if (isFieldsValid(forumUpdateParams) && isValidDocumentID(postID)) {
     const params = getValidValues(forumUpdateParams);
     const id = new mongoose.Types.ObjectId(postID);
     const user = await searchUserByAuthToken(authToken);
-    const post = await Forum.updatePostById(id, {
-      userID: user._id.toString(),
-      ...params,
-    }, true, true);
+    const post = await Forum.updatePostById(
+      id,
+      {
+        userID: user._id.toString(),
+        ...params,
+      },
+      true,
+      true,
+    );
     res.status(200).send({
       userID: post.userID,
       communityID: post.communityID,
@@ -215,7 +217,7 @@ export async function postUpdateById(req: TypedRequestBody<UpdatePostDTO>, res: 
       downVotes: post.downVotes,
       comments: post.comments,
     });
-  }else{
+  } else {
     throw new ServerError('bad request', 400, { postID });
   }
 }
@@ -225,12 +227,17 @@ export async function postUpdateById(req: TypedRequestBody<UpdatePostDTO>, res: 
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export async function commentViewById(req: Request, res: Response<Array<IComment>>) {
+export async function commentViewById(
+  req: Request,
+  res: Response<Array<IComment>>,
+) {
   const postID = req.params.id;
   if (isValidDocumentID(postID)) {
-    const comments = await Forum.getAllCommentsByPostId(new mongoose.Types.ObjectId(postID));
+    const comments = await Forum.getAllCommentsByPostId(
+      new mongoose.Types.ObjectId(postID),
+    );
     res.status(200).send(comments);
-  }else{
+  } else {
     throw new ServerError('bad request', 400);
   }
 }
@@ -240,7 +247,10 @@ export async function commentViewById(req: Request, res: Response<Array<IComment
  * @param req HTTP request object containing forum post comment field data, and post ID, and authorization token
  * @param res HTTP request response status code, and message if error, or JSON with comment data if successful
  */
-export async function commentGiveById(req: TypedRequestBody<CreateCommentDTO>, res: Response<IComment>) {
+export async function commentGiveById(
+  req: TypedRequestBody<CreateCommentDTO>,
+  res: Response<IComment>,
+) {
   const authToken = req.get(config.get('authToken'));
 
   const commentParams: IValidation<CreateCommentDTO> = {
@@ -323,17 +333,20 @@ export async function commentUpdateById(req: Request, res: Response<IComment>) {
     attachments: {
       value: req.body.attachments,
       valid: req.body.attachments != undefined,
-    }
-  }
+    },
+  };
 
   if (isValidDocumentID(commentID) && isFieldsValid(commentUpdateParams)) {
-
     const params = getValidValues(commentUpdateParams);
 
     const user = await searchUserByAuthToken(authToken);
 
-    const comment = await Forum.updateCommentById(new mongoose.Types.ObjectId(commentID),
-      params, true, true);
+    const comment = await Forum.updateCommentById(
+      new mongoose.Types.ObjectId(commentID),
+      params,
+      true,
+      true,
+    );
     res.status(200).send(comment);
   } else {
     throw new ServerError('bad request', 400);

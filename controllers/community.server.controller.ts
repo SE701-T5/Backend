@@ -1,16 +1,12 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import Joi, { array, string } from 'joi';
 import mongoose from 'mongoose';
 import { ICommunity } from '../config/db_schemas/community.schema';
 import { ServerError, TypedRequestBody } from '../lib/utils.lib';
 import * as Community from '../models/community.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
-import {
-  getValidValues,
-  validateForm,
-  isValidDocumentID,
-  IValidation,
-} from '../lib/validate.lib';
+import { validate } from '../lib/validate.lib';
 
 interface UpdateCommunityDTO {
   name?: string;
@@ -30,28 +26,13 @@ export async function communityUpdateById(
 ) {
   const authToken = req.get(config.get('authToken'));
 
-  // Set community fields to an object for passing to the model
-  const communityParams: IValidation<UpdateCommunityDTO> = {
-    name: {
-      valid: req.body.name != undefined && req.body.name.length > 0,
-      value: req.body.name,
-      required: false,
-    },
-    description: {
-      valid: req.body.description != undefined,
-      value: req.body.description,
-      required: false,
-    },
-    img: {
-      valid: req.body.img != undefined,
-      value: req.body.img,
-      required: false,
-    },
-  };
+  const schema = Joi.object<UpdateCommunityDTO>({
+    name: string().min(3),
+    description: string().allow(['']),
+    img: array().items(string().uri()).max(3),
+  }).min(1);
 
-  if (!validateForm(communityParams) && isValidDocumentID(req.params.id)) {
-    throw new ServerError('Bad request', 400);
-  }
+  const data = validate(schema, req.body);
 
   const id = new mongoose.Types.ObjectId(req.params.id);
   const community = await Community.searchCommunityById(id);
@@ -60,10 +41,7 @@ export async function communityUpdateById(
     throw new ServerError('forbidden', 403);
   }
 
-  const newCommunity = await Community.updateCommunityById(
-    id,
-    getValidValues(communityParams),
-  );
+  const newCommunity = await Community.updateCommunityById(id, data);
 
   res.status(200).send({
     img: newCommunity.img,
@@ -80,30 +58,18 @@ export async function communityCreate(
 ) {
   const authToken = req.get(config.get('authToken'));
 
-  // Set community fields to an object for passing to the model
-  const communityParams: IValidation<CreateCommunityDTO> = {
-    name: {
-      value: req.body.name,
-      valid: req.body.name.length > 0,
-    },
-    img: {
-      value: req.body.img,
-      valid: true,
-    },
-    description: {
-      value: req.body.description,
-      valid: req.body.description != undefined,
-    },
-  };
+  const schema = Joi.object<CreateCommunityDTO>({
+    name: string().min(3).required(),
+    description: string().allow(['']).required(),
+    img: array().items(string().uri()).max(3).required(),
+  });
 
-  if (!validateForm(communityParams)) {
-    throw new ServerError('bad request', 400);
-  }
+  const data = validate(schema, req.body);
 
   const user = await User.searchUserByAuthToken(authToken);
   const community = await Community.insertCommunity({
     owner: user._id,
-    ...getValidValues(communityParams),
+    ...data,
   });
 
   res.status(201).send({
