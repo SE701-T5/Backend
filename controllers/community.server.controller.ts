@@ -1,5 +1,5 @@
-import { Response } from 'express';
-import Joi, { array, string } from 'joi';
+import { Request, Response } from 'express';
+import Joi from 'joi';
 import mongoose from 'mongoose';
 import { ICommunity } from '../config/db_schemas/community.schema';
 import {
@@ -21,10 +21,11 @@ interface UpdateCommunityDTO {
 interface CreateCommunityDTO {
   name: string;
   description: string;
-  img: string;
+  img?: string;
 }
 
 interface CommunityResponse extends ICommunity {
+  id: mongoose.Types.ObjectId;
   memberCount: number;
 }
 
@@ -35,9 +36,9 @@ export async function communityUpdateById(
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<UpdateCommunityDTO>({
-    name: string().min(3),
-    description: string().allow(['']),
-    img: array().items(string().uri()).max(3),
+    name: Joi.string().min(3),
+    description: Joi.string().allow(''),
+    img: Joi.string().uri(),
   }).min(1);
 
   const data = validate(schema, req.body);
@@ -52,6 +53,7 @@ export async function communityUpdateById(
   const newCommunity = await Community.updateCommunityById(id, data);
 
   res.status(200).send({
+    id: newCommunity._id,
     img: newCommunity.img,
     name: newCommunity.name,
     owner: newCommunity.owner,
@@ -63,6 +65,31 @@ export async function communityUpdateById(
   });
 }
 
+export async function getCommunities(
+  req: Request,
+  res: Response<CommunityResponse[]>,
+) {
+  const communities = await Community.getAll();
+
+  //Todo: get member counts asynchronously
+  const mappedCommunities: CommunityResponse[] = [];
+  for (const i of communities) {
+    mappedCommunities.push({
+      id: i._id,
+      img: i.img,
+      name: i.name,
+      owner: i.owner,
+      memberCount: await Community.getCommunityMemberCount(i._id),
+      description: i.description,
+      posts: i.posts,
+      createdAt: i.createdAt,
+      updatedAt: i.updatedAt,
+    });
+  }
+
+  res.status(200).send(mappedCommunities);
+}
+
 export async function communityCreate(
   req: TypedRequestBody<CreateCommunityDTO>,
   res: Response<CommunityResponse>,
@@ -70,9 +97,9 @@ export async function communityCreate(
   const authToken = req.get(config.get('authToken'));
 
   const schema = Joi.object<CreateCommunityDTO>({
-    name: string().min(3).required(),
-    description: string().allow(['']).required(),
-    img: array().items(string().uri()).max(3).required(),
+    name: Joi.string().min(3).required(),
+    description: Joi.string().allow('').required(),
+    img: Joi.array().items(Joi.string().uri()).max(3),
   });
 
   const data = validate(schema, req.body);
@@ -84,6 +111,7 @@ export async function communityCreate(
   });
 
   res.status(201).send({
+    id: community._id,
     img: community.img,
     name: community.name,
     owner: community.owner,
