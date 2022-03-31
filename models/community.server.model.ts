@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import { CommunityDocument } from '../config/db_schemas/community.schema';
 import Community, { ICommunity } from '../config/db_schemas/community.schema';
+import { PostDocument } from '../config/db_schemas/post.schema';
 import User from '../config/db_schemas/user.schema';
+import Post from '../config/db_schemas/post.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
 
 interface CreateCommunityDTO {
@@ -67,6 +69,12 @@ export async function searchCommunityById(
 
 export async function getAll(): Promise<CommunityDocument[]> {
   return await Community.find({});
+}
+
+export async function getPosts(
+  id: mongoose.Types.ObjectId,
+): Promise<PostDocument[]> {
+  return await Post.find({ community: id });
 }
 
 export async function getCommunityMemberCount(

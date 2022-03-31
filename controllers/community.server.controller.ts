@@ -11,6 +11,7 @@ import * as Community from '../models/community.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { validate } from '../lib/validate.lib';
+import { PostResponse } from './forum.server.controller';
 
 interface UpdateCommunityDTO {
   name?: string;
@@ -27,6 +28,33 @@ interface CreateCommunityDTO {
 interface CommunityResponse extends ICommunity {
   id: mongoose.Types.ObjectId;
   memberCount: number;
+}
+
+export async function getPosts(req: Request, res: Response<PostResponse[]>) {
+  const id = convertToObjectId(req.params.id);
+  const posts = await Community.getPosts(id);
+
+  console.log(posts);
+
+  const response = posts.map(
+    (post) =>
+      ({
+        id: post._id,
+        owner: post.owner,
+        community: post.community,
+        title: post.title,
+        bodyText: post.bodyText,
+        edited: post.edited,
+        upVotes: post.upVotes,
+        attachments: post.attachments,
+        downVotes: post.downVotes,
+        comments: post.comments,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      } as PostResponse),
+  );
+
+  res.status(200).send(response);
 }
 
 export async function communityUpdateById(

@@ -19,7 +19,8 @@ export default function (app: Express) {
 
   app
     .route('/api/v1/communities/:id/posts')
-    .post(isRequestTokenAuthorized, asyncHandler(forum.postCreate));
+    .post(isRequestTokenAuthorized, asyncHandler(forum.postCreate))
+    .get(asyncHandler(community.getPosts));
 
   app
     .route('/api/v1/communities')

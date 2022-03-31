@@ -43,7 +43,12 @@ interface UpdateCommentDTO {
   attachments: string[];
 }
 
-interface CommentResponse {
+export interface PostResponse extends IPost {
+  id: mongoose.Types.ObjectId;
+}
+
+export interface CommentResponse {
+  id: mongoose.Types.ObjectId;
   owner: {
     id: mongoose.Types.ObjectId;
     username: string;
@@ -60,12 +65,13 @@ interface CommentResponse {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export async function postViews(req: Request, res: Response<IPost[]>) {
+export async function postViews(req: Request, res: Response<PostResponse[]>) {
   const posts = await Forum.getPosts();
 
   const response = posts.map(
     (post) =>
       ({
+        id: post._id,
         owner: post.owner,
         community: post.community,
         title: post.title,
@@ -77,7 +83,7 @@ export async function postViews(req: Request, res: Response<IPost[]>) {
         comments: post.comments,
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
-      } as IPost),
+      } as PostResponse),
   );
 
   res.status(200).send(response);
@@ -90,7 +96,7 @@ export async function postViews(req: Request, res: Response<IPost[]>) {
  */
 export async function postCreate(
   req: TypedRequestBody<CreatePostDTO>,
-  res: Response<IPost>,
+  res: Response<PostResponse>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -112,6 +118,7 @@ export async function postCreate(
   });
 
   res.status(201).send({
+    id: post._id,
     owner: post.owner,
     community: post.community,
     title: post.title,
@@ -131,11 +138,12 @@ export async function postCreate(
  * @param req HTTP request object containing forum post ID for identifying the post being viewed
  * @param res HTTP request response status code and forum post data in JSON format or error message
  */
-export async function postViewById(req: Request, res: Response<IPost>) {
+export async function postViewById(req: Request, res: Response<PostResponse>) {
   const postID = convertToObjectId(req.params.id);
 
   const post = await Forum.searchPostById(postID);
   res.status(200).send({
+    id: post._id,
     owner: post.owner,
     community: post.community,
     title: post.title,
@@ -157,7 +165,7 @@ export async function postViewById(req: Request, res: Response<IPost>) {
  */
 export async function postUpdateById(
   req: TypedRequestBody<UpdatePostDTO>,
-  res: Response<IPost>,
+  res: Response<PostResponse>,
 ) {
   const authToken = req.get(config.get('authToken'));
 
@@ -183,6 +191,7 @@ export async function postUpdateById(
   const newPost = await Forum.updatePostById(id, data, true, true);
 
   res.status(200).send({
+    id: newPost._id,
     owner: newPost.owner,
     community: newPost.community,
     title: newPost.title,
@@ -210,6 +219,7 @@ export async function commentViewById(
   const comments = await Forum.getAllCommentsByPostId(postID);
   res.status(200).send(
     comments.map((comment) => ({
+      id: comment._id,
       owner: {
         id: comment.owner._id,
         username: comment.owner.username,
@@ -250,6 +260,7 @@ export async function commentGiveById(
   });
 
   res.status(201).send({
+    id: comment._id,
     owner: {
       id: user._id,
       username: user.username,
@@ -296,6 +307,7 @@ export async function commentUpdateById(
     'owner',
   );
   res.status(200).send({
+    id: populatedComment._id,
     owner: {
       id: populatedComment.owner._id,
       username: populatedComment.owner.username,

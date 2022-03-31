@@ -32,7 +32,7 @@ interface InsertCommentDTO {
   attachments?: string[];
 }
 
-type PopulatedComment = Overwrite<IComment, { owner: UserDocument }>;
+type PopulatedComment = Overwrite<CommentDocument, { owner: UserDocument }>;
 
 /**
  * Insert a new forum post to the database
