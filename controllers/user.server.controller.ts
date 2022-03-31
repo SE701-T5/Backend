@@ -8,6 +8,7 @@ import config from '../config/config.server.config';
 import { validators, validate } from '../lib/validate.lib';
 
 interface UserResponseDTO {
+  id: mongoose.Types.ObjectId;
   username: string;
   displayName: string;
   email: string;
@@ -31,7 +32,7 @@ export async function userCreate(
 ) {
   const rules = Joi.object<CreateUserDTO>({
     username: validators.username().required(),
-    displayName: Joi.string().alphanum().min(2).required(),
+    displayName: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     plaintextPassword: validators.password().required(),
   });
@@ -40,6 +41,7 @@ export async function userCreate(
 
   const user = await User.createUser(formData);
   res.status(201).json({
+    id: user._id,
     displayName: user.displayName,
     email: user.email,
     username: user.username,
@@ -70,6 +72,7 @@ export async function userLogin(
 
   const user = await User.authenticateUser(login, data.plaintextPassword, true);
   res.status(200).send({
+    id: user._id,
     username: user.username,
     displayName: user.displayName,
     email: user.email,
@@ -104,6 +107,7 @@ export async function userViewById(
   const user = await User.searchUserById(id);
 
   res.status(200).send({
+    id: user._id,
     username: user.username,
     displayName: user.displayName,
     email: user.email,
@@ -123,7 +127,7 @@ export async function userUpdateById(
 
   const schema = Joi.object<UpdateUserDTO>({
     username: validators.username(),
-    displayName: Joi.string().alphanum().min(2),
+    displayName: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
   }).min(1);
@@ -134,6 +138,7 @@ export async function userUpdateById(
   if (await User.isUserAuthorized(id, authToken)) {
     const user = await User.updateUserById(id, data);
     res.status(200).send({
+      id: user._id,
       username: user.username,
       email: user.email,
       displayName: user.displayName,

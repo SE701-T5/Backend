@@ -54,7 +54,7 @@ export function errorHandler(
     error: serverError.message,
     context:
       config.get('environment') === 'development'
-        ? JSON.stringify(serverError.context)
+        ? serverError.context
         : undefined,
   });
 }

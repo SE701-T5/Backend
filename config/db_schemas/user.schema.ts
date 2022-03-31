@@ -47,6 +47,8 @@ const userSchema = new Schema<IUser>(
     // Authorization for verifying users are logged in and can access data
     authToken: {
       type: String,
+      unique: true,
+      index: true,
       required: false,
     },
 
