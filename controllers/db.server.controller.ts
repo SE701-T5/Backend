@@ -13,15 +13,9 @@ import { Request, Response } from 'express';
  * @param res HTTP request response object
  */
 export async function resetDB(req: Request, res: Response) {
-  const isAdminUserAuthenticated = true; // TODO: implement admin user authentication
-
-  if (isAdminUserAuthenticated) {
-    // Remove all documents in the database collections
-    await Database.resetCollections();
-    res.status(204).send();
-  } else {
-    res.status(401).send('Unauthorized');
-  }
+  // Remove all documents in the database collections
+  await Database.resetCollections();
+  res.status(204).send();
 }
 
 /**

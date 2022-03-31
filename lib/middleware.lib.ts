@@ -3,6 +3,12 @@ import config from '../config/config.server.config';
 import express, { Request, Response, NextFunction } from 'express';
 import { ServerError } from './utils.lib';
 
+export function isDevelopment(req: Request, res: Response, next: NextFunction) {
+  if (config.get('environment') !== 'development')
+    throw new ServerError('endpoint does not exist', 404);
+  next();
+}
+
 /**
  * Verify if an authorization token exists in the database at API gateway to determine whether to continue or not
  * @param req HTTP request object containing the authorization token for verification
