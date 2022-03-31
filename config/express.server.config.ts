@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { errorHandler } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
 
@@ -18,6 +19,7 @@ export default function () {
 
   // This is required for parsing application/json in req.body
   app.use(bodyParser.json());
+  app.use(cors());
 
   // Set response headers using middleware
   app.use(function (req, res, next) {
