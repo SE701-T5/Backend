@@ -1,8 +1,7 @@
 import { Express } from 'express';
 import * as user from '../controllers/user.server.controller';
-import { isRequestTokenAuthorized } from '../lib/middleware.lib';
+import { asyncHandler, isRequestTokenAuthorized } from '../lib/middleware.lib';
 import multer from 'multer';
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './uploads');
@@ -20,13 +19,13 @@ const upload = multer({ storage: storage });
 export default function (app: Express) {
   app
     .route('/api/v1/users')
-    .post(upload.single('profilePicture'), user.userCreate);
+    .post(upload.single('profilePicture'), asyncHandler(user.userCreate));
 
-  app.route('/api/v1/users/login').post(user.userLogin);
+  app.route('/api/v1/users/login').post(asyncHandler(user.userLogin));
 
   app
     .route('/api/v1/users/logout')
-    .post(isRequestTokenAuthorized, user.userLogout);
+    .post(isRequestTokenAuthorized, asyncHandler(user.userLogout));
 
   app
     .route('/api/v1/users/current')
@@ -39,7 +38,7 @@ export default function (app: Express) {
     .patch(
       upload.single('profilePicture'),
       isRequestTokenAuthorized,
-      user.userUpdateById,
+      asyncHandler(user.userUpdateById),
     )
-    .delete(isRequestTokenAuthorized, user.userDeleteById);
+    .delete(isRequestTokenAuthorized, asyncHandler(user.userDeleteById));
 }

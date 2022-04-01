@@ -1,41 +1,22 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-interface Comment {
-  postID: string;
-  authorID: string;
-  authorUserName: string;
+export interface IComment extends TimestampedModel {
+  owner: mongoose.Types.ObjectId;
   bodyText: string;
   edited: boolean;
   upVotes: number;
   downVotes: number;
-  attachments?: string[];
+  attachments: string[];
 }
 
-const commentSchema = new Schema<Comment>(
+const commentSchema = new Schema<IComment>(
   {
-    // The Forum post ID the comment is made to - must be a document ID length
-    postID: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
-    },
     // The User's ID who authored the comment to the forum post - must be a document ID length
-    authorID: {
-      type: String,
+    owner: {
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true,
-      minlength: 24,
-      maxLength: 24,
-    },
-    // User's publicly displayed username
-    authorUserName: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 3,
+      ref: 'User',
     },
     // Contains the body of text for the forum post comment
     bodyText: {
@@ -46,22 +27,29 @@ const commentSchema = new Schema<Comment>(
     // Used to determine whether a comment has been edited
     edited: {
       type: Boolean,
+      default: false,
       required: true,
     },
     // Indicates the number of up votes the forum post comment has
     upVotes: {
       type: Number,
+      default: 0,
       required: true,
+      min: 0,
     },
     // Indicates the number of down votes the forum post comment has
     downVotes: {
       type: Number,
+      default: 0,
       required: true,
+      min: 0,
     },
     // Contains list of file paths to attachments (optional)
     attachments: [
       {
         type: String,
+        default: [],
+        required: true,
       },
     ],
   },
@@ -71,6 +59,8 @@ const commentSchema = new Schema<Comment>(
   },
 );
 
+export type CommentDocument = HydratedDocument<IComment>;
+
 // User can be used to create new documents with the userSchema
-const CommentModel = mongoose.model<Comment>('Comment', commentSchema);
+const CommentModel = mongoose.model<IComment>('Comment', commentSchema);
 export default CommentModel;

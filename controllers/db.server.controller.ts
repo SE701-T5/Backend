@@ -1,3 +1,7 @@
+import Joi from 'joi';
+import { TypedRequestBody } from '../lib/utils.lib';
+import { validate } from '../lib/validate.lib';
+import { ResampleCounts, ResampleDTO } from '../models/db.server.model';
 import * as Database from '../models/db.server.model';
 import { Request, Response } from 'express';
 
@@ -6,22 +10,10 @@ import { Request, Response } from 'express';
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export function resetDB(req: Request, res: Response) {
-  const isAdminUserAuthenticated = true; // TODO: implement admin user authentication
-
-  if (isAdminUserAuthenticated) {
-    // Remove all documents in the database collections
-    Database.resetCollections().then((result) => {
-      if (result.err) {
-        // Return the error message with the error status
-        res.status(result.status).send(result.err);
-      } else {
-        res.status(result.status).send('OK');
-      }
-    });
-  } else {
-    res.status(401).send('Unauthorized');
-  }
+export async function resetDB(req: Request, res: Response) {
+  // Remove all documents in the database collections
+  await Database.resetCollections();
+  res.status(204).send();
 }
 
 /**
@@ -29,7 +21,25 @@ export function resetDB(req: Request, res: Response) {
  * @param req HTTP request object
  * @param res HTTP request response object
  */
-export function resampleDB(req: Request, res: Response) {
-  // TODO: implement resampleDB()
-  res.json({ dummyTest: 'resampleDB() dummy test passes' });
+export async function resampleDB(
+  req: TypedRequestBody<ResampleDTO>,
+  res: Response<ResampleCounts>,
+) {
+  const schema = Joi.object<ResampleDTO>({
+    users: Joi.number().min(1).max(100).integer(),
+    communities: Joi.number().min(1).max(100).integer(),
+    posts: Joi.alternatives(
+      Joi.number().min(1).max(20).integer(),
+      Joi.array().items(Joi.number().min(1).max(20).integer()).length(2),
+    ),
+    comments: Joi.alternatives(
+      Joi.number().min(1).max(10).integer(),
+      Joi.array().items(Joi.number().min(1).max(10).integer()).length(2),
+    ),
+  });
+
+  const data = validate(schema, req.body);
+
+  const counts = await Database.generateFakeData(data);
+  res.status(200).send(counts);
 }

@@ -1,169 +1,266 @@
-import Forum from '../config/db_schemas/forum.schema';
-import Comment from '../config/db_schemas/comment.schema';
+import { Overwrite } from 'convict';
+import { DeleteResult } from 'mongodb';
+import mongoose from 'mongoose';
+import { CommunityDocument } from '../config/db_schemas/community.schema';
+import Post, { PostDocument, IPost } from '../config/db_schemas/post.schema';
+import Comment, {
+  CommentDocument,
+  IComment,
+} from '../config/db_schemas/comment.schema';
+import { UserDocument } from '../config/db_schemas/user.schema';
+import { getProp, ServerError } from '../lib/utils.lib';
+
+interface InsertPostDTO {
+  owner: mongoose.Types.ObjectId;
+  community: mongoose.Types.ObjectId;
+  title: string;
+  bodyText?: string;
+  edited?: boolean;
+  upVotes?: number;
+  downVotes?: number;
+  attachments?: string[];
+  comments?: string[];
+}
+
+interface InsertCommentDTO {
+  owner: mongoose.Types.ObjectId;
+  bodyText: string;
+  edited?: boolean;
+  upVotes?: number;
+  downVotes?: number;
+  attachments?: string[];
+}
+
+type PopulatedComment = Overwrite<CommentDocument, { owner: UserDocument }>;
+type PopulatedPost = PostDocument & {
+  owner: UserDocument;
+  community: CommunityDocument;
+};
 
 /**
  * Insert a new forum post to the database
  * @param params object containing forum post attributes
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function insertPost(params, done) {
-  // Set forum post attributes
-  const userID = params.userID,
-    communityID = params.communityID,
-    title = params.title,
-    bodyText = params.bodyText,
-    edited = false,
-    upVotes = 0,
-    downVotes = 0,
-    attachments = params.attachments,
-    comments = [''];
-
+export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
   // Create new forum post document
-  const newPost = new Forum({
-    userID,
-    communityID,
-    title,
-    bodyText,
-    edited,
-    upVotes,
-    downVotes,
-    attachments,
-    comments,
+  const newPost = new Post({
+    owner: params.owner,
+    community: params.community,
+    title: params.title,
+    bodyText: params.bodyText,
+    edited: params.edited ?? false,
+    upVotes: params.upVotes ?? 0,
+    downVotes: params.downVotes ?? 0,
+    attachments: params.attachments ?? [],
+    comments: params.comments ?? [],
   });
 
   // Save new forum post document to database collection
-  newPost
-    .save()
-    .then((res) => {
-      return done(res);
-    })
-    .catch((err) => {
-      // Forum post is already in the database with unique attributes, return duplicate conflict error
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      // Any other database error, return internal server error
-      return done({ err: 'Internal server error', status: 500 });
-    });
+  try {
+    return await newPost.save();
+  } catch (err) {
+    // Forum post is already in the database with unique attributes, return duplicate conflict error
+    if (getProp(err, 'code') === 11000) {
+      throw new ServerError('Conflict', 409, err);
+    }
+    // Any other error
+    throw err;
+  }
+}
+
+export async function populatePost(post: PostDocument): Promise<PopulatedPost> {
+  return post.populate<{
+    owner: UserDocument;
+    community: CommunityDocument;
+  }>(['community', 'owner']);
+}
+
+export async function populatePosts(
+  posts: PostDocument[],
+): Promise<PopulatedPost[]> {
+  return (await Post.populate(posts, [
+    { path: 'community' },
+    { path: 'owner' },
+  ])) as PopulatedPost[];
 }
 
 /**
  * Search for a forum post in the database
  * @param id forum post ID
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function searchPostById(id, done) {
-  try {
-    Forum.findById(id)
-      .then((res) => done(res))
-      .catch((err) => {
-        return done({ status: 404, err: err });
-      });
-  } catch (err) {
-    return done({ err: 'Internal server error', status: 500 });
+export async function searchPostById(
+  id: mongoose.Types.ObjectId,
+): Promise<PostDocument> {
+  const resource = await Post.findById(id);
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('forum post not found', 404);
   }
 }
 
 /**
  * Delete an existing forum post matching a given ID
  * @param id the ID for matching to the database document being deleted
- * @param done function callback, returns status code and message if error
  */
-export function deletePostById(id, done) {
-  Forum.deleteOne({ _id: id })
-    .then((res) => {
-      if (res.deletedCount === 0) {
-        return done({ err: 'Not found', status: 404 });
-      }
-      return done(res);
-    })
-    .catch((err) => {
-      return done({ err: 'Internal server error', status: 500 });
-    });
+export async function deletePostById(
+  id: mongoose.Types.ObjectId,
+): Promise<DeleteResult> {
+  const result = await Post.deleteOne({ _id: id });
+
+  if (result.deletedCount === 0) {
+    throw new ServerError('not found', 404, result);
+  }
+
+  return result;
 }
 
 /**
  * Updates given fields of a database collection document matching a given ID
  * @param id the ID of the document being updated
  * @param updates the document field(s) being updated
- * @param done function callback, returns status code and message if error
+ * @param checkForEdits if set to true, will automatically update the edited field in certain cases
+ * @param deltaVotes if set to true, upVote and downVote counts will be added to the existing count instead of replacing.
  */
-export function updatePostById(id, updates, done) {
-  // Search for a document matching the given ID to increment upVotes and downVotes
-  searchPostById(id, function (result) {
-    if (result.err) {
-      // Return the error message with the error status
-      return done(result);
-    } else {
-      updates['upVotes'] = updates.upVotes
-        ? updates.upVotes + result.upVotes
-        : result.upVotes;
-      updates['downVotes'] = updates.downVotes
-        ? updates.downVotes + result.downVotes
-        : result.downVotes;
-      updates['comments'] = updates.comments
-        ? result.comments.concat(updates.comments)
-        : result.comments;
+export async function updatePostById(
+  id: mongoose.Types.ObjectId,
+  updates: Partial<IPost>,
+  checkForEdits: boolean,
+  deltaVotes = false,
+): Promise<PostDocument> {
+  if (checkForEdits && updates.edited === undefined) {
+    const editTriggerProperties = ['title', 'bodyText', 'attachments'];
+    const updatedProperties = Object.keys(updates);
 
-      // If the update does not just involve up votes, down votes, or comments, and actual edits
-      if (Object.keys(updates).length > 3) {
-        updates['edited'] = true; // set the edited field to true
-      }
+    const intersection = editTriggerProperties.filter((i) =>
+      updatedProperties.includes(i),
+    );
 
-      // Find the document and update the changed fields
-      Forum.findOneAndUpdate({ _id: id }, { $set: updates }, { new: true })
-        .then((res) => {
-          return done(res);
-        })
-        .catch((err) => {
-          return done({ err: 'Internal server error', status: 500 });
-        });
+    if (intersection.length > 0) updates.edited = true;
+  }
+
+  if (deltaVotes) {
+    const post = await searchPostById(id);
+    if ('upVotes' in updates) {
+      updates.upVotes = post.upVotes + updates.upVotes;
     }
-  });
+    if ('downVotes' in updates) {
+      updates.downVotes = post.downVotes + updates.downVotes;
+    }
+  }
+
+  const resource = await Post.findOneAndUpdate(
+    { _id: id },
+    { $set: updates },
+    { new: true },
+  );
+
+  if (resource != null) {
+    return resource;
+  } else {
+    throw new ServerError('forum not found', 400);
+  }
 }
 
 /**
  * Creates and returns a new forum comment using the comment schema
+ * @param postId post that the comment is on
  * @param params object containing forum post comment fields
- * @param done function callback, returns status code, and message if error, or JSON if successful
  */
-export function addComment(params, done) {
-  const postID = params.postID,
-    authorID = params.authorID,
-    authorUserName = params.authorUserName,
-    bodyText = params.bodyText,
-    edited = false,
-    upVotes = 0,
-    downVotes = 0,
-    attachments = params.attachments;
+export async function addComment(
+  postId: mongoose.Types.ObjectId,
+  params: InsertCommentDTO,
+): Promise<CommentDocument> {
+  const newComment = new Comment(params);
 
-  const newComment = new Comment({
-    postID,
-    authorID,
-    authorUserName,
-    bodyText,
-    edited,
-    upVotes,
-    downVotes,
-    attachments,
+  let comment: CommentDocument;
+  try {
+    comment = await newComment.save();
+  } catch (err: unknown) {
+    if (getProp(err, 'code') === 11000) {
+      throw new ServerError('Conflict', 409, err);
+    }
+    throw err;
+  }
+
+  await Post.findByIdAndUpdate(postId, {
+    $push: {
+      comments: {
+        $each: [comment._id],
+      },
+    },
   });
 
-  newComment
-    .save()
-    .then((res) => {
-      updatePostById(postID, { comments: [res.id] }, function (result) {
-        if (result.err) {
-          // Return the error message with the error status
-          return done(result);
-        } else {
-          done(res);
-        }
-      });
+  return comment;
+}
+
+/**
+ * Search for a forum post in the database
+ */
+export async function getPosts(): Promise<PostDocument[]> {
+  return await Post.find();
+}
+
+/**
+ * Updates given fields of a database collection document matching a given ID
+ * @param id the ID of the document being updated
+ * @param updates the document field(s) being updated
+ * @param checkForEdits if set to true, will automatically update the edited field in certain cases
+ * @param deltaVotes if set to true, upVote and downVote counts will be added to the existing count instead of replacing.
+ */
+export async function updateCommentById(
+  id: mongoose.Types.ObjectId,
+  updates: Partial<IComment>,
+  checkForEdits: boolean,
+  deltaVotes = false,
+): Promise<CommentDocument> {
+  if (
+    checkForEdits &&
+    updates.edited == undefined &&
+    updates.bodyText != undefined
+  ) {
+    updates.edited = true;
+  }
+
+  if (deltaVotes) {
+    const comment = await searchCommentById(id);
+    if ('upVotes' in updates)
+      updates.upVotes = comment.upVotes + updates.upVotes;
+    if ('downVotes' in updates)
+      updates.downVotes = comment.downVotes + updates.downVotes;
+  }
+
+  return await Comment.findOneAndUpdate(
+    { _id: id },
+    { $set: updates },
+    { new: true },
+  );
+}
+
+export async function searchCommentById(
+  id: mongoose.Types.ObjectId,
+): Promise<CommentDocument> {
+  const resource = await Comment.findById(id);
+
+  if (resource != null) return resource;
+  else {
+    throw new ServerError('comment not found', 404);
+  }
+}
+
+export async function getAllCommentsByPostId(
+  id: mongoose.Types.ObjectId,
+): Promise<PopulatedComment[]> {
+  const post = await Post.findById(id)
+    .populate<{ comments: PopulatedComment[] }>({
+      path: 'comments',
+      populate: { path: 'owner' },
     })
-    .catch((err) => {
-      if (err.code === 11000) {
-        return done({ err: 'Conflict', status: 409 });
-      }
-      return done({ err: 'Internal server error', status: 500 });
-    });
+    .exec();
+
+  if (post != null) {
+    return post.comments;
+  } else {
+    throw new ServerError('forum post not found', 404);
+  }
 }
