@@ -1,9 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+import pinoHttp from 'pino-http';
+import { errorHandler, logger } from '../lib/middleware.lib';
+import { ServerError } from '../lib/utils.lib';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
+import communityServerRoutes from '../routes/community.routes';
 
 /**
  * Configure Express.js application
@@ -15,6 +20,12 @@ export default function () {
 
   // This is required for parsing application/json in req.body
   app.use(bodyParser.json());
+  app.use(cors());
+  app.use(
+    pinoHttp({
+      logger,
+    }),
+  );
 
   // Set response headers using middleware
   app.use(function (req, res, next) {
@@ -29,13 +40,25 @@ export default function () {
 
   // HTTP GET request to homepage with a message response stating the server is running
   app.get('/health', function (req, res) {
-    res.status(200).json({ msg: 'The server is up and running!' });
+    res.status(200).json({
+      msg: 'The server is up and running!',
+      tim: new Date().getTime(),
+    });
   });
 
   // Configure HTTP routes
   dbServerRoutes(app);
   forumServerRoutes(app);
   userServerRoutes(app);
+  communityServerRoutes(app);
+
+  // 404 Route
+  app.all('*', () => {
+    throw new ServerError('endpoint does not exist', 404);
+  });
+
+  // Configure Error Handler
+  app.use(errorHandler);
 
   return app;
 }

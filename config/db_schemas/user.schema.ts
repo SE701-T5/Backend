@@ -1,15 +1,15 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, HydratedDocument } from 'mongoose';
+import { TimestampedModel } from '../../lib/utils.lib';
 
-export interface IUser {
+export interface IUser extends TimestampedModel {
   username: string;
   displayName: string;
   email: string;
   hashedPassword: string;
-  authToken: string;
+  salt: string;
+  authToken?: string;
+  subscribedCommunities: mongoose.Types.ObjectId[];
 }
-
-export interface IUserDocument extends IUser, Document {}
-export type IUserModel = Model<IUserDocument>;
 
 const userSchema = new Schema<IUser>(
   {
@@ -40,17 +40,34 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
-    // Authorization for verifying users are logged in and can access data
-    authToken: {
+    salt: {
       type: String,
       required: true,
     },
+    // Authorization for verifying users are logged in and can access data
+    authToken: {
+      type: String,
+      unique: true,
+      index: true,
+      required: false,
+      sparse: true,
+    },
+
+    subscribedCommunities: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Community',
+      },
+    ],
   },
   {
     // Assigns createdAt and updatedAt fields
     timestamps: true,
   },
 );
+
+export type UserDocument = HydratedDocument<IUser>;
 
 // User can be used to create new documents with the userSchema
 const UserModel = mongoose.model<IUser>('User', userSchema);
