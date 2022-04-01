@@ -123,7 +123,7 @@ export async function communityCreate(
   const schema = Joi.object<CreateCommunityDTO>({
     name: Joi.string().min(3).required(),
     description: Joi.string().allow('').required(),
-    img: Joi.array().items(Joi.string().uri()).max(3),
+    img: Joi.string().uri(),
   });
 
   const data = validate(schema, req.body);
