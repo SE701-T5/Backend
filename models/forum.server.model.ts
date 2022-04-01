@@ -93,10 +93,9 @@ export async function searchPostById(
 ): Promise<PostDocument> {
   const resource = await Post.findById(id);
 
-  if (resource != null) return resource;
-  else {
-    throw new ServerError('forum post not found', 404);
-  }
+  if (resource == null) throw new ServerError('post not found', 404);
+
+  return resource;
 }
 
 /**
@@ -155,11 +154,9 @@ export async function updatePostById(
     { new: true },
   );
 
-  if (resource != null) {
-    return resource;
-  } else {
-    throw new ServerError('forum not found', 400);
-  }
+  if (resource == null) throw new ServerError('post not found', 404);
+
+  return resource;
 }
 
 /**
@@ -242,10 +239,9 @@ export async function searchCommentById(
 ): Promise<CommentDocument> {
   const resource = await Comment.findById(id);
 
-  if (resource != null) return resource;
-  else {
-    throw new ServerError('comment not found', 404);
-  }
+  if (resource == null) throw new ServerError('comment not found', 404);
+
+  return resource;
 }
 
 export async function getAllCommentsByPostId(
@@ -258,9 +254,7 @@ export async function getAllCommentsByPostId(
     })
     .exec();
 
-  if (post != null) {
-    return post.comments;
-  } else {
-    throw new ServerError('forum post not found', 404);
-  }
+  if (post == null) throw new ServerError('post not found', 404);
+
+  return post.comments;
 }

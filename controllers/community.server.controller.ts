@@ -100,20 +100,18 @@ export async function getCommunities(
 ) {
   const communities = await Community.getAll();
 
-  //Todo: get member counts asynchronously
-  const mappedCommunities: CommunityResponse[] = [];
-  for (const i of communities) {
-    mappedCommunities.push({
-      id: i._id,
-      img: i.img,
-      name: i.name,
-      owner: i.owner,
-      memberCount: await Community.getCommunityMemberCount(i._id),
-      description: i.description,
-      createdAt: i.createdAt,
-      updatedAt: i.updatedAt,
-    });
-  }
+  const mappedCommunities: CommunityResponse[] = await Promise.all(
+    communities.map(async (doc) => ({
+      id: doc._id,
+      img: doc.img,
+      name: doc.name,
+      owner: doc.owner,
+      memberCount: await Community.getCommunityMemberCount(doc._id),
+      description: doc.description,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    })),
+  );
 
   res.status(200).send(mappedCommunities);
 }

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import { IPost } from '../config/db_schemas/post.schema';
 import { UserDocument } from '../config/db_schemas/user.schema';
 import {
   convertToObjectId,

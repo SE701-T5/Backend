@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import * as user from '../controllers/user.server.controller';
-import { asyncHandler, isRequestTokenAuthorized } from '../lib/middleware.lib';
+import { asyncHandler, isAuthenticated } from '../lib/middleware.lib';
 
 /**
  * Handles HTTP requests for the User module using Express.js route()
@@ -13,11 +13,11 @@ export default function (app: Express) {
 
   app
     .route('/api/v1/users/logout')
-    .post(isRequestTokenAuthorized, asyncHandler(user.userLogout));
+    .post(isAuthenticated, asyncHandler(user.userLogout));
 
   app
     .route('/api/v1/users/:id')
     .get(user.userViewById)
-    .patch(isRequestTokenAuthorized, asyncHandler(user.userUpdateById))
-    .delete(isRequestTokenAuthorized, asyncHandler(user.userDeleteById));
+    .patch(isAuthenticated, asyncHandler(user.userUpdateById))
+    .delete(isAuthenticated, asyncHandler(user.userDeleteById));
 }

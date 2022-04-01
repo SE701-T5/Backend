@@ -1,6 +1,7 @@
+import pino from 'pino';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
-import express, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ServerError } from './utils.lib';
 import { StatusCodes } from 'http-status-codes';
 
@@ -16,7 +17,7 @@ export function isDevelopment(req: Request, res: Response, next: NextFunction) {
  * @param res HTTP request response status code with message if the verification fails
  * @param next continue to the next function if the status code returned from authorization token verification is 200
  */
-export async function isRequestTokenAuthorized(
+export async function isAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -53,10 +54,12 @@ export function errorHandler(
   next: NextFunction,
 ) {
   if (!(err instanceof ServerError)) {
-    console.error('unhandled error', err);
+    logger.error({ msg: 'unhandled error', err, serverError: false });
     err = new ServerError('internal server error', 500, err);
   } else if (err.status === 500) {
-    console.error('server error', err);
+    logger.error({ msg: 'unknown server error', err, serverError: false });
+  } else {
+    logger.warn({ msg: 'server error caught', serverError: true, err });
   }
 
   // update typings
@@ -71,3 +74,12 @@ export function errorHandler(
         : undefined,
   });
 }
+
+export const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+});
