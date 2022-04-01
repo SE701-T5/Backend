@@ -12,60 +12,51 @@ import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 import app from '../server';
 import mongoose from 'mongoose';
+import { ServerError } from '../lib/utils.lib';
 
-describe('Authenticate', () => {
+describe.only('Authenticate', () => {
   beforeEach(async () => {
     await new User({
       username: 'TestDummy',
       displayName: 'MostValuedTest',
       email: 'test@dummy.com',
-      hashedPassword: hashPassword('authentication-test'),
+      hashedPassword: hashPassword('authentication-test').hash,
+      salt: hashPassword('authentication-test').salt,
       authToken: '6a95b47e-c37d-492e-8278-faca6824ada6',
     }).save();
   });
 
   it('Incorrect password', async () => {
-    const result = await authenticateUser(
-      { email: 'test@dummy.com' },
-      'incorrectPassword',
-    );
-    expect(result).to.be.false;
+    expect(
+      authenticateUser({ email: 'test@dummy.com' }, 'incorrectPassword'),
+    ).to.be.rejectedWith(ServerError);
   });
 
   it('Incorrect username', async () => {
-    const result = await authenticateUser(
-      { username: 'IncorrectUsername' },
-      'authentication-test',
-    );
-    expect(result).to.be.false;
+    expect(
+      authenticateUser(
+        { username: 'IncorrectUsername' },
+        'authentication-test',
+      ),
+    ).to.be.rejectedWith(ServerError);
   });
 
   it('Incorrect email', async () => {
-    const result = await authenticateUser(
-      { email: 'incorrectemail@example.com' },
-      'authentication-test',
-    );
-    expect(result).to.be.false;
+    expect(
+      authenticateUser(
+        { email: 'incorrectemail@example.com' },
+        'authentication-test',
+      ),
+    ).to.be.rejectedWith(ServerError);
   });
 
-  // it('Incorrect login details', async () => {
-  //   const result = await authenticateUser(
-  //     { displayName: 'MostValuedTest' },
-  //     'authentication-test',
-  //   );
-  //   expect(result).to.be.false;
-  // });
-
   it('Correct username and password', async () => {
-    const result: any = await authenticateUser(
+    const result = await authenticateUser(
       { username: 'TestDummy' },
       'authentication-test',
     );
 
-    expect(result).to.have.property('res');
-    expect(result.res.email).to.equal('test@dummy.com');
-    expect(result).to.have.property('status');
-    expect(result.status).to.equal(StatusCodes.OK);
+    expect(result.email).to.equal('test@dummy.com');
   });
 
   it('Correct email and password', async () => {
@@ -73,10 +64,7 @@ describe('Authenticate', () => {
       { email: 'test@dummy.com' },
       'authentication-test',
     );
-    expect(result).to.have.property('res');
-    expect(result.res.email).to.equal('test@dummy.com');
-    expect(result).to.have.property('status');
-    expect(result.status).to.equal(StatusCodes.OK);
+    expect(result.email).to.equal('test@dummy.com');
   });
 });
 
