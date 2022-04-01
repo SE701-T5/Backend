@@ -14,14 +14,15 @@ import app from '../server';
 import mongoose from 'mongoose';
 import { ServerError } from '../lib/utils.lib';
 
-describe.only('Authenticate', () => {
+describe('Authenticate', () => {
+  const password = hashPassword('authentication-test');
   beforeEach(async () => {
     await new User({
       username: 'TestDummy',
       displayName: 'MostValuedTest',
       email: 'test@dummy.com',
-      hashedPassword: hashPassword('authentication-test').hash,
-      salt: hashPassword('authentication-test').salt,
+      hashedPassword: password.hash,
+      salt: password.salt,
       authToken: '6a95b47e-c37d-492e-8278-faca6824ada6',
     }).save();
   });
@@ -57,6 +58,7 @@ describe.only('Authenticate', () => {
     );
 
     expect(result.email).to.equal('test@dummy.com');
+    expect(result.username).to.equal('TestDummy');
   });
 
   it('Correct email and password', async () => {
@@ -65,48 +67,56 @@ describe.only('Authenticate', () => {
       'authentication-test',
     );
     expect(result.email).to.equal('test@dummy.com');
+    expect(result.username).to.equal('TestDummy');
   });
 });
 
 describe('Login', () => {
   const password = 'passwordtodd';
+  const passwordHashed = hashPassword(password);
 
   beforeEach(async () => {
     await new User({
       username: 'Todd123',
       displayName: 'Todd',
       email: 'todd413@hotmail.com',
-      hashedPassword: hashPassword(password),
+      hashedPassword: passwordHashed.hash,
+      salt: passwordHashed.salt,
       authToken: '6a95b47e-c37d-492e-8278-faca6824ada6',
     }).save();
   });
 
   it('Authtoken provided with valid details', async () => {
-    const response = await request(app).post('/api/v1/users/login').send({
-      email: 'todd413@hotmail.com',
-      plaintextPassword: password,
-    });
-    expect(response.status).to.equal(StatusCodes.OK);
+    const response = await request(app)
+      .post('/api/v1/users/login')
+      .send({
+        email: 'todd413@hotmail.com',
+        plaintextPassword: password,
+      })
+      .expect(StatusCodes.OK);
     expect(response.body).to.have.property('authToken');
   });
 
-  // XXX: Original test expected 403 Forbidden but this is functionality is found nowhere in userLogin
   it('Authtoken not provided invalid details', async () => {
-    const response = await request(app).post('/api/v1/users/login').send({
-      username: 'InvalidUsername',
-      email: 'todd413@hotmail.com',
-      plaintextPassword: password,
-    });
-    expect(response.status).to.equal(StatusCodes.NOT_FOUND);
-    expect(response.body).to.not.have.property('authToken');
+    expect(
+      request(app)
+        .post('/api/v1/users/login')
+        .send({
+          username: 'InvalidUsername',
+          email: 'todd413@hotmail.com',
+          plaintextPassword: password,
+        })
+        .expect(StatusCodes.NOT_FOUND),
+    ).to.be.rejectedWith(ServerError);
   });
 
   it('Verify isUserAuthorized', async () => {
     const loginResponse = await request(app).post('/api/v1/users/login').send({
       username: 'Todd123',
       email: 'todd413@hotmail.com',
-      plaintextPassword: 'passwordtodd',
+      plaintextPassword: password,
     });
+
     expect(loginResponse.status).to.equal(StatusCodes.OK);
     expect(loginResponse.body).to.have.property('userID');
     expect(loginResponse.body).to.have.property('authToken');

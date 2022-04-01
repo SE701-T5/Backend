@@ -55,8 +55,12 @@ export function errorHandler(
 ) {
   if (!(err instanceof ServerError)) {
     logger.error({ msg: 'unhandled error', err, serverError: false });
-    err = new ServerError('internal server error', 500, err);
-  } else if (err.status === 500) {
+    err = new ServerError(
+      'internal server error',
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      err,
+    );
+  } else if (err.status === StatusCodes.INTERNAL_SERVER_ERROR) {
     logger.error({ msg: 'unknown server error', err, serverError: false });
   } else {
     logger.warn({ msg: 'server error caught', serverError: true, err });
