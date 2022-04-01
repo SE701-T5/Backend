@@ -9,6 +9,7 @@ import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
 import communityServerRoutes from '../routes/community.routes';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Configure Express.js application
@@ -21,11 +22,13 @@ export default function () {
   // This is required for parsing application/json in req.body
   app.use(bodyParser.json());
   app.use(cors());
-  app.use(
-    pinoHttp({
-      logger,
-    }),
-  );
+
+  // TODO: comment this back in when done
+  // app.use(
+  //   pinoHttp({
+  //     logger,
+  //   }),
+  // );
 
   // Set response headers using middleware
   app.use(function (req, res, next) {
@@ -40,7 +43,7 @@ export default function () {
 
   // HTTP GET request to homepage with a message response stating the server is running
   app.get('/health', function (req, res) {
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       msg: 'The server is up and running!',
       tim: new Date().getTime(),
     });

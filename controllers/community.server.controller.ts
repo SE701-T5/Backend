@@ -13,6 +13,7 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { validate } from '../lib/validate.lib';
 import { PostResponse } from './forum.server.controller';
+import { StatusCodes } from 'http-status-codes';
 
 interface UpdateCommunityDTO {
   name?: string;
@@ -56,7 +57,7 @@ export async function getPosts(req: Request, res: Response<PostResponse[]>) {
       } as PostResponse),
   );
 
-  res.status(200).send(response);
+  res.status(StatusCodes.OK).send(response);
 }
 
 export async function communityUpdateById(
@@ -77,12 +78,12 @@ export async function communityUpdateById(
   const community = await Community.searchCommunityById(id);
 
   if (!(await User.isUserAuthorized(community.owner, authToken))) {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 
   const newCommunity = await Community.updateCommunityById(id, data);
 
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: newCommunity._id,
     img: newCommunity.img,
     name: newCommunity.name,
@@ -113,7 +114,7 @@ export async function getCommunities(
     })),
   );
 
-  res.status(200).send(mappedCommunities);
+  res.status(StatusCodes.OK).send(mappedCommunities);
 }
 
 export async function communityCreate(

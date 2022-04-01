@@ -1,4 +1,5 @@
-import chai from 'chai';
+import { fail } from 'assert';
+import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';

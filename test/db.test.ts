@@ -5,11 +5,11 @@ import { StatusCodes } from 'http-status-codes';
 import { expect } from 'chai';
 
 describe.skip('Database', () => {
-  it('Reset', () => {
+  it.skip('Reset', () => {
     request(app).post('/api/v1/reset').expect(StatusCodes.OK);
   });
 
-  it('Connection statuses', async () => {
+  it.skip('Connection statuses', async () => {
     closeConn();
     expect(getState()).equals(3); // Disconnecting
     await closeConn();
@@ -27,7 +27,7 @@ describe.skip('Database', () => {
     await connect();
   });
 
-  it('Reset on closed connection', async () => {
+  it.skip('Reset on closed connection', async () => {
     await closeConn().then(() => {
       request(app)
         .post('/api/v1/reset')
@@ -37,7 +37,7 @@ describe.skip('Database', () => {
   });
 
   // XXX: Dummy awaiting implementation
-  it('Reset on closed connection (dummy)', async () => {
+  it.skip('Reset on closed connection (dummy)', async () => {
     await closeConn();
     request(app)
       .post('/api/v1/resample')

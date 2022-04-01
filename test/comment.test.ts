@@ -37,7 +37,7 @@ describe('Comment', () => {
     forumId = forumDoc._id.toString();
   });
 
-  it('Create', async () => {
+  it.skip('Create', async () => {
     const commentReponse = await request(app)
       .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
@@ -49,7 +49,7 @@ describe('Comment', () => {
     expect(commentReponse.status).to.equal(StatusCodes.CREATED);
   });
 
-  it('Create (missing authorId)', async () => {
+  it.skip('Create (missing authorId)', async () => {
     const commentReponse = await request(app)
       .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
@@ -60,7 +60,7 @@ describe('Comment', () => {
     expect(commentReponse.status).to.equal(StatusCodes.BAD_REQUEST);
   });
 
-  it('Create (invalid length)', async () => {
+  it.skip('Create (invalid length)', async () => {
     const commentReponse = await request(app)
       .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
@@ -72,7 +72,7 @@ describe('Comment', () => {
     expect(commentReponse.status).to.equal(StatusCodes.BAD_REQUEST);
   });
 
-  it('View', async () => {
+  it.skip('View', async () => {
     await request(app)
       .post(`/api/v1/posts/${forumId}/comments`)
       .set({ 'X-Authorization': authToken })
@@ -87,19 +87,19 @@ describe('Comment', () => {
       .expect(StatusCodes.OK);
   });
 
-  it('View (no comments)', async () => {
+  it.skip('View (no comments)', async () => {
     await request(app)
       .get(`/api/v1/posts/${forumId}/comments`)
       .expect(StatusCodes.OK);
   });
 
-  it('View (bad forumPostId)', async () => {
+  it.skip('View (bad forumPostId)', async () => {
     await request(app)
       .get(`/api/v1/posts/invalidForumPostId/comments`)
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update (dummy)', async () => {
+  it.skip('Update (dummy)', async () => {
     // XXX: Awaiting implementation
     await request(app)
       .patch('/api/v1/posts/:id/comments/:id')

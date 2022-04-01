@@ -37,7 +37,7 @@ describe('Forum', () => {
   });
 
   describe('Post', () => {
-    it('Create', async () => {
+    it.skip('Create', async () => {
       await request(app)
         .post('/api/v1/posts')
         .set({ 'X-Authorization': authToken })
@@ -51,7 +51,7 @@ describe('Forum', () => {
         .expect(StatusCodes.CREATED);
     });
 
-    it('Create wtih invalid authToken header', async () => {
+    it.skip('Create wtih invalid authToken header', async () => {
       await request(app)
         .post('/api/v1/posts')
         .set({ 'X-Authorization': 'invalidAuthToekn' })
@@ -65,7 +65,7 @@ describe('Forum', () => {
         .expect(StatusCodes.FORBIDDEN);
     });
 
-    it('Create missing userId', async () => {
+    it.skip('Create missing userId', async () => {
       await request(app)
         .post('/api/v1/posts')
         .set({ 'X-Authorization': authToken })
@@ -78,7 +78,7 @@ describe('Forum', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Create with invalid communityId (less than three chars)', async () => {
+    it.skip('Create with invalid communityId (less than three chars)', async () => {
       await request(app)
         .post('/api/v1/posts')
         .set({ 'X-Authorization': authToken })
@@ -91,7 +91,7 @@ describe('Forum', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Create with 0 char title', async () => {
+    it.skip('Create with 0 char title', async () => {
       await request(app)
         .post('/api/v1/posts')
         .set({ 'X-Authorization': authToken })
@@ -105,23 +105,23 @@ describe('Forum', () => {
     });
 
     // XXX: Awaiting implementation
-    it('Create with 0 char title', async () => {
+    it.skip('Create with 0 char title', async () => {
       await request(app)
         .get('/api/v1/posts')
         .expect({ dummyTest: 'postViews() dummy test passes' });
     });
 
-    it('View', async () => {
+    it.skip('View', async () => {
       await request(app).get(`/api/v1/posts/${forumId}`).expect(StatusCodes.OK);
     });
 
-    it('View with invalid forumId', async () => {
+    it.skip('View with invalid forumId', async () => {
       await request(app)
         .get(`/api/v1/posts/62328e357ec3446e40e1b29b`)
         .expect(StatusCodes.NOT_FOUND);
     });
 
-    it('Update for edits and votes', async () => {
+    it.skip('Update for edits and votes', async () => {
       const updatePayload = {
         userID: userId,
         title: "No more St. Paddy's day!",
@@ -151,7 +151,7 @@ describe('Forum', () => {
     });
   });
 
-  it('Update for edits and votes', async () => {
+  it.skip('Update for edits and votes', async () => {
     const updatePayload = {
       userID: userId,
       title: "No more St. Paddy's day!",
@@ -179,7 +179,7 @@ describe('Forum', () => {
     expect(postUpdateResponse.body.forumPost.edited).equals(true);
   });
 
-  it('Update with invalid authToken', async () => {
+  it.skip('Update with invalid authToken', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': 'invalidAuthToken' })
@@ -190,7 +190,7 @@ describe('Forum', () => {
       .expect(StatusCodes.FORBIDDEN);
   });
 
-  it('Update with invalid forumPostId', async () => {
+  it.skip('Update with invalid forumPostId', async () => {
     await request(app)
       .patch(`/api/v1/posts/invalidForumId`)
       .set({ 'X-Authorization': authToken })
@@ -201,7 +201,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update with invalid forumPostId', async () => {
+  it.skip('Update with invalid forumPostId', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -209,7 +209,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update with invalid forumPostId', async () => {
+  it.skip('Update with invalid forumPostId', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -219,7 +219,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update with empty title', async () => {
+  it.skip('Update with empty title', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -229,7 +229,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update with invalid upVotes/downVotes field', async () => {
+  it.skip('Update with invalid upVotes/downVotes field', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -240,7 +240,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Update with invalid upVotes/downVotes field', async () => {
+  it.skip('Update with invalid upVotes/downVotes field', async () => {
     await request(app)
       .patch(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -251,7 +251,7 @@ describe('Forum', () => {
       .expect(StatusCodes.BAD_REQUEST);
   });
 
-  it('Delete', async () => {
+  it.skip('Delete', async () => {
     await request(app)
       .delete(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': authToken })
@@ -261,7 +261,7 @@ describe('Forum', () => {
       .expect(StatusCodes.OK);
   });
 
-  it('Delete with invalid id', async () => {
+  it.skip('Delete with invalid id', async () => {
     const invalidID = 'Ab345678901234567890123'; // one char too short
     await request(app)
       .delete(`/api/v1/posts/${invalidID}`)
@@ -271,7 +271,7 @@ describe('Forum', () => {
       })
       .expect(StatusCodes.BAD_REQUEST);
   });
-  it('Delete with nonexistant valid id', async () => {
+  it.skip('Delete with nonexistant valid id', async () => {
     const nonExistentValidID = '01234e357ec3446e40e1b29b';
     await request(app)
       .delete(`/api/v1/posts/${nonExistentValidID}`)
@@ -282,7 +282,7 @@ describe('Forum', () => {
       .expect(StatusCodes.NOT_FOUND);
   });
 
-  it('Delete with invalid authToken', async () => {
+  it.skip('Delete with invalid authToken', async () => {
     await request(app)
       .delete(`/api/v1/posts/${forumId}`)
       .set({ 'X-Authorization': 'invalidAuthToken' })

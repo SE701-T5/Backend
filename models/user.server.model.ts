@@ -1,4 +1,5 @@
 import * as Crypto from 'crypto';
+import { StatusCodes } from 'http-status-codes';
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
 import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
@@ -139,7 +140,7 @@ export async function updateUserById(
   if (resource != null) {
     return resource;
   } else {
-    throw new ServerError('forum not found', 400);
+    throw new ServerError('user not found', StatusCodes.BAD_REQUEST);
   }
 }
 
@@ -172,7 +173,7 @@ export async function authenticateUser(
 
     return res;
   } else {
-    throw new ServerError('incorrect password', 401);
+    throw new ServerError('incorrect password', StatusCodes.UNAUTHORIZED);
   }
 }
 
@@ -211,7 +212,11 @@ export async function isUserAuthorized(
   const user = await searchUserById(userID);
 
   if (user.authToken == null)
-    throw new ServerError('forbidden', 403, 'no auth token found on user');
+    throw new ServerError(
+      'forbidden',
+      StatusCodes.FORBIDDEN,
+      'no auth token found on user',
+    );
 
   const dbAuthToken = Buffer.from(user.authToken, 'hex');
   const providedAuthToken = Buffer.from(authToken, 'hex');

@@ -15,7 +15,7 @@ export function isDevelopment(req: Request, res: Response, next: NextFunction) {
  * Verify if an authorization token exists in the database at API gateway to determine whether to continue or not
  * @param req HTTP request object containing the authorization token for verification
  * @param res HTTP request response status code with message if the verification fails
- * @param next continue to the next function if the status code returned from authorization token verification is 200
+ * @param next continue to the next function if the status code returned from authorization token verification is StatusCodes.OK
  */
 export async function isAuthenticated(
   req: Request,
@@ -54,16 +54,16 @@ export function errorHandler(
   next: NextFunction,
 ) {
   if (!(err instanceof ServerError)) {
-    logger.error({ msg: 'unhandled error', err, serverError: false });
+    // logger.error({ msg: 'unhandled error', err, serverError: false });
     err = new ServerError(
       'internal server error',
       StatusCodes.INTERNAL_SERVER_ERROR,
       err,
     );
   } else if (err.status === StatusCodes.INTERNAL_SERVER_ERROR) {
-    logger.error({ msg: 'unknown server error', err, serverError: false });
+    // logger.error({ msg: 'unknown server error', err, serverError: false });
   } else {
-    logger.warn({ msg: 'server error caught', serverError: true, err });
+    // logger.warn({ msg: 'server error caught', serverError: true, err });
   }
 
   // update typings

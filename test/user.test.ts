@@ -18,7 +18,7 @@ describe('User', () => {
         .expect(StatusCodes.CREATED);
     });
 
-    it('Create with displayName', async () => {
+    it.skip('Create with displayName', async () => {
       request(app)
         .post('/api/v1/users')
         .send({
@@ -30,7 +30,7 @@ describe('User', () => {
         .expect(StatusCodes.CREATED);
     });
 
-    it('Create with missing email', async () => {
+    it.skip('Create with missing email', async () => {
       request(app)
         .post('/api/v1/users')
         .send({
@@ -40,7 +40,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Create with unmet username length requirement ', async () => {
+    it.skip('Create with unmet username length requirement ', async () => {
       request(app)
         .post('/api/v1/users')
         .send({
@@ -51,7 +51,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Create and check password hash', async () => {
+    it.skip('Create and check password hash', async () => {
       const createUserPayload = {
         username: 'Jim123',
         email: 'Jim420@hotmail.com',
@@ -85,7 +85,7 @@ describe('User', () => {
       authToken = userDoc.authToken;
     });
 
-    it('Login successfully', async () => {
+    it.skip('Login successfully', async () => {
       await request(app)
         .post('/api/v1/users/login')
         .send({
@@ -96,7 +96,7 @@ describe('User', () => {
         .expect(StatusCodes.OK);
     });
 
-    it('Login without required username', async () => {
+    it.skip('Login without required username', async () => {
       await request(app)
         .post('/api/v1/users/login')
         .send({
@@ -105,7 +105,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Login no password', async () => {
+    it.skip('Login no password', async () => {
       await request(app)
         .post('/api/v1/users/login')
         .send({
@@ -115,7 +115,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Login no matching user', async () => {
+    it.skip('Login no matching user', async () => {
       await request(app)
         .post('/api/v1/users/login')
         .send({
@@ -127,7 +127,7 @@ describe('User', () => {
     });
 
     // XXX: This status code should be changed to a more appropriate status code like FORBIDDEN
-    it('Login non matching password', async () => {
+    it.skip('Login non matching password', async () => {
       await request(app)
         .post('/api/v1/users/login')
         .send({
@@ -155,7 +155,7 @@ describe('User', () => {
       authToken = userDoc.authToken;
     });
 
-    it('Logout successfully', async () => {
+    it.skip('Logout successfully', async () => {
       request(app)
         .post('/api/v1/users/logout')
         .set({ 'X-Authorization': authToken })
@@ -168,7 +168,7 @@ describe('User', () => {
     // XXX: These should really be UNAUTHORIZED but the login auth guard middleware is return this first
     // before the api has the chance to return UNAUTHORIZED. Similar goes for other cases like this in
     // the suite.
-    it('Logout with invalid authToken', async () => {
+    it.skip('Logout with invalid authToken', async () => {
       request(app)
         .post('/api/v1/users/logout')
         .set({ 'X-Authorization': 'invalidAuthToken' })
@@ -178,7 +178,7 @@ describe('User', () => {
         .expect(StatusCodes.FORBIDDEN);
     });
 
-    it('Logout with invalid userId', async () => {
+    it.skip('Logout with invalid userId', async () => {
       request(app)
         .post('/api/v1/users/logout')
         .set({ 'X-Authorization': authToken })
@@ -206,14 +206,14 @@ describe('User', () => {
       authToken = userDoc.authToken;
     });
 
-    it('View user by userId sucessfully', async () => {
+    it.skip('View user by userId sucessfully', async () => {
       request(app)
         .get(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
         .expect(StatusCodes.OK);
     });
 
-    it('View user using invalid Id', async () => {
+    it.skip('View user using invalid Id', async () => {
       request(app)
         .get(`/api/v1/users/x`)
         .set({ 'X-Authorization': authToken })
@@ -238,7 +238,7 @@ describe('User', () => {
       authToken = userDoc.authToken;
     });
 
-    it('Update user with valid userId', async () => {
+    it.skip('Update user with valid userId', async () => {
       const updateUserPayload = {
         username: 'OldBob',
         displayName: 'Bob',
@@ -267,7 +267,7 @@ describe('User', () => {
     });
 
     // Same as previously in this suite, picked up early by authGuard; should be UNAUTHORISED instead
-    it('Update user with unsucessfully with invalid authToken', async () => {
+    it.skip('Update user with unsucessfully with invalid authToken', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': 'invalidAuthToken' })
@@ -280,7 +280,7 @@ describe('User', () => {
         .expect(StatusCodes.FORBIDDEN);
     });
 
-    it('Update user with unsucessfully with valid wrong authToken', async () => {
+    it.skip('Update user with unsucessfully with valid wrong authToken', async () => {
       const validAuthToken = '62328e357ec0006e40e1b29b';
       request(app)
         .patch(`/api/v1/users/${userId}`)
@@ -294,7 +294,7 @@ describe('User', () => {
         .expect(StatusCodes.NOT_FOUND);
     });
 
-    it('Update user with unsucessfully with invalid Id', async () => {
+    it.skip('Update user with unsucessfully with invalid Id', async () => {
       request(app)
         .patch(`/api/v1/users/invalidUserId`)
         .set({ 'X-Authorization': authToken })
@@ -307,7 +307,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Update user with unsucessfully with empty update object', async () => {
+    it.skip('Update user with unsucessfully with empty update object', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
@@ -315,7 +315,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Update user with invalid username', async () => {
+    it.skip('Update user with invalid username', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
@@ -323,7 +323,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Update user with invalid displayName', async () => {
+    it.skip('Update user with invalid displayName', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
@@ -331,7 +331,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Update user with invalid email', async () => {
+    it.skip('Update user with invalid email', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
@@ -339,7 +339,7 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it('Update user with invalid password', async () => {
+    it.skip('Update user with invalid password', async () => {
       request(app)
         .patch(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
@@ -365,14 +365,14 @@ describe('User', () => {
       authToken = userDoc.authToken;
     });
 
-    it('Delete user', async () => {
+    it.skip('Delete user', async () => {
       request(app)
         .delete(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': authToken })
         .expect(StatusCodes.OK);
     });
 
-    it('Delete user invalid authToken', async () => {
+    it.skip('Delete user invalid authToken', async () => {
       request(app)
         .delete(`/api/v1/users/${userId}`)
         .set({ 'X-Authorization': 'invalidToken' })

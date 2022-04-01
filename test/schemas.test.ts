@@ -10,7 +10,7 @@ import Comment from '../config/db_schemas/comment.schema';
  */
 describe('Schemas', () => {
   describe('User', () => {
-    it('Empty fields', () => {
+    it.skip('Empty fields', () => {
       const user = new User();
       user.validate(function (err: mongoose.Error.ValidationError) {
         expect(err.errors.username).to.exist;
@@ -23,7 +23,7 @@ describe('Schemas', () => {
   });
 
   describe('Forum post', () => {
-    it('Empty fields', () => {
+    it.skip('Empty fields', () => {
       const forum = new Forum();
       forum.validate(function (err: mongoose.Error.ValidationError) {
         expect(err.errors.userID).to.exist;
@@ -38,7 +38,7 @@ describe('Schemas', () => {
   });
 
   describe('Comment', () => {
-    it('Empty fields', () => {
+    it.skip('Empty fields', () => {
       const comment = new Comment();
       comment.validate(function (err: mongoose.Error.ValidationError) {
         expect(err.errors.postID).to.exist;
