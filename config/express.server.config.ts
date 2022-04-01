@@ -53,6 +53,10 @@ export default function () {
   userServerRoutes(app);
   communityServerRoutes(app);
 
+  // Add uploads folder
+  app.use(express.static(__dirname + '/public'));
+  app.use('/uploads', express.static('uploads'));
+
   // 404 Route
   app.all('*', () => {
     throw new ServerError('endpoint does not exist', 404);

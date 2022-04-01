@@ -9,9 +9,6 @@ const app = createApp();
 
 const PORT = config.get('port');
 
-app.use(express.static(__dirname + '/public'));
-app.use('/uploads', express.static('uploads'));
-
 // Connect to MongoDB database
 connect().then(
   () => {
