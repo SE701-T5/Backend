@@ -7,19 +7,8 @@ import { expect } from 'chai';
 
 describe('User', () => {
   describe('Create', () => {
-    it('Create without displayName', async () => {
-      request(app)
-        .post('/api/v1/users')
-        .send({
-          username: 'Bob123',
-          email: 'bob420@hotmail.com',
-          plaintextPassword: 'passwordbob',
-        })
-        .expect(StatusCodes.CREATED);
-    });
-
-    it.skip('Create with displayName', async () => {
-      request(app)
+    it('Create with displayName', async () => {
+      return request(app)
         .post('/api/v1/users')
         .send({
           username: 'Bob123',
@@ -30,8 +19,19 @@ describe('User', () => {
         .expect(StatusCodes.CREATED);
     });
 
-    it.skip('Create with missing email', async () => {
-      request(app)
+    it('Create without displayName', async () => {
+      return request(app)
+        .post('/api/v1/users')
+        .send({
+          username: 'Bob123',
+          email: 'bob420@hotmail.com',
+          plaintextPassword: 'passwordbob',
+        })
+        .expect(StatusCodes.BAD_REQUEST);
+    });
+
+    it('Create with missing email', async () => {
+      return request(app)
         .post('/api/v1/users')
         .send({
           username: 'Bob123',
@@ -40,8 +40,8 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it.skip('Create with unmet username length requirement ', async () => {
-      request(app)
+    it('Create with unmet username length requirement ', async () => {
+      return request(app)
         .post('/api/v1/users')
         .send({
           username: 'Yi',
@@ -51,20 +51,21 @@ describe('User', () => {
         .expect(StatusCodes.BAD_REQUEST);
     });
 
-    it.skip('Create and check password hash', async () => {
+    it('Create and check password hash', async () => {
       const createUserPayload = {
         username: 'Jim123',
+        displayName: 'Jim',
         email: 'Jim420@hotmail.com',
         plaintextPassword: 'passwordjim',
       };
-      const createUserRequest = await request(app)
+      const result = await request(app)
         .post('/api/v1/users')
-        .send(createUserPayload)
-        .expect(StatusCodes.CREATED);
+        .send(createUserPayload);
 
-      expect(createUserRequest.body.userData.res.hashedPassword).equals(
-        hashPassword(createUserPayload.plaintextPassword),
-      );
+      expect(result.status).equals(StatusCodes.CREATED);
+      expect(result.body.username).equals(createUserPayload.username);
+      expect(result.body.displayName).equals(createUserPayload.displayName);
+      expect(result.body.email).equals(createUserPayload.email);
     });
   });
 

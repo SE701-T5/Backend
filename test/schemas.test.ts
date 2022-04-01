@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import mongoose from 'mongoose';
 
 import User from '../config/db_schemas/user.schema';
-import Forum from '../config/db_schemas/post.schema';
+import Post from '../config/db_schemas/post.schema';
 import Comment from '../config/db_schemas/comment.schema';
 
 /**
@@ -10,29 +10,27 @@ import Comment from '../config/db_schemas/comment.schema';
  */
 describe('Schemas', () => {
   describe('User', () => {
-    it.skip('Empty fields', () => {
+    it('Empty fields', () => {
       const user = new User();
       user.validate(function (err: mongoose.Error.ValidationError) {
         expect(err.errors.username).to.exist;
         expect(err.errors.displayName).to.exist;
         expect(err.errors.email).to.exist;
         expect(err.errors.hashedPassword).to.exist;
-        expect(err.errors.authToken).to.exist;
       });
     });
   });
 
-  describe('Forum post', () => {
-    it.skip('Empty fields', () => {
-      const forum = new Forum();
+  describe.skip('Post', () => {
+    it('Empty fields', () => {
+      const forum = new Post();
       forum.validate(function (err: mongoose.Error.ValidationError) {
-        expect(err.errors.userID).to.exist;
-        expect(err.errors.communityID).to.exist;
+        expect(err.errors.owner).to.exist;
         expect(err.errors.title).to.exist;
         expect(err.errors.bodyText).to.exist;
         expect(err.errors.edited).to.exist;
-        expect(err.errors.upVotes).to.exist;
-        expect(err.errors.downVotes).to.exist;
+        // expect(err.errors.upVotes).to.exist;
+        // expect(err.errors.downVotes).to.exist;
       });
     });
   });
