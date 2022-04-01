@@ -1,7 +1,7 @@
 import pino from 'pino';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
-import express, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ServerError } from './utils.lib';
 
 export function isDevelopment(req: Request, res: Response, next: NextFunction) {
@@ -16,7 +16,7 @@ export function isDevelopment(req: Request, res: Response, next: NextFunction) {
  * @param res HTTP request response status code with message if the verification fails
  * @param next continue to the next function if the status code returned from authorization token verification is 200
  */
-export async function isRequestTokenAuthorized(
+export async function isAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction,
