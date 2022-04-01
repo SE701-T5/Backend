@@ -16,6 +16,7 @@ interface UserResponseDTO {
   username: string;
   displayName: string;
   email: string;
+  profilePicture: string;
   authToken?: string;
 }
 
@@ -39,9 +40,14 @@ export async function userCreate(
     displayName: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     plaintextPassword: validators.password().required(),
+    profilePicture: Joi.string(),
   });
 
-  const formData = validate(rules, req.body);
+  const requestInfo = {
+    ...req.body,
+    profilePicture: req.file.filename,
+  };
+  const formData = validate(rules, requestInfo);
 
   const user = await User.createUser(formData);
   res.status(201).json({
@@ -49,6 +55,7 @@ export async function userCreate(
     displayName: user.displayName,
     email: user.email,
     username: user.username,
+    profilePicture: user.profilePicture,
     authToken: user.authToken,
   });
 }
@@ -80,6 +87,7 @@ export async function userLogin(
     username: user.username,
     displayName: user.displayName,
     email: user.email,
+    profilePicture: user.profilePicture,
     authToken: user.authToken,
   });
 }
@@ -115,6 +123,7 @@ export async function userViewById(
     username: user.username,
     displayName: user.displayName,
     email: user.email,
+    profilePicture: user.profilePicture,
   });
 }
 
@@ -134,9 +143,14 @@ export async function userUpdateById(
     displayName: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
+    profilePicture: Joi.string(),
   }).min(1);
 
-  const data = validate(schema, req.body);
+  const requestInfo = {
+    ...req.body,
+    profilePicture: req.file.filename,
+  };
+  const data = validate(schema, requestInfo);
 
   const id = convertToObjectId(req.params.id);
   if (await User.isUserAuthorized(id, authToken)) {
@@ -146,6 +160,7 @@ export async function userUpdateById(
       username: user.username,
       email: user.email,
       displayName: user.displayName,
+      profilePicture: user.profilePicture,
     });
   } else {
     throw new ServerError('forbidden', 403);
@@ -169,50 +184,48 @@ export async function userDeleteById(req: Request, res: Response) {
   }
 }
 
-export function userViewCurrent(req: Request, res: Response) {
+export async function userViewCurrent(
+  req: Request,
+  res: Response<UserResponseDTO>,
+) {
   const authToken = req.get(config.get('authToken'));
-  User.searchUserByAuthToken(authToken, (result) => {
-    if (result.err) {
-      res.status(result.status).send(result.err);
-    } else {
-      res.json({ user: result });
-    }
+  const user = await User.searchUserByAuthToken(authToken);
+  res.status(200).send({
+    id: user._id,
+    username: user.username,
+    displayName: user.displayName,
+    email: user.email,
+    profilePicture: user.profilePicture,
   });
 }
 
-export function userUpdateCurrent(req: Request, res: Response) {
+export async function userUpdateCurrent(
+  req: Request,
+  res: Response<UserResponseDTO>,
+) {
   const authToken = req.get(config.get('authToken'));
-  const reqBody = req.body;
 
-  const userUpdateParams = {
-    username:
-      reqBody.username && reqBody.username.length > 2
-        ? reqBody.username
-        : false,
-    displayName:
-      reqBody.displayName && reqBody.displayName.length > 2
-        ? reqBody.displayName
-        : false,
-    email:
-      reqBody.email && emailValidator.validate(reqBody.email)
-        ? reqBody.email
-        : false,
-    plaintextPassword:
-      reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
-        ? reqBody.plaintextPassword
-        : false,
-    profilePicture: req.file ? req.file.filename : false,
+  const schema = Joi.object<UpdateUserDTO>({
+    username: validators.username(),
+    displayName: Joi.string().min(3).max(30),
+    email: Joi.string().email(),
+    plaintextPassword: validators.password(),
+    profilePicture: Joi.string(),
+  }).min(1);
+
+  const requestInfo = {
+    ...req.body,
+    profilePicture: req.file.filename,
   };
+  const data = validate(schema, requestInfo);
 
-  if (isAnyFieldValid(userUpdateParams)) {
-    User.searchUserByAuthToken(authToken, (result) => {
-      User.updateUserById(result.res.id, userUpdateParams, (result) => {
-        if (result.err) {
-          res.status(result.status).send(result.err);
-        } else {
-          res.status(201).json({ updatedForumUser: result });
-        }
-      });
-    });
-  }
+  const userID = (await User.searchUserByAuthToken(authToken)).id;
+  const user = await User.updateUserById(userID, data);
+  res.status(200).send({
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    displayName: user.displayName,
+    profilePicture: user.profilePicture,
+  });
 }

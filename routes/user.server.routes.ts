@@ -29,8 +29,12 @@ export default function (app: Express) {
 
   app
     .route('/api/v1/users/current')
-    .get(user.userViewCurrent)
-    .put(upload.single('profilePicture'), user.userUpdateCurrent);
+    .get(isRequestTokenAuthorized, user.userViewCurrent)
+    .put(
+      upload.single('profilePicture'),
+      isRequestTokenAuthorized,
+      user.userUpdateCurrent,
+    );
 
   app
     .route('/api/v1/users/:id')
