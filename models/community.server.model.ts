@@ -39,11 +39,9 @@ export async function updateCommunityById(
     { new: true },
   );
 
-  if (resource != null) {
-    return resource;
-  } else {
-    throw new ServerError('community not found', 400);
-  }
+  if (resource == null) throw new ServerError('community not found', 404);
+
+  return resource;
 }
 
 export async function searchCommunityById(
@@ -51,10 +49,9 @@ export async function searchCommunityById(
 ): Promise<CommunityDocument> {
   const resource = await Community.findById(id).exec();
 
-  if (resource != null) return resource;
-  else {
-    throw new ServerError('community not found', 404);
-  }
+  if (resource == null) throw new ServerError('community not found', 404);
+
+  return resource;
 }
 
 export async function getAll(): Promise<CommunityDocument[]> {

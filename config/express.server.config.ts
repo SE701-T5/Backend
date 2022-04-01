@@ -2,7 +2,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import pino from 'pino';
 import { errorHandler, logger } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
 

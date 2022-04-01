@@ -1,7 +1,6 @@
 import config from './config/config.server.config';
 import { connect } from './config/db.server.config';
 import createApp from './config/express.server.config';
-import express from 'express';
 import { logger } from './lib/middleware.lib';
 
 // Express.js application object

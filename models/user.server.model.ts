@@ -80,10 +80,9 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
 export async function searchUserById(id: mongoose.Types.ObjectId) {
   const resource = await User.findById(id);
 
-  if (resource != null) return resource;
-  else {
-    throw new ServerError('user not found', 404);
-  }
+  if (resource == null) throw new ServerError('user not found', 404);
+
+  return resource;
 }
 
 /**
@@ -95,10 +94,9 @@ export async function searchUserByAuthToken(
 ): Promise<UserDocument> {
   const resource = await User.findOne({ authToken });
 
-  if (resource != null) return resource;
-  else {
-    throw new ServerError('user not found', 404);
-  }
+  if (resource == null) throw new ServerError('user not found', 404);
+
+  return resource;
 }
 
 /**
