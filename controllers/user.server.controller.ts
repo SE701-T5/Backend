@@ -41,7 +41,7 @@ export function userCreate(req: Request, res: Response) {
         reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
           ? reqBody.plaintextPassword
           : false,
-      profilePicture: req.file ? req.file.originalname : false,
+      profilePicture: req.file ? req.file.filename : false,
     };
 
   if (isAllFieldsValid(forumUserParams)) {
@@ -124,7 +124,7 @@ export function userLogin(req: Request, res: Response) {
       },
     );
   } else {
-    res.status(400).send(reqBody);
+    res.status(400).send('Bad request');
   }
 }
 
@@ -213,7 +213,7 @@ export function userUpdateById(req: Request, res: Response) {
       reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
         ? reqBody.plaintextPassword
         : false,
-    profilePicture: req.file ? req.file.originalname : false,
+    profilePicture: req.file ? req.file.filename : false,
   };
 
   if (isValidDocumentID(reqParams.id) && isAnyFieldValid(userUpdateParams)) {
@@ -309,7 +309,7 @@ export function userUpdateCurrent(req: Request, res: Response) {
       reqBody.plaintextPassword && reqBody.plaintextPassword.length > 0
         ? reqBody.plaintextPassword
         : false,
-    profilePicture: req.file ? req.file.originalname : false,
+    profilePicture: req.file ? req.file.filename : false,
   };
 
   if (isAnyFieldValid(userUpdateParams)) {
