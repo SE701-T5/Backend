@@ -8,6 +8,7 @@ import {
   TypedRequestBody,
 } from '../lib/utils.lib';
 import * as Community from '../models/community.server.model';
+import * as Forum from '../models/forum.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { validate } from '../lib/validate.lib';
@@ -32,14 +33,17 @@ interface CommunityResponse extends ICommunity {
 
 export async function getPosts(req: Request, res: Response<PostResponse[]>) {
   const id = convertToObjectId(req.params.id);
-  const posts = await Community.getPosts(id);
+  const posts = await Forum.populatePosts(await Community.getPosts(id));
 
   const response = posts.map(
     (post) =>
       ({
         id: post._id,
         owner: post.owner,
-        community: post.community,
+        community: {
+          id: post.community._id,
+          name: post.community.name,
+        },
         title: post.title,
         bodyText: post.bodyText,
         edited: post.edited,

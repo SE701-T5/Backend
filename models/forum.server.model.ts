@@ -1,6 +1,7 @@
 import { Overwrite } from 'convict';
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
+import { CommunityDocument } from '../config/db_schemas/community.schema';
 import Post, { PostDocument, IPost } from '../config/db_schemas/post.schema';
 import Comment, {
   CommentDocument,
@@ -31,6 +32,10 @@ interface InsertCommentDTO {
 }
 
 type PopulatedComment = Overwrite<CommentDocument, { owner: UserDocument }>;
+type PopulatedPost = PostDocument & {
+  owner: UserDocument;
+  community: CommunityDocument;
+};
 
 /**
  * Insert a new forum post to the database
@@ -61,6 +66,22 @@ export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
     // Any other error
     throw err;
   }
+}
+
+export async function populatePost(post: PostDocument): Promise<PopulatedPost> {
+  return post.populate<{
+    owner: UserDocument;
+    community: CommunityDocument;
+  }>(['community', 'owner']);
+}
+
+export async function populatePosts(
+  posts: PostDocument[],
+): Promise<PopulatedPost[]> {
+  return (await Post.populate(posts, [
+    { path: 'community' },
+    { path: 'owner' },
+  ])) as PopulatedPost[];
 }
 
 /**

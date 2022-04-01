@@ -5,6 +5,7 @@ import { UserDocument } from '../config/db_schemas/user.schema';
 import {
   convertToObjectId,
   ServerError,
+  TimestampedModel,
   TypedRequestBody,
 } from '../lib/utils.lib';
 import { searchCommentById } from '../models/forum.server.model';
@@ -42,8 +43,20 @@ interface UpdateCommentDTO {
   attachments: string[];
 }
 
-export interface PostResponse extends IPost {
+export interface PostResponse extends TimestampedModel {
   id: mongoose.Types.ObjectId;
+  owner: mongoose.Types.ObjectId;
+  community: {
+    id: mongoose.Types.ObjectId;
+    name: string;
+  };
+  title: string;
+  bodyText: string;
+  edited: boolean;
+  upVotes: number;
+  downVotes: number;
+  attachments: string[];
+  comments: mongoose.Types.ObjectId[];
 }
 
 export interface CommentResponse {
@@ -65,14 +78,17 @@ export interface CommentResponse {
  * @param res HTTP request response object
  */
 export async function postViews(req: Request, res: Response<PostResponse[]>) {
-  const posts = await Forum.getPosts();
+  const posts = await Forum.populatePosts(await Forum.getPosts());
 
   const response = posts.map(
     (post) =>
       ({
         id: post._id,
-        owner: post.owner,
-        community: post.community,
+        owner: post.owner._id,
+        community: {
+          id: post.community._id,
+          name: post.community.name,
+        },
         title: post.title,
         bodyText: post.bodyText,
         edited: post.edited,
@@ -110,16 +126,21 @@ export async function postCreate(
 
   const user = await searchUserByAuthToken(authToken);
 
-  const post = await Forum.insertPost({
-    ...data,
-    owner: user._id,
-    community,
-  });
+  const post = await Forum.populatePost(
+    await Forum.insertPost({
+      ...data,
+      owner: user._id,
+      community,
+    }),
+  );
 
   res.status(201).send({
     id: post._id,
     owner: post.owner,
-    community: post.community,
+    community: {
+      id: post.community._id,
+      name: post.community.name,
+    },
     title: post.title,
     bodyText: post.bodyText,
     edited: post.edited,
@@ -140,11 +161,14 @@ export async function postCreate(
 export async function postViewById(req: Request, res: Response<PostResponse>) {
   const postID = convertToObjectId(req.params.id);
 
-  const post = await Forum.searchPostById(postID);
+  const post = await Forum.populatePost(await Forum.searchPostById(postID));
   res.status(200).send({
     id: post._id,
     owner: post.owner,
-    community: post.community,
+    community: {
+      id: post.community._id,
+      name: post.community.name,
+    },
     title: post.title,
     bodyText: post.bodyText,
     edited: post.edited,
@@ -187,12 +211,17 @@ export async function postUpdateById(
     throw new ServerError('forbidden', 403);
   }
 
-  const newPost = await Forum.updatePostById(id, data, true, true);
+  const newPost = await Forum.populatePost(
+    await Forum.updatePostById(id, data, true, true),
+  );
 
   res.status(200).send({
     id: newPost._id,
     owner: newPost.owner,
-    community: newPost.community,
+    community: {
+      id: newPost.community._id,
+      name: newPost.community.name,
+    },
     title: newPost.title,
     bodyText: newPost.bodyText,
     edited: newPost.edited,
