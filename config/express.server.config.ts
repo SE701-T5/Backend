@@ -1,8 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import pino from 'pino-http';
-import { errorHandler } from '../lib/middleware.lib';
+import pinoHttp from 'pino-http';
+import pino from 'pino';
+import { errorHandler, logger } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
 
 import dbServerRoutes from '../routes/db.server.routes';
@@ -21,7 +22,11 @@ export default function () {
   // This is required for parsing application/json in req.body
   app.use(bodyParser.json());
   app.use(cors());
-  app.use(pino());
+  app.use(
+    pinoHttp({
+      logger,
+    }),
+  );
 
   // Set response headers using middleware
   app.use(function (req, res, next) {

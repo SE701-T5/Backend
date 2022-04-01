@@ -1,3 +1,4 @@
+import pino from 'pino';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import express, { Request, Response, NextFunction } from 'express';
@@ -51,10 +52,12 @@ export function errorHandler(
   next: NextFunction,
 ) {
   if (!(err instanceof ServerError)) {
-    console.error('unhandled error', err);
+    logger.error({ msg: 'unhandled error', err, serverError: false });
     err = new ServerError('internal server error', 500, err);
   } else if (err.status === 500) {
-    console.error('server error', err);
+    logger.error({ msg: 'unknown server error', err, serverError: false });
+  } else {
+    logger.warn({ msg: 'server error caught', serverError: true, err });
   }
 
   // update typings
@@ -69,3 +72,12 @@ export function errorHandler(
         : undefined,
   });
 }
+
+export const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+});
