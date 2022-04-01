@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../server';
 import User from '../config/db_schemas/user.schema';
-import Forum from '../config/db_schemas/forum.schema';
+import Post from '../config/db_schemas/post.schema';
 import { hashPassword } from '../models/user.server.model';
 import { StatusCodes } from 'http-status-codes';
 import { expect } from 'chai';
@@ -24,7 +24,7 @@ describe('Comment', () => {
     authToken = userDoc.authToken;
 
     // Create forum
-    const forumDoc = await new Forum({
+    const forumDoc = await new Post({
       userID: userId,
       communityID: userId,
       title: 'asdf',

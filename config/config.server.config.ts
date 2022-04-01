@@ -1,6 +1,11 @@
 import convict from 'convict';
 
 export default convict({
+  environment: {
+    format: String,
+    default: 'production',
+    env: 'NODE_ENV',
+  },
   authToken: {
     format: String,
     default: 'X-Authorization',

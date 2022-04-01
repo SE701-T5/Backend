@@ -2,7 +2,7 @@ import app from '../server';
 import request from 'supertest';
 import { StatusCodes } from 'http-status-codes';
 import User from '../config/db_schemas/user.schema';
-import Forum from '../config/db_schemas/forum.schema';
+import Post from '../config/db_schemas/post.schema';
 import { hashPassword } from '../models/user.server.model';
 import { expect } from 'chai';
 
@@ -23,7 +23,7 @@ describe('Forum', () => {
     authToken = userDoc.authToken;
 
     // Create forum
-    const forumDoc = await new Forum({
+    const postDoc = await new Post({
       userID: userId,
       communityID: 'communityId',
       title: 'Dummy forum title',
@@ -33,7 +33,7 @@ describe('Forum', () => {
       downVotes: 0,
     }).save();
 
-    forumId = forumDoc._id.toString();
+    forumId = postDoc._id.toString();
   });
 
   describe('Post', () => {
