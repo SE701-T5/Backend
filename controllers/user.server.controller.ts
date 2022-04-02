@@ -16,7 +16,7 @@ interface UserResponseDTO {
   username: string;
   displayName: string;
   email: string;
-  profilePicture: string;
+  profilePicture?: string;
   authToken?: string;
 }
 
@@ -40,12 +40,16 @@ export async function userCreate(
     displayName: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     plaintextPassword: validators.password().required(),
-    profilePicture: Joi.string(),
+    profilePicture: Joi.string().uri(),
   });
 
   const requestInfo = {
     ...req.body,
-    profilePicture: req.file.filename,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadDestination',
+      )}${req.file.filename}`,
+    }),
   };
   const formData = validate(rules, requestInfo);
 
@@ -143,12 +147,16 @@ export async function userUpdateById(
     displayName: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
-    profilePicture: Joi.string(),
+    profilePicture: Joi.string().uri(),
   }).min(1);
 
   const requestInfo = {
     ...req.body,
-    profilePicture: req.file.filename,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadDestination',
+      )}${req.file.filename}`,
+    }),
   };
   const data = validate(schema, requestInfo);
 
@@ -184,6 +192,11 @@ export async function userDeleteById(req: Request, res: Response) {
   }
 }
 
+/**
+ * Responds to HTTP request with user document for currently logged in user
+ * @param req HTTP request object containing authorization token for verification
+ * @param res HTTP request response status code and user data in JSON format or error message
+ */
 export async function userViewCurrent(
   req: Request,
   res: Response<UserResponseDTO>,
@@ -199,6 +212,11 @@ export async function userViewCurrent(
   });
 }
 
+/**
+ * Modifies the data of the currently logged in user using HTTP request object data
+ * @param req HTTP request object containing the user fields being updated and auth token for verification
+ * @param res HTTP request response object status code and updated user data in JSON format or error message
+ */
 export async function userUpdateCurrent(
   req: Request,
   res: Response<UserResponseDTO>,
@@ -210,16 +228,20 @@ export async function userUpdateCurrent(
     displayName: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
-    profilePicture: Joi.string(),
+    profilePicture: Joi.string().uri(),
   }).min(1);
 
   const requestInfo = {
     ...req.body,
-    profilePicture: req.file.filename,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadDestination',
+      )}${req.file.filename}`,
+    }),
   };
   const data = validate(schema, requestInfo);
 
-  const userID = (await User.searchUserByAuthToken(authToken)).id;
+  const userID = (await User.searchUserByAuthToken(authToken))._id;
   const user = await User.updateUserById(userID, data);
   res.status(200).send({
     id: user._id,

@@ -1,16 +1,6 @@
 import { Express } from 'express';
 import * as user from '../controllers/user.server.controller';
-import { asyncHandler, isAuthenticated } from '../lib/middleware.lib';
-import multer from 'multer';
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './uploads');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now().toString() + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+import { asyncHandler, isAuthenticated, upload } from '../lib/middleware.lib';
 
 /**
  * Handles HTTP requests for the User module using Express.js route()

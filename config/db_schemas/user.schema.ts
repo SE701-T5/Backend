@@ -6,7 +6,7 @@ export interface IUser extends TimestampedModel {
   displayName: string;
   email: string;
   hashedPassword: string;
-  profilePicture: string;
+  profilePicture?: string;
   salt: string;
   authToken?: string;
   subscribedCommunities: mongoose.Types.ObjectId[];

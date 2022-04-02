@@ -9,7 +9,7 @@ export interface CreateUserDTO {
   displayName: string;
   email: string;
   plaintextPassword: string;
-  profilePicture: string;
+  profilePicture?: string;
 }
 
 export interface UpdateUserDTO
