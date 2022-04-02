@@ -98,7 +98,7 @@ describe('Comment', () => {
   });
 
   // TODO: Not sure why not working; 404 on update endpoint
-  it.skip('Update', async () => {
+  it('Update', async () => {
     const response = await request(app)
       .post(`/api/v1/posts/${postId}/comments`)
       .set({ 'X-Authorization': authToken })
@@ -108,22 +108,15 @@ describe('Comment', () => {
       .expect(StatusCodes.CREATED);
 
     const commentId = response.body.id;
-    // console.log(commentId)
 
-    console.log(
-      await request(app)
-        .post(`/api/v1/comments/${commentId}`)
-        .set({ 'X-Authorization': authToken })
-        .send({
-          bodyText: 'updated',
-        }),
-    );
     return expect(
       request(app)
         .post(`/api/v1/comments/${commentId}`)
         .set({ 'X-Authorization': authToken })
         .send({
           bodyText: 'updated',
+          upVotes: 5,
+          attachments: ['asdf'],
         }),
     ).to.eventually.have.property('status', StatusCodes.OK);
   });
