@@ -35,14 +35,4 @@ describe('Database', () => {
     });
     await connect();
   });
-
-  // TODO: Dummy awaiting implementation
-  it.skip('Reset on closed connection (dummy)', async () => {
-    await closeConn();
-    request(app)
-      .post('/api/v1/resample')
-      .send({ dummyTestInput: 'this text is useless' })
-      .expect({ dummyTest: 'resampleDB() dummy test passes' });
-    await connect();
-  });
 });

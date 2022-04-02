@@ -16,36 +16,30 @@ describe('Schemas', () => {
         expect(err.errors.username).to.exist;
         expect(err.errors.displayName).to.exist;
         expect(err.errors.email).to.exist;
+        expect(err.errors.salt).to.exist;
         expect(err.errors.hashedPassword).to.exist;
       });
     });
   });
 
-  describe.skip('Post', () => {
+  describe('Post', () => {
     it('Empty fields', () => {
       const forum = new Post();
       forum.validate(function (err: mongoose.Error.ValidationError) {
         expect(err.errors.owner).to.exist;
         expect(err.errors.title).to.exist;
+        expect(err.errors.community).to.exist;
         expect(err.errors.bodyText).to.exist;
-        expect(err.errors.edited).to.exist;
-        // expect(err.errors.upVotes).to.exist;
-        // expect(err.errors.downVotes).to.exist;
       });
     });
   });
 
   describe('Comment', () => {
-    it.skip('Empty fields', () => {
+    it('Empty fields', () => {
       const comment = new Comment();
       comment.validate(function (err: mongoose.Error.ValidationError) {
-        expect(err.errors.postID).to.exist;
-        expect(err.errors.authorID).to.exist;
-        expect(err.errors.authorUserName).to.exist;
+        expect(err.errors.owner).to.exist;
         expect(err.errors.bodyText).to.exist;
-        expect(err.errors.edited).to.exist;
-        expect(err.errors.upVotes).to.exist;
-        expect(err.errors.downVotes).to.exist;
       });
     });
   });
