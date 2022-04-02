@@ -4,9 +4,9 @@
   "description": "RESTful API for a forum site.",
   "main": "server.ts",
   "scripts": {
-    "test": "TESTING=true mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --colors --exit",
-    "test:dev": "TESTING=true mocha --require ts-node/register --require ./test/global-fixtures.ts --colours --watch --watch-files test, test/**/*.test.ts",
-    "coverage": "TESTING=true nyc npm run test",
+    "test": "cross-env NODE_ENV=testing mocha --require ts-node/register --require ./test/global-fixtures.ts ./test/* --colors --exit",
+    "test:dev": "cross-env NODE_ENV=testing mocha --require ts-node/register --require ./test/global-fixtures.ts --colours --watch --watch-files test, test/**/*.test.ts",
+    "coverage": "cross-env NODE_ENV=testing nyc npm run test",
     "start": "ts-node server.ts",
     "dev": "nodemon server.ts",
     "prepare": "husky install"
@@ -42,6 +42,7 @@
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8.11.0",
     "eslint-config-prettier": "^8.5.0",
     "husky": "^7.0.4",

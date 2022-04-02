@@ -6,11 +6,9 @@ import { logger } from './lib/middleware.lib';
 
 // Express.js application object
 const app = createApp();
-
 const PORT = config.get('port');
-const TESTING = config.get('testing');
 
-const connectFn = TESTING ? resolve : connect;
+const connectFn = config.get('environment') == 'testing' ? resolve : connect;
 // Connect to MongoDB database
 connectFn().then(
   () => {

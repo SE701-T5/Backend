@@ -30,9 +30,4 @@ export default convict({
     default: 4200,
     env: 'PORT',
   },
-  testing: {
-    format: 'Boolean',
-    default: false,
-    env: 'TESTING',
-  },
 });
