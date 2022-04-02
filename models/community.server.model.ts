@@ -64,6 +64,10 @@ export async function getAll(): Promise<CommunityDocument[]> {
 export async function getPosts(
   id: mongoose.Types.ObjectId,
 ): Promise<PostDocument[]> {
+  const community = await Community.findById(id).exec();
+  if (community == null)
+    throw new ServerError('community not found', StatusCodes.NOT_FOUND);
+
   return await Post.find({ community: id });
 }
 

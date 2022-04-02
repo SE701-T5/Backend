@@ -34,7 +34,8 @@ interface CommunityResponse extends ICommunity {
 
 export async function getPosts(req: Request, res: Response<PostResponse[]>) {
   const id = convertToObjectId(req.params.id);
-  const posts = await Forum.populatePosts(await Community.getPosts(id));
+  const community = await Community.getPosts(id);
+  const posts = await Forum.populatePosts(community);
 
   const response = posts.map(
     (post) =>
