@@ -3,29 +3,42 @@ import request from 'supertest';
 import { StatusCodes } from 'http-status-codes';
 import User from '../config/db_schemas/user.schema';
 import Post from '../config/db_schemas/post.schema';
+import Community from '../config/db_schemas/community.schema';
 import { hashPassword } from '../models/user.server.model';
 import { expect } from 'chai';
 
-describe('Forum', () => {
-  let userId, authToken, forumId: string;
+describe.only('Forum', () => {
+  let userId, authToken, communityId, postId: string;
+
+  const password = 'authentication-test';
+  const hashedPassword = hashPassword('authentication-test');
 
   beforeEach(async () => {
-    // Create user
     const userDoc = await new User({
-      username: 'TestDummy',
-      displayName: 'MostValuedTest',
+      username: 'Dummy username',
+      displayName: 'Dummy displayName',
       email: 'test@dummy.com',
-      hashedPassword: hashPassword('authentication-test'),
+      hashedPassword: hashedPassword.hash,
+      salt: hashedPassword.salt,
       authToken: 'a'.repeat(16), // Valid authTokens are 16chars wide
     }).save();
 
     userId = userDoc._id;
     authToken = userDoc.authToken;
 
-    // Create forum
+    // Create Community
+    const communityDoc = await new Community({
+      owner: userId,
+      name: 'Dummy name',
+      description: 'Dummy description',
+    });
+
+    communityId = communityDoc._id.toString();
+
+    // Create post
     const postDoc = await new Post({
-      userID: userId,
-      communityID: 'communityId',
+      owner: userId,
+      community: userId,
       title: 'Dummy forum title',
       bodyText: 'Dummy forum body text',
       edited: false,
@@ -33,20 +46,18 @@ describe('Forum', () => {
       downVotes: 0,
     }).save();
 
-    forumId = postDoc._id.toString();
+    postId = postDoc._id.toString();
   });
 
   describe('Post', () => {
-    it.skip('Create', async () => {
+    it.only('Create', async () => {
       await request(app)
-        .post('/api/v1/posts')
+        .post(`/api/v1/communities/${communityId}/posts`)
         .set({ 'X-Authorization': authToken })
         .send({
-          userID: userId,
-          title: 'How do I make a forum post?!',
-          communityID: 'communityID',
-          text: "Help me, I don't know how to turn my computer on!",
-          images: ['image string'],
+          title: 'Forum post title',
+          bodyText: 'asdfasd',
+          attachments: [],
         })
         .expect(StatusCodes.CREATED);
     });
@@ -112,7 +123,7 @@ describe('Forum', () => {
     });
 
     it.skip('View', async () => {
-      await request(app).get(`/api/v1/posts/${forumId}`).expect(StatusCodes.OK);
+      await request(app).get(`/api/v1/posts/${postId}`).expect(StatusCodes.OK);
     });
 
     it.skip('View with invalid forumId', async () => {
@@ -131,7 +142,7 @@ describe('Forum', () => {
       };
 
       const postUpdateResponse: any = await request(app)
-        .patch(`/api/v1/posts/${forumId}`)
+        .patch(`/api/v1/posts/${postId}`)
         .set({ 'X-Authorization': authToken })
         .send(updatePayload);
 
@@ -161,7 +172,7 @@ describe('Forum', () => {
     };
 
     const postUpdateResponse: any = await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send(updatePayload);
 
@@ -181,7 +192,7 @@ describe('Forum', () => {
 
   it.skip('Update with invalid authToken', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': 'invalidAuthToken' })
       .send({
         userID: userId,
@@ -203,7 +214,7 @@ describe('Forum', () => {
 
   it.skip('Update with invalid forumPostId', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({})
       .expect(StatusCodes.BAD_REQUEST);
@@ -211,7 +222,7 @@ describe('Forum', () => {
 
   it.skip('Update with invalid forumPostId', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({
         communityID: '12',
@@ -221,7 +232,7 @@ describe('Forum', () => {
 
   it.skip('Update with empty title', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({
         title: '',
@@ -231,7 +242,7 @@ describe('Forum', () => {
 
   it.skip('Update with invalid upVotes/downVotes field', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({
         upVotes: NaN,
@@ -242,7 +253,7 @@ describe('Forum', () => {
 
   it.skip('Update with invalid upVotes/downVotes field', async () => {
     await request(app)
-      .patch(`/api/v1/posts/${forumId}`)
+      .patch(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({
         upVotes: NaN,
@@ -253,7 +264,7 @@ describe('Forum', () => {
 
   it.skip('Delete', async () => {
     await request(app)
-      .delete(`/api/v1/posts/${forumId}`)
+      .delete(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': authToken })
       .send({
         userID: userId,
@@ -284,7 +295,7 @@ describe('Forum', () => {
 
   it.skip('Delete with invalid authToken', async () => {
     await request(app)
-      .delete(`/api/v1/posts/${forumId}`)
+      .delete(`/api/v1/posts/${postId}`)
       .set({ 'X-Authorization': 'invalidAuthToken' })
       .send({
         userID: userId,
