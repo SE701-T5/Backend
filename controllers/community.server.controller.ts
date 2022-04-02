@@ -137,7 +137,7 @@ export async function communityCreate(
     ...data,
   });
 
-  res.status(201).send({
+  res.status(StatusCodes.CREATED).send({
     id: community._id,
     img: community.img,
     name: community.name,

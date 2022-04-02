@@ -14,7 +14,7 @@ import { StatusCodes } from 'http-status-codes';
 export async function resetDB(req: Request, res: Response) {
   // Remove all documents in the database collections
   await Database.resetCollections();
-  res.status(204).send();
+  res.status(StatusCodes.NO_CONTENT).send();
 }
 
 /**

@@ -45,7 +45,7 @@ export async function userCreate(
   const formData = validate(rules, req.body);
 
   const user = await User.createUser(formData);
-  res.status(201).json({
+  res.status(StatusCodes.CREATED).json({
     id: user._id,
     displayName: user.displayName,
     email: user.email,
@@ -96,7 +96,7 @@ export async function userLogout(req: Request, res: Response) {
   const user = await User.searchUserByAuthToken(authToken);
   await User.removeUserAuthToken(user._id);
 
-  res.status(204).send();
+  res.status(StatusCodes.NO_CONTENT).send();
 }
 
 /**
@@ -164,7 +164,7 @@ export async function userDeleteById(req: Request, res: Response) {
 
   if (await User.isUserAuthorized(id, authToken)) {
     await User.deleteUserById(id);
-    res.status(204).send();
+    res.status(StatusCodes.NO_CONTENT).send();
   } else {
     throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }

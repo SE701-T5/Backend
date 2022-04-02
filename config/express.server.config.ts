@@ -57,7 +57,7 @@ export default function () {
 
   // 404 Route
   app.all('*', () => {
-    throw new ServerError('endpoint does not exist', 404);
+    throw new ServerError('endpoint does not exist', StatusCodes.NOT_FOUND);
   });
 
   // Configure Error Handler

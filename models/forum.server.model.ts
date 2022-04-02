@@ -9,6 +9,7 @@ import Comment, {
 } from '../config/db_schemas/comment.schema';
 import { UserDocument } from '../config/db_schemas/user.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
+import { StatusCodes } from 'http-status-codes';
 
 interface InsertPostDTO {
   owner: mongoose.Types.ObjectId;
@@ -61,7 +62,7 @@ export async function insertPost(params: InsertPostDTO): Promise<PostDocument> {
   } catch (err) {
     // Forum post is already in the database with unique attributes, return duplicate conflict error
     if (getProp(err, 'code') === 11000) {
-      throw new ServerError('Conflict', 409, err);
+      throw new ServerError('Conflict', StatusCodes.CONFLICT, err);
     }
     // Any other error
     throw err;
@@ -93,7 +94,8 @@ export async function searchPostById(
 ): Promise<PostDocument> {
   const resource = await Post.findById(id);
 
-  if (resource == null) throw new ServerError('post not found', 404);
+  if (resource == null)
+    throw new ServerError('post not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -108,7 +110,7 @@ export async function deletePostById(
   const result = await Post.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
-    throw new ServerError('not found', 404, result);
+    throw new ServerError('not found', StatusCodes.NOT_FOUND, result);
   }
 
   return result;
@@ -154,7 +156,8 @@ export async function updatePostById(
     { new: true },
   );
 
-  if (resource == null) throw new ServerError('post not found', 404);
+  if (resource == null)
+    throw new ServerError('post not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -175,7 +178,7 @@ export async function addComment(
     comment = await newComment.save();
   } catch (err: unknown) {
     if (getProp(err, 'code') === 11000) {
-      throw new ServerError('Conflict', 409, err);
+      throw new ServerError('Conflict', StatusCodes.CONFLICT, err);
     }
     throw err;
   }
@@ -239,7 +242,8 @@ export async function searchCommentById(
 ): Promise<CommentDocument> {
   const resource = await Comment.findById(id);
 
-  if (resource == null) throw new ServerError('comment not found', 404);
+  if (resource == null)
+    throw new ServerError('comment not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -254,7 +258,8 @@ export async function getAllCommentsByPostId(
     })
     .exec();
 
-  if (post == null) throw new ServerError('post not found', 404);
+  if (post == null)
+    throw new ServerError('post not found', StatusCodes.NOT_FOUND);
 
   return post.comments;
 }

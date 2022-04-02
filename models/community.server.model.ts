@@ -5,6 +5,7 @@ import { PostDocument } from '../config/db_schemas/post.schema';
 import User from '../config/db_schemas/user.schema';
 import Post from '../config/db_schemas/post.schema';
 import { getProp, ServerError } from '../lib/utils.lib';
+import { StatusCodes } from 'http-status-codes';
 
 interface CreateCommunityDTO {
   owner: mongoose.Types.ObjectId;
@@ -22,7 +23,7 @@ export async function insertCommunity(params: CreateCommunityDTO) {
     return await newCommunity.save();
   } catch (err: unknown) {
     if (getProp(err, 'code') === 11000) {
-      throw new ServerError('Conflict', 409);
+      throw new ServerError('Conflict', StatusCodes.CONFLICT);
     }
     // Any other database error
     throw err;
@@ -39,7 +40,8 @@ export async function updateCommunityById(
     { new: true },
   );
 
-  if (resource == null) throw new ServerError('community not found', 404);
+  if (resource == null)
+    throw new ServerError('community not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -49,7 +51,8 @@ export async function searchCommunityById(
 ): Promise<CommunityDocument> {
   const resource = await Community.findById(id).exec();
 
-  if (resource == null) throw new ServerError('community not found', 404);
+  if (resource == null)
+    throw new ServerError('community not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }

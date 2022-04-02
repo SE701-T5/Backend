@@ -134,7 +134,7 @@ export async function postCreate(
     }),
   );
 
-  res.status(201).send({
+  res.status(StatusCodes.CREATED).send({
     id: post._id,
     owner: post.owner,
     community: {
@@ -286,7 +286,7 @@ export async function commentGiveById(
     owner: user._id,
   });
 
-  res.status(201).send({
+  res.status(StatusCodes.CREATED).send({
     id: comment._id,
     owner: {
       id: user._id,
@@ -360,7 +360,7 @@ export async function postDeleteById(req: Request, res: Response) {
 
   if (await User.isUserAuthorized(forum.owner, authToken)) {
     await Forum.deletePostById(id);
-    res.status(204).send();
+    res.status(StatusCodes.NO_CONTENT).send();
   } else {
     throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
