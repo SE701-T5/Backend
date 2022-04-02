@@ -4,7 +4,7 @@ import { closeConn, connect, getState } from '../config/db.server.config';
 import { StatusCodes } from 'http-status-codes';
 import { expect } from 'chai';
 
-describe('Database', () => {
+describe.skip('Database', () => {
   it('Reset', () => {
     request(app).post('/api/v1/reset').expect(StatusCodes.OK);
   });
