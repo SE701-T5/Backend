@@ -86,7 +86,7 @@ export const logger = pino({
 export const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, '.' + config.get('uploadDestination'));
+      cb(null, './uploads');
     },
     filename: function (req, file, cb) {
       cb(null, Date.now().toString() + file.originalname);

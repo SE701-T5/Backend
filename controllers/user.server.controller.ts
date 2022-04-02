@@ -47,7 +47,7 @@ export async function userCreate(
     ...req.body,
     ...(req.file && {
       profilePicture: `${req.protocol}://${req.get('host')}${config.get(
-        'uploadDestination',
+        'uploadsRoute',
       )}${req.file.filename}`,
     }),
   };
@@ -154,7 +154,7 @@ export async function userUpdateById(
     ...req.body,
     ...(req.file && {
       profilePicture: `${req.protocol}://${req.get('host')}${config.get(
-        'uploadDestination',
+        'uploadsRoute',
       )}${req.file.filename}`,
     }),
   };
@@ -235,7 +235,7 @@ export async function userUpdateCurrent(
     ...req.body,
     ...(req.file && {
       profilePicture: `${req.protocol}://${req.get('host')}${config.get(
-        'uploadDestination',
+        'uploadsRoute',
       )}${req.file.filename}`,
     }),
   };

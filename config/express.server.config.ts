@@ -4,6 +4,8 @@ import cors from 'cors';
 import pinoHttp from 'pino-http';
 import { errorHandler, logger } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
+import config from './config.server.config';
+import path from 'path';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
@@ -53,8 +55,7 @@ export default function () {
   communityServerRoutes(app);
 
   // Add uploads folder
-  app.use(express.static(__dirname + '/public'));
-  app.use('/uploads', express.static('uploads'));
+  app.use(config.get('uploadsRoute'), express.static('uploads'));
 
   // 404 Route
   app.all('*', () => {

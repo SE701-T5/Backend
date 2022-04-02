@@ -30,7 +30,7 @@ export default convict({
     default: 4200,
     env: 'PORT',
   },
-  uploadDestination: {
+  uploadsRoute: {
     format: String,
     default: '/uploads/',
   },
