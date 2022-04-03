@@ -204,7 +204,7 @@ export async function userViewCurrent(
 ) {
   const authToken = req.get(config.get('authToken'));
   const user = await User.searchUserByAuthToken(authToken);
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: user._id,
     username: user.username,
     displayName: user.displayName,
@@ -244,7 +244,7 @@ export async function userUpdateCurrent(
 
   const userID = (await User.searchUserByAuthToken(authToken))._id;
   const user = await User.updateUserById(userID, data);
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: user._id,
     username: user.username,
     email: user.email,
