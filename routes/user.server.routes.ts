@@ -35,4 +35,8 @@ export default function (app: Express) {
       asyncHandler(user.userUpdateById),
     )
     .delete(isAuthenticated, asyncHandler(user.userDeleteById));
+
+  app
+    .route('/api/v1/users/:id/posts')
+    .get(isAuthenticated, asyncHandler(user.currentUserPosts));
 }

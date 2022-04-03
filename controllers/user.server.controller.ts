@@ -8,6 +8,7 @@ import {
 } from '../lib/utils.lib';
 import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
+import * as Forum from '../models/forum.server.model';
 import config from '../config/config.server.config';
 import { validators, validate } from '../lib/validate.lib';
 import { StatusCodes } from 'http-status-codes';
@@ -251,4 +252,48 @@ export async function userUpdateCurrent(
     displayName: user.displayName,
     profilePicture: user.profilePicture,
   });
+}
+
+export async function currentUserPosts(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
+  const user = await User.searchUserByAuthToken(authToken);
+
+  const userPostsSkeleton = (await Forum.getPosts()).filter((p) =>
+    p.owner._id.equals(user._id),
+  );
+
+  const posts = (await Forum.populatePosts(userPostsSkeleton)).map(
+    ({
+      _id: id,
+      owner,
+      title,
+      bodyText,
+      edited,
+      upVotes,
+      attachments,
+      downVotes,
+      comments,
+      createdAt,
+      updatedAt,
+      community,
+    }) => ({
+      id,
+      owner,
+      community: {
+        id: community._id,
+        name: community.name,
+      },
+      title,
+      bodyText,
+      edited,
+      upVotes,
+      attachments,
+      downVotes,
+      comments,
+      createdAt,
+      updatedAt,
+    }),
+  );
+
+  return res.status(StatusCodes.OK).send(posts);
 }

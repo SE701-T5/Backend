@@ -12,7 +12,6 @@ import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
 import communityServerRoutes from '../routes/community.routes';
 import { StatusCodes } from 'http-status-codes';
-import config from './config.server.config';
 
 /**
  * Configure Express.js application
