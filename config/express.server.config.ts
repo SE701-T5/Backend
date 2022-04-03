@@ -10,6 +10,7 @@ import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
 import communityServerRoutes from '../routes/community.routes';
 import { StatusCodes } from 'http-status-codes';
+import config from './config.server.config';
 
 /**
  * Configure Express.js application
@@ -23,12 +24,13 @@ export default function () {
   app.use(bodyParser.json());
   app.use(cors());
 
-  // TODO: comment this back in when done
-  // app.use(
-  //   pinoHttp({
-  //     logger,
-  //   }),
-  // );
+  const level = config.get('environment') == 'testing' ? 'error' : 'info';
+  app.use(
+    pinoHttp({
+      logger,
+      level,
+    }),
+  );
 
   // Set response headers using middleware
   app.use(function (req, res, next) {
