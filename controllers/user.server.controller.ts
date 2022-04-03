@@ -220,7 +220,7 @@ export async function userViewCurrent(
  * @param res HTTP request response object status code and updated user data in JSON format or error message
  */
 export async function userUpdateCurrent(
-  req: Request,
+  req: TypedRequestBody<UpdateUserDTO>,
   res: Response<UserResponseDTO>,
 ) {
   const authToken = req.get(config.get('authToken'));

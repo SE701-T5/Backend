@@ -87,6 +87,5 @@ const postSchema = new Schema<IPost>(
 export type PostDocument = HydratedDocument<IPost>;
 
 // Forum can be used to create new documents with the postSchema
-const PostModel =
-  mongoose.models.Post || mongoose.model<IPost>('Post', postSchema);
+const PostModel = mongoose.model<IPost>('Post', postSchema);
 export default PostModel;

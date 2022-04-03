@@ -74,6 +74,5 @@ const userSchema = new Schema<IUser>(
 export type UserDocument = HydratedDocument<IUser>;
 
 // User can be used to create new documents with the userSchema
-const UserModel =
-  mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+const UserModel = mongoose.model<IUser>('User', userSchema);
 export default UserModel;
