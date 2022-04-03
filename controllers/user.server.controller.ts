@@ -10,6 +10,7 @@ import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { validators, validate } from '../lib/validate.lib';
+import { StatusCodes } from 'http-status-codes';
 
 interface UserResponseDTO {
   id: mongoose.Types.ObjectId;
@@ -54,7 +55,7 @@ export async function userCreate(
   const formData = validate(rules, requestInfo);
 
   const user = await User.createUser(formData);
-  res.status(201).json({
+  res.status(StatusCodes.CREATED).json({
     id: user._id,
     displayName: user.displayName,
     email: user.email,
@@ -86,7 +87,7 @@ export async function userLogin(
   };
 
   const user = await User.authenticateUser(login, data.plaintextPassword, true);
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: user._id,
     username: user.username,
     displayName: user.displayName,
@@ -107,7 +108,7 @@ export async function userLogout(req: Request, res: Response) {
   const user = await User.searchUserByAuthToken(authToken);
   await User.removeUserAuthToken(user._id);
 
-  res.status(204).send();
+  res.status(StatusCodes.NO_CONTENT).send();
 }
 
 /**
@@ -122,7 +123,7 @@ export async function userViewById(
   const id = convertToObjectId(req.params.id);
   const user = await User.searchUserById(id);
 
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: user._id,
     username: user.username,
     displayName: user.displayName,
@@ -163,7 +164,7 @@ export async function userUpdateById(
   const id = convertToObjectId(req.params.id);
   if (await User.isUserAuthorized(id, authToken)) {
     const user = await User.updateUserById(id, data);
-    res.status(200).send({
+    res.status(StatusCodes.OK).send({
       id: user._id,
       username: user.username,
       email: user.email,
@@ -171,7 +172,7 @@ export async function userUpdateById(
       profilePicture: user.profilePicture,
     });
   } else {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 }
 
@@ -186,9 +187,9 @@ export async function userDeleteById(req: Request, res: Response) {
 
   if (await User.isUserAuthorized(id, authToken)) {
     await User.deleteUserById(id);
-    res.status(204).send();
+    res.status(StatusCodes.NO_CONTENT).send();
   } else {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 }
 

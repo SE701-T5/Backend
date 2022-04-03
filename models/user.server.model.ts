@@ -1,4 +1,5 @@
 import * as Crypto from 'crypto';
+import { StatusCodes } from 'http-status-codes';
 import { DeleteResult } from 'mongodb';
 import mongoose from 'mongoose';
 import User, { IUser, UserDocument } from '../config/db_schemas/user.schema';
@@ -68,7 +69,7 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
     return await newUser.save();
   } catch (err) {
     if (getProp(err, 'code') === 11000)
-      throw new ServerError('conflict', 409, err);
+      throw new ServerError('conflict', StatusCodes.CONFLICT, err);
     throw err;
   }
 }
@@ -80,7 +81,8 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
 export async function searchUserById(id: mongoose.Types.ObjectId) {
   const resource = await User.findById(id);
 
-  if (resource == null) throw new ServerError('user not found', 404);
+  if (resource == null)
+    throw new ServerError('user not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -94,7 +96,8 @@ export async function searchUserByAuthToken(
 ): Promise<UserDocument> {
   const resource = await User.findOne({ authToken });
 
-  if (resource == null) throw new ServerError('user not found', 404);
+  if (resource == null)
+    throw new ServerError('user not found', StatusCodes.NOT_FOUND);
 
   return resource;
 }
@@ -109,7 +112,7 @@ export async function deleteUserById(
   const result = await User.deleteOne({ _id: id });
 
   if (result.deletedCount === 0)
-    throw new ServerError('not found', 404, result);
+    throw new ServerError('not found', StatusCodes.NOT_FOUND, result);
 
   return result;
 }
@@ -141,7 +144,7 @@ export async function updateUserById(
   if (resource != null) {
     return resource;
   } else {
-    throw new ServerError('forum not found', 400);
+    throw new ServerError('user not found', StatusCodes.BAD_REQUEST);
   }
 }
 
@@ -160,7 +163,8 @@ export async function authenticateUser(
     $or: [{ username: login.username }, { email: login.email }],
   }).exec();
 
-  if (res == null) throw new ServerError('user not found', 404, login);
+  if (res == null)
+    throw new ServerError('user not found', StatusCodes.NOT_FOUND, login);
 
   const hashedPassword: HashedPassword = {
     hash: res.hashedPassword,
@@ -174,7 +178,7 @@ export async function authenticateUser(
 
     return res;
   } else {
-    throw new ServerError('incorrect password', 401);
+    throw new ServerError('incorrect password', StatusCodes.UNAUTHORIZED);
   }
 }
 
@@ -213,7 +217,11 @@ export async function isUserAuthorized(
   const user = await searchUserById(userID);
 
   if (user.authToken == null)
-    throw new ServerError('forbidden', 403, 'no auth token found on user');
+    throw new ServerError(
+      'forbidden',
+      StatusCodes.FORBIDDEN,
+      'no auth token found on user',
+    );
 
   const dbAuthToken = Buffer.from(user.authToken, 'hex');
   const providedAuthToken = Buffer.from(authToken, 'hex');

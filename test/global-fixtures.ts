@@ -1,9 +1,13 @@
+import { fail } from 'assert';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { closeConn, connect } from '../config/db.server.config';
 
 export const mochaHooks = {
   async beforeAll() {
+    chai.use(chaiAsPromised);
     this.timeout('60s');
     console.error('starting server');
 

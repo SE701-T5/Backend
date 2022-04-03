@@ -1,170 +1,28 @@
-# Continuous integration/deployment workflow for node.js backend server
-name: Backend Node.js CI
-
-# Events that trigger the workflow
-on:
-  # Workflow is run when changes are pushed to any branch
-  push:
-
-  # Workflow is run when pull requests to the main branch are opened, reopened, and synchronized
-  pull_request_target:
-    branches: [main]
-
-  # Workflow is run when manually triggered on the GitHub website
-  workflow_dispatch:
-
-# The workflow jobs: builds and tests the backend
+name: Backend
+on: [push, pull_request]
 jobs:
-  build_pull_request:
-    name: 'Job for PR Action With Secrets Access'
-    if: github.event_name == 'pull_request_target'
-
-    # Workflow job is run on the latest Ubuntu runner
+  Backend:
+    name: Backend
     runs-on: ubuntu-latest
-
-    # Defines the Node.js variation for the workflow job configuration
     strategy:
-      # Set to sequential testing to prevent test conflicts between jobs
       max-parallel: 1
       matrix:
         node-version: [16.x, 17.x]
 
-    # Sequence of tasks for completing the workflow job
     steps:
-      - name: Check out repository
+      - name: Checkout
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
-      # Runs the workflow job using the Node.js version specified in 'strategy'
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup node ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Clean installation of backend dependencies
-      - name: Run install
+      - name: Install
         run: npm ci
 
-      # Builds the project
-      - name: Run build
+      - name: Build
         run: npm run build --if-present
 
-      # Runs automated testing
-      - name: Run test
+      - name: Test
         run: npm test
-        # Configure environment variables
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  build_fork:
-    name: 'Job for Non-PR Action in Fork Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.ref_name != 'main'
-
-    # Workflow job is run on the latest Ubuntu runner
-    runs-on: ubuntu-latest
-
-    # Defines the Node.js variation for the workflow job configuration
-    strategy:
-      # Set to sequential testing to prevent test conflicts between jobs
-      max-parallel: 1
-      matrix:
-        node-version: [16.x, 17.x]
-
-    # Sequence of tasks for completing the workflow job
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-
-      # Runs the workflow job using the Node.js version specified in 'strategy'
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      # Clean installation of backend dependencies
-      - name: Run install
-        run: npm ci
-
-      # Builds the project
-      - name: Run build
-        run: npm run build --if-present
-
-      # Runs automated testing
-      - name: Run test
-        run: npm test
-        # Configure environment variables
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  build_main:
-    name: 'Job for Non-PR Action in Main Repo With Secrets Access'
-    if: github.event_name != 'pull_request_target' && github.repository == 'SE701-T5/Backend' && github.ref_name == 'main'
-
-    # Workflow job is run on the latest Ubuntu runner
-    runs-on: ubuntu-latest
-
-    # Defines the Node.js variation for the workflow job configuration
-    strategy:
-      # Set to sequential testing to prevent test conflicts between jobs
-      max-parallel: 1
-      matrix:
-        node-version: [16.x, 17.x]
-
-    # Sequence of tasks for completing the workflow job
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-
-      # Runs the workflow job using the Node.js version specified in 'strategy'
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      # Clean installation of backend dependencies
-      - name: Run install
-        run: npm ci
-
-      # Builds the project
-      - name: Run build
-        run: npm run build --if-present
-
-      # Runs automated testing
-      - name: Run test
-        run: npm test
-        # Configure environment variables
-        env:
-          PORT: ${{ secrets.PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PW: ${{ secrets.DATABASE_PW }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_TEST_NAME: ${{ secrets.DATABASE_TEST_NAME }}
-
-  deploy_main:
-    name: 'Job for Heroku Deploy Main Repo With Secrets Access'
-    needs: build_main
-
-    # Workflow job is run on the latest Ubuntu runner
-    runs-on: ubuntu-latest
-
-    # Sequence of tasks for completing the workflow job
-    steps:
-      - uses: actions/checkout@v2
-
-      # Uses heroku-deploy GitHub action:
-      # https://github.com/AkhileshNS/heroku-deploy
-      - uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: 'web: npm start'

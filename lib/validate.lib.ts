@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import Joi from 'joi';
 import { ServerError } from './utils.lib';
 
@@ -21,7 +22,11 @@ export function validate<T>(
   const result = rules.validate(data, options);
 
   if (result.error) {
-    throw new ServerError(result.error.message, 400, result);
+    throw new ServerError(
+      result.error.message,
+      StatusCodes.BAD_REQUEST,
+      result,
+    );
   } else {
     return result.value;
   }

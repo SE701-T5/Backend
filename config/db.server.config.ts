@@ -13,7 +13,6 @@ export function connect(
 ): Promise<typeof database> {
   const databaseURI = uri ?? config.get('databaseURI');
   const databaseOptions = options ?? config.get('databaseOptions');
-
   return database.connect(databaseURI, databaseOptions);
 }
 

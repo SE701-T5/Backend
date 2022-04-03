@@ -38,5 +38,7 @@ const communitySchema = new Schema<ICommunity>(
 
 export type CommunityDocument = HydratedDocument<ICommunity>;
 
-const CommunityModel = mongoose.model<ICommunity>('Community', communitySchema);
+const CommunityModel =
+  mongoose.models.Community ||
+  mongoose.model<ICommunity>('Community', communitySchema);
 export default CommunityModel;
