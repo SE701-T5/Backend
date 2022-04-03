@@ -14,6 +14,7 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import mongoose from 'mongoose';
 import { validate, validators } from '../lib/validate.lib';
+import { StatusCodes } from 'http-status-codes';
 
 interface CreatePostDTO {
   title: string;
@@ -100,7 +101,7 @@ export async function postViews(req: Request, res: Response<PostResponse[]>) {
       } as PostResponse),
   );
 
-  res.status(200).send(response);
+  res.status(StatusCodes.OK).send(response);
 }
 
 /**
@@ -133,7 +134,7 @@ export async function postCreate(
     }),
   );
 
-  res.status(201).send({
+  res.status(StatusCodes.CREATED).send({
     id: post._id,
     owner: post.owner,
     community: {
@@ -161,7 +162,7 @@ export async function postViewById(req: Request, res: Response<PostResponse>) {
   const postID = convertToObjectId(req.params.id);
 
   const post = await Forum.populatePost(await Forum.searchPostById(postID));
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: post._id,
     owner: post.owner,
     community: {
@@ -207,14 +208,14 @@ export async function postUpdateById(
   const post = await Forum.searchPostById(id);
 
   if (!(await User.isUserAuthorized(post.owner, authToken))) {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 
   const newPost = await Forum.populatePost(
     await Forum.updatePostById(id, data, true, true),
   );
 
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: newPost._id,
     owner: newPost.owner,
     community: {
@@ -244,7 +245,7 @@ export async function commentViewById(
 ) {
   const postID = convertToObjectId(req.params.id);
   const comments = await Forum.getAllCommentsByPostId(postID);
-  res.status(200).send(
+  res.status(StatusCodes.OK).send(
     comments.map((comment) => ({
       id: comment._id,
       owner: {
@@ -285,7 +286,7 @@ export async function commentGiveById(
     owner: user._id,
   });
 
-  res.status(201).send({
+  res.status(StatusCodes.CREATED).send({
     id: comment._id,
     owner: {
       id: user._id,
@@ -325,14 +326,14 @@ export async function commentUpdateById(
   const comment = await searchCommentById(commentID);
 
   if (!(await User.isUserAuthorized(comment.owner, authToken))) {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 
   const newComment = await Forum.updateCommentById(commentID, data, true, true);
   const populatedComment = await newComment.populate<{ owner: UserDocument }>(
     'owner',
   );
-  res.status(200).send({
+  res.status(StatusCodes.OK).send({
     id: populatedComment._id,
     owner: {
       id: populatedComment.owner._id,
@@ -359,8 +360,8 @@ export async function postDeleteById(req: Request, res: Response) {
 
   if (await User.isUserAuthorized(forum.owner, authToken)) {
     await Forum.deletePostById(id);
-    res.status(204).send();
+    res.status(StatusCodes.NO_CONTENT).send();
   } else {
-    throw new ServerError('forbidden', 403);
+    throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
 }

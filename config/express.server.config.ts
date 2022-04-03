@@ -9,6 +9,8 @@ import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
 import communityServerRoutes from '../routes/community.routes';
+import { StatusCodes } from 'http-status-codes';
+import config from './config.server.config';
 
 /**
  * Configure Express.js application
@@ -21,9 +23,12 @@ export default function () {
   // This is required for parsing application/json in req.body
   app.use(bodyParser.json());
   app.use(cors());
+
+  const level = config.get('environment') == 'testing' ? 'error' : 'info';
   app.use(
     pinoHttp({
       logger,
+      level,
     }),
   );
 
@@ -40,7 +45,7 @@ export default function () {
 
   // HTTP GET request to homepage with a message response stating the server is running
   app.get('/health', function (req, res) {
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       msg: 'The server is up and running!',
       tim: new Date().getTime(),
     });
@@ -54,7 +59,7 @@ export default function () {
 
   // 404 Route
   app.all('*', () => {
-    throw new ServerError('endpoint does not exist', 404);
+    throw new ServerError('endpoint does not exist', StatusCodes.NOT_FOUND);
   });
 
   // Configure Error Handler

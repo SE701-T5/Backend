@@ -4,6 +4,7 @@ import { validate } from '../lib/validate.lib';
 import { ResampleCounts, ResampleDTO } from '../models/db.server.model';
 import * as Database from '../models/db.server.model';
 import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 /**
  * Responds to HTTP request for removing all documents from database collections
@@ -13,7 +14,7 @@ import { Request, Response } from 'express';
 export async function resetDB(req: Request, res: Response) {
   // Remove all documents in the database collections
   await Database.resetCollections();
-  res.status(204).send();
+  res.status(StatusCodes.NO_CONTENT).send();
 }
 
 /**
@@ -41,5 +42,5 @@ export async function resampleDB(
   const data = validate(schema, req.body);
 
   const counts = await Database.generateFakeData(data);
-  res.status(200).send(counts);
+  res.status(StatusCodes.OK).send(counts);
 }

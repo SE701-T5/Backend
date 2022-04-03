@@ -62,5 +62,6 @@ const commentSchema = new Schema<IComment>(
 export type CommentDocument = HydratedDocument<IComment>;
 
 // User can be used to create new documents with the userSchema
-const CommentModel = mongoose.model<IComment>('Comment', commentSchema);
+const CommentModel =
+  mongoose.models.Comment || mongoose.model<IComment>('Comment', commentSchema);
 export default CommentModel;

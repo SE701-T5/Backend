@@ -11,10 +11,7 @@ export default function (app: Express) {
   app
     .route('/api/v1/communities/:id')
     // .get(community.userViewById)
-    .patch(
-      isAuthenticated,
-      asyncHandler(community.communityUpdateById),
-    );
+    .patch(isAuthenticated, asyncHandler(community.communityUpdateById));
 
   app
     .route('/api/v1/communities/:id/posts')
