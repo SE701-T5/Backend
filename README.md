@@ -36,13 +36,10 @@ PORT = <port>
 The following environment variables are required for connecting the application to a MongoDB account
 
 ```
-DATABASE_USER = <database-username>
-DATABASE_PW = <database-password>
-DATABASE_NAME = <application-database-name>
-DATABASE_TEST_NAME = <test-database-name>
+DATABASE_URI = <database-uri>
 ```
 
-> It is recommended to use a different `test-database-name` for repository forks and local testing
+> It is recommended to use a different database name for repository forks and local testing
 
 #### Deployment
 
