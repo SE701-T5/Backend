@@ -55,6 +55,7 @@ export async function generateFakeData(
         displayName: faker.name.findName(firstName, lastName),
         hashedPassword: password.hash,
         salt: password.salt,
+        profilePicture: 'https://source.unsplash.com/random/1920x1080',
       }),
     );
   }
@@ -71,7 +72,7 @@ export async function generateFakeData(
           'COMPSCI',
         ]) + Crypto.randomInt(0, 999).toString().padStart(3, '0'),
       description: faker.commerce.productDescription(),
-      img: faker.image.business(),
+      img: 'https://source.unsplash.com/random/1920x1080',
       owner: faker.random.arrayElement(users)._id,
     });
     communities.push(community);
@@ -87,7 +88,11 @@ export async function generateFakeData(
         upVotes: Crypto.randomInt(0, 100),
         downVotes: Crypto.randomInt(0, 100),
         attachments: faker.random.arrayElements(
-          [faker.image.image(), faker.image.image(), faker.image.image()],
+          [
+            'https://source.unsplash.com/random/1920x1080',
+            'https://source.unsplash.com/random/1920x1080',
+            'https://source.unsplash.com/random/1920x1080',
+          ],
           Crypto.randomInt(0, 4),
         ),
         community: community._id,
@@ -108,7 +113,11 @@ export async function generateFakeData(
           owner: faker.random.arrayElement(users)._id,
           edited: false,
           attachments: faker.random.arrayElements(
-            [faker.image.image(), faker.image.image(), faker.image.image()],
+            [
+              'https://source.unsplash.com/random/1920x1080',
+              'https://source.unsplash.com/random/1920x1080',
+              'https://source.unsplash.com/random/1920x1080',
+            ],
             Crypto.randomInt(0, 4),
           ),
           upVotes: Crypto.randomInt(0, 100),

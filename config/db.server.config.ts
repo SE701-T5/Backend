@@ -10,7 +10,8 @@ import config from './config.server.config';
 export function connect(
   uri?: string,
   options?: database.ConnectOptions,
-): Promise<typeof database> {
+): Promise<typeof database | undefined> {
+  if (config.get('environment') === 'testing') return;
   const databaseURI = uri ?? config.get('databaseURI');
   const databaseOptions = options ?? config.get('databaseOptions');
   return database.connect(databaseURI, databaseOptions);

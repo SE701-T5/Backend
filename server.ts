@@ -8,9 +8,8 @@ import { logger } from './lib/middleware.lib';
 const app = createApp();
 const PORT = config.get('port');
 
-const connectFn = config.get('environment') == 'testing' ? resolve : connect;
 // Connect to MongoDB database
-connectFn().then(
+connect().then(
   () => {
     if (require.main === module) {
       app.listen(PORT, function () {
