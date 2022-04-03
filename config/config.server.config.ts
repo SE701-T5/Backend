@@ -3,7 +3,7 @@ import convict from 'convict';
 export default convict({
   environment: {
     format: String,
-    default: 'production',
+    default: 'development',
     env: 'NODE_ENV',
   },
   authToken: {
