@@ -7,3 +7,6 @@ coverage/
 
 # Jetbrains IDE files
 .idea/
+
+# Uploads
+uploads/

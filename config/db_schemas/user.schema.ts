@@ -6,6 +6,7 @@ export interface IUser extends TimestampedModel {
   displayName: string;
   email: string;
   hashedPassword: string;
+  profilePicture?: string;
   salt: string;
   authToken?: string;
   subscribedCommunities: mongoose.Types.ObjectId[];
@@ -43,6 +44,9 @@ const userSchema = new Schema<IUser>(
     salt: {
       type: String,
       required: true,
+    },
+    profilePicture: {
+      type: String,
     },
     // Authorization for verifying users are logged in and can access data
     authToken: {

@@ -8,6 +8,7 @@ import {
 } from '../lib/utils.lib';
 import { CreateUserDTO, UpdateUserDTO } from '../models/user.server.model';
 import * as User from '../models/user.server.model';
+import * as Forum from '../models/forum.server.model';
 import config from '../config/config.server.config';
 import { validators, validate } from '../lib/validate.lib';
 import { StatusCodes } from 'http-status-codes';
@@ -17,6 +18,7 @@ interface UserResponseDTO {
   username: string;
   displayName: string;
   email: string;
+  profilePicture?: string;
   authToken?: string;
 }
 
@@ -40,9 +42,18 @@ export async function userCreate(
     displayName: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     plaintextPassword: validators.password().required(),
+    profilePicture: Joi.string().uri(),
   });
 
-  const formData = validate(rules, req.body);
+  const requestInfo = {
+    ...req.body,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadsRoute',
+      )}${req.file.filename}`,
+    }),
+  };
+  const formData = validate(rules, requestInfo);
 
   const user = await User.createUser(formData);
   res.status(StatusCodes.CREATED).json({
@@ -50,6 +61,7 @@ export async function userCreate(
     displayName: user.displayName,
     email: user.email,
     username: user.username,
+    profilePicture: user.profilePicture,
     authToken: user.authToken,
   });
 }
@@ -81,6 +93,7 @@ export async function userLogin(
     username: user.username,
     displayName: user.displayName,
     email: user.email,
+    profilePicture: user.profilePicture,
     authToken: user.authToken,
   });
 }
@@ -116,6 +129,7 @@ export async function userViewById(
     username: user.username,
     displayName: user.displayName,
     email: user.email,
+    profilePicture: user.profilePicture,
   });
 }
 
@@ -135,9 +149,18 @@ export async function userUpdateById(
     displayName: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     plaintextPassword: validators.password(),
+    profilePicture: Joi.string().uri(),
   }).min(1);
 
-  const data = validate(schema, req.body);
+  const requestInfo = {
+    ...req.body,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadsRoute',
+      )}${req.file.filename}`,
+    }),
+  };
+  const data = validate(schema, requestInfo);
 
   const id = convertToObjectId(req.params.id);
   if (await User.isUserAuthorized(id, authToken)) {
@@ -147,6 +170,7 @@ export async function userUpdateById(
       username: user.username,
       email: user.email,
       displayName: user.displayName,
+      profilePicture: user.profilePicture,
     });
   } else {
     throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
@@ -168,4 +192,108 @@ export async function userDeleteById(req: Request, res: Response) {
   } else {
     throw new ServerError('forbidden', StatusCodes.FORBIDDEN);
   }
+}
+
+/**
+ * Responds to HTTP request with user document for currently logged in user
+ * @param req HTTP request object containing authorization token for verification
+ * @param res HTTP request response status code and user data in JSON format or error message
+ */
+export async function userViewCurrent(
+  req: Request,
+  res: Response<UserResponseDTO>,
+) {
+  const authToken = req.get(config.get('authToken'));
+  const user = await User.searchUserByAuthToken(authToken);
+  res.status(StatusCodes.OK).send({
+    id: user._id,
+    username: user.username,
+    displayName: user.displayName,
+    email: user.email,
+    profilePicture: user.profilePicture,
+  });
+}
+
+/**
+ * Modifies the data of the currently logged in user using HTTP request object data
+ * @param req HTTP request object containing the user fields being updated and auth token for verification
+ * @param res HTTP request response object status code and updated user data in JSON format or error message
+ */
+export async function userUpdateCurrent(
+  req: Request,
+  res: Response<UserResponseDTO>,
+) {
+  const authToken = req.get(config.get('authToken'));
+
+  const schema = Joi.object<UpdateUserDTO>({
+    username: validators.username(),
+    displayName: Joi.string().min(3).max(30),
+    email: Joi.string().email(),
+    plaintextPassword: validators.password(),
+    profilePicture: Joi.string().uri(),
+  }).min(1);
+
+  const requestInfo = {
+    ...req.body,
+    ...(req.file && {
+      profilePicture: `${req.protocol}://${req.get('host')}${config.get(
+        'uploadsRoute',
+      )}${req.file.filename}`,
+    }),
+  };
+  const data = validate(schema, requestInfo);
+
+  const userID = (await User.searchUserByAuthToken(authToken))._id;
+  const user = await User.updateUserById(userID, data);
+  res.status(StatusCodes.OK).send({
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    displayName: user.displayName,
+    profilePicture: user.profilePicture,
+  });
+}
+
+export async function currentUserPosts(req: Request, res: Response) {
+  const authToken = req.get(config.get('authToken'));
+  const user = await User.searchUserByAuthToken(authToken);
+
+  const userPostsSkeleton = (await Forum.getPosts()).filter((p) =>
+    p.owner._id.equals(user._id),
+  );
+
+  const posts = (await Forum.populatePosts(userPostsSkeleton)).map(
+    ({
+      _id: id,
+      owner,
+      title,
+      bodyText,
+      edited,
+      upVotes,
+      attachments,
+      downVotes,
+      comments,
+      createdAt,
+      updatedAt,
+      community,
+    }) => ({
+      id,
+      owner,
+      community: {
+        id: community._id,
+        name: community.name,
+      },
+      title,
+      bodyText,
+      edited,
+      upVotes,
+      attachments,
+      downVotes,
+      comments,
+      createdAt,
+      updatedAt,
+    }),
+  );
+
+  return res.status(StatusCodes.OK).send(posts);
 }

@@ -3,6 +3,7 @@ import * as User from '../models/user.server.model';
 import config from '../config/config.server.config';
 import { Request, Response, NextFunction } from 'express';
 import { ServerError } from './utils.lib';
+import multer from 'multer';
 import { StatusCodes } from 'http-status-codes';
 
 export function isDevelopment(req: Request, res: Response, next: NextFunction) {
@@ -86,4 +87,15 @@ export const logger = pino({
       colorize: true,
     },
   },
+});
+
+export const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './uploads');
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now().toString() + file.originalname);
+    },
+  }),
 });

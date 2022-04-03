@@ -4,13 +4,13 @@ import cors from 'cors';
 import pinoHttp from 'pino-http';
 import { errorHandler, logger } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
+import config from './config.server.config';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
 import userServerRoutes from '../routes/user.server.routes';
 import communityServerRoutes from '../routes/community.routes';
 import { StatusCodes } from 'http-status-codes';
-import config from './config.server.config';
 
 /**
  * Configure Express.js application
@@ -56,6 +56,9 @@ export default function () {
   forumServerRoutes(app);
   userServerRoutes(app);
   communityServerRoutes(app);
+
+  // Add uploads folder
+  app.use(config.get('uploadsRoute'), express.static('uploads'));
 
   // 404 Route
   app.all('*', () => {

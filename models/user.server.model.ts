@@ -10,6 +10,7 @@ export interface CreateUserDTO {
   displayName: string;
   email: string;
   plaintextPassword: string;
+  profilePicture?: string;
 }
 
 export interface UpdateUserDTO
@@ -61,6 +62,7 @@ export async function createUser(params: CreateUserDTO): Promise<UserDocument> {
     email: params.email,
     hashedPassword: hashedPassword.hash,
     salt: hashedPassword.salt,
+    profilePicture: params.profilePicture,
   });
 
   try {

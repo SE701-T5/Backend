@@ -3,7 +3,7 @@ import convict from 'convict';
 export default convict({
   environment: {
     format: String,
-    default: 'production',
+    default: 'development',
     env: 'NODE_ENV',
   },
   authToken: {
@@ -29,5 +29,9 @@ export default convict({
     format: 'nat',
     default: 4200,
     env: 'PORT',
+  },
+  uploadsRoute: {
+    format: String,
+    default: '/uploads/',
   },
 });
