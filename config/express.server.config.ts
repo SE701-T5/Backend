@@ -5,7 +5,6 @@ import pinoHttp from 'pino-http';
 import { errorHandler, logger } from '../lib/middleware.lib';
 import { ServerError } from '../lib/utils.lib';
 import config from './config.server.config';
-import path from 'path';
 
 import dbServerRoutes from '../routes/db.server.routes';
 import forumServerRoutes from '../routes/forum.server.routes';
